@@ -31,7 +31,7 @@ export default class Ctx2 extends VScene {
 
   override async init() {
     this.bg = BG;
-    this.env = { eq: ['ppl', 'rope', 'alibi', 'posinterp', 'attention', 'clm'], seed: 14, keep: (x) => Math.abs(x) > 40, r0: 60, fixedR0: true, floorKeep: 0 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
+    this.env = { eq: ['ppl', 'rope', 'alibi', 'posinterp', 'attention', 'clm'], seed: 14, keep: (x) => Math.abs(x) > 40, r0: 60, fixedR0: true, floorKeep: 0, alpha: (t) => 1 - 0.5 * clamp((t - (this.L[3]![0]!.start - 0.3)) / 0.4) }; // (dimmer behind the records' staircase) // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);
@@ -60,15 +60,38 @@ export default class Ctx2 extends VScene {
         const L3 = (a: V3, b: V3): V3 => [lerp(a[0], b[0], u), lerp(a[1], b[1], u), lerp(a[2], b[2], u)];
         return K(L3(pa, pb), L3(ga, gb), lerp(fa, fb, u), 0.02 * Math.sin(t));
       } },
-      { t0: t55 - 0.05, snap: 0.25, name: 'late', key: (t) => { const x = this.nowX(t); return K([x + 1.5, 5.5, 9100 + 15], [x + 0.5, 4.2, 9100], 46, -0.01); } },
+      // (the whole axis in frame, nearly still: the records stack up as a staircase and that only reads if every
+      // step is seen — following NOW, one spike at a time came up and went down, and it read as noise)
+      { t0: t55 - 0.05, snap: 0.25, name: 'late', key: (t) => { const k = ease.inOutQuad(clamp((t - t55) / 3.6)); return K([lerp(6.0, 8.4, k), lerp(6.4, 7.0, k), 9098 + lerp(24.5, 22.5, k)], [7.2, 6.2, 9098], 46, -0.01); } },
     ], [{ t: t2k, amp: 0.6 }, { t: tMil, amp: 1.2 }, { t: t53, amp: 0.6 }, { t: tDate, amp: 1.4 }, { t: t55, amp: 0.6 }], 0.8, 151);
   }
 
+  /** NOW on the axis: it passes each claim's year on a word of the line (MEMORY on EVERY, DEPTH on BREAKTHROUGH'S,
+   *  ATTENTION on JUST, SCALE on BASELINE) and the next, unnamed one on LATE */
+  private nowKeys: [number, number][] = [];
   private nowYear(t: number) {
-    const L55 = this.L[3]!;
-    return lerp(1997, 2026, ease.inOutQuad(clamp((t - L55[0]!.start) / (L55[L55.length - 1]!.end - L55[0]!.start + 0.2))));
+    if (!this.nowKeys.length) {
+      const L55 = this.L[3]!, w = (re: RegExp) => L55.find((x) => re.test(x.w))!;
+      this.nowKeys = [
+        [L55[0]!.start - 0.35, 1995.0], [L55[0]!.start + 0.12, 1998.3], [w(/breakthrough/).start + 0.15, 2016.3],
+        [w(/^just$/).start + 0.08, 2017.8], [w(/baseline/).start + 0.08, 2020.4], [w(/late/).start + 0.1, 2025.2],
+        [L55[L55.length - 1]!.end + 0.4, 2026.0],
+      ];
+    }
+    const K = this.nowKeys;
+    if (t <= K[0]![0]) return K[0]![1];
+    for (let i = 1; i < K.length; i++) {
+      const [ta, ya] = K[i - 1]!, [tb, yb] = K[i]!;
+      if (t <= tb) return lerp(ya, yb, ease.inOutQuad((t - ta) / (tb - ta)));
+    }
+    return K[K.length - 1]![1];
   }
-  private nowX(t: number) { return -6 + (this.nowYear(t) - 1995) * 0.85; }
+  /** when NOW reaches a year (the first time) */
+  private yearTime(yr: number) {
+    let lo = this.nowKeys[0]?.[0] ?? 0, hi = this.nowKeys[this.nowKeys.length - 1]?.[0] ?? 0;
+    for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (this.nowYear(m) < yr) lo = m; else hi = m; }
+    return hi;
+  }
   /** window length in world units: 2,048 tokens at "2K", doubling up to 1,048,576 by the end of "long" */
   private winLen(t: number) {
     const w = (re: RegExp) => this.L[0]!.find((x) => re.test(x.w))!;
@@ -242,38 +265,59 @@ export default class Ctx2 extends VScene {
       const anchor = (w: Word): [number, number] => [this.rig ? this.rig.at(w.start).tg[0] : 0, 0];
       c.save(); c.globalAlpha *= 1 - clamp((t - t55.start) / 0.4); this.chunk3(c, L54, t, P, 0, 0, { anchor, size: 1.05, maxW: 15, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 4, 7], text: (x) => x.w.replace(/[“”]/g, '"').replace(',', '') }); c.restore();
     }
-    // late: spikes on a time axis, NOW sweeping, each passed spike sinking to the baseline; a clock running ahead
+    // late: the records on a time axis. NOW sweeps right; as it passes each claim's year the claim rises as a step,
+    // higher than the one before (the new state of the art) — and the one before turns grey, its top run out as a
+    // dashed line: the level the next one had to beat, now just a baseline. On LATE an unnamed next step rises over
+    // SCALE, and SCALE becomes a baseline too. (2026-10-10: the spikes used to shoot up and sink back, which read as
+    // noise; a record never goes down, it only gets beaten.)
     if (t > t55.start - 0.3) {
       const a = clamp((t - t55.start + 0.3) / 0.4);
       const ax: Pl = wallPl(9100 - 2, [0, 0, 9100 - 2]);
-      const X = (yr: number) => -6 + (yr - 1995) * 0.85;
-      void X;
-      this.seg(c, at(ax, X(1995), 1.0), at(ax, X(2026), 1.0), hexA(PAPER, a), 2);
-      for (let yr = 1995; yr <= 2025; yr += 5) { this.seg(c, at(ax, X(yr), 0.8), at(ax, X(yr), 1.2), hexA(PAPER, a), 1.4); this.text3(c, String(yr), ax, X(yr), 0.2, { size: 0.36, fam: MONO, color: hexA(PAPER, 0.8 * a), align: 'center' }); }
-      // (at the axis' left end: over it, the claims sinking to the baseline printed on it)
-      this.text3(c, 'BASELINE', ax, X(1995) - 0.35, 1.0, { size: 0.36, fam: MONOB, color: hexA(PAPER, 0.7 * a), align: 'right', mid: true });
+      const X = (yr: number) => -6 + (yr - 1995) * 0.85, Y0 = 1.0, XE = X(2026);
+      this.seg(c, at(ax, X(1995), Y0), at(ax, XE, Y0), hexA(PAPER, a), 2);
+      for (let yr = 1995; yr <= 2025; yr += 5) { this.seg(c, at(ax, X(yr), Y0 - 0.2), at(ax, X(yr), Y0 + 0.2), hexA(PAPER, a), 1.4); this.text3(c, String(yr), ax, X(yr), 0.2, { size: 0.42, fam: MONO, color: hexA(PAPER, 0.8 * a), align: 'center' }); }
+      this.text3(c, 'BASELINE', ax, X(1995) - 0.35, Y0, { size: 0.36, fam: MONOB, color: hexA(PAPER, 0.7 * a), align: 'right', mid: true });
       const now = this.nowYear(t);
-      this.seg(c, at(ax, X(now), 0.4), at(ax, X(now), 9.5), hexA(GRN, a), 2.4);
-      // (under the axis: up the line, the falling claims' names crossed it)
-      this.text3(c, `NOW ${Math.floor(now)}`, ax, X(now) + 0.2, -0.65, { size: 0.6, fam: MONOB, color: GRN });
-      CLAIMS.forEach((cl, ci) => {
-        const passed = now - cl.year;
-        const hgt = passed < 0 ? 0 : passed < 0.3 ? 7 * (passed / 0.3) : 7 * Math.exp(-(passed - 0.3) * 0.9);
-        const x = X(cl.year);
-        if (passed > 0) {
-          this.pl3(c, [at(ax, x - 0.5, 1.0), at(ax, x, 1.0 + hgt), at(ax, x + 0.5, 1.0)], cl.col, 2.6, { alpha: a });
-          this.text3(c, cl.s.split(' ')[0]!.replace("'S", ''), ax, x, 1.4 + hgt + ci * 0.75 * clamp(1 - hgt / 3), { size: 0.6, fam: MONOB, color: hexA(cl.col, a), align: 'center' });
+      // the steps: MEMORY, DEPTH, ATTENTION, SCALE, then the next one — each higher than the last
+      const STEPS = [...CLAIMS.map((cl) => ({ name: cl.s.split(' ')[0]!.replace("'S", ''), year: cl.year, ghost: false })), { name: '? ? ?', year: 2025.0, ghost: true }];
+      const H = [2.0, 4.0, 6.0, 8.0, 10.2], SW = 1.6;
+      const tLand = STEPS.map((st) => this.yearTime(st.year));
+      let lastBeaten = -1; // the newest baseline: the highest step a later one has beaten
+      for (let i = 0; i + 1 < STEPS.length; i++) if (t >= tLand[i + 1]!) lastBeaten = i;
+      STEPS.forEach((st, i) => {
+        const tl = tLand[i]!;
+        if (t < tl - 0.02) return;
+        const rise = ease.outBack(clamp((t - tl) / 0.28), 1.5), h = H[i]! * rise, x = X(st.year);
+        const beaten = i + 1 < STEPS.length && t >= tLand[i + 1]!; // a higher one has landed
+        const dem = beaten ? clamp((t - tLand[i + 1]!) / 0.25) : 0;
+        const col = st.ghost ? MAG : mixHex(MAG, U.ash, dem);
+        const top = Y0 + h;
+        if (st.ghost) {
+          this.rect3(c, ax, x - SW / 2, Y0, SW, h, { stroke: hexA(MAG, a), lw: 2, dash: [6, 5] });
+        } else {
+          this.rect3(c, ax, x - SW / 2, Y0, SW, h, { fill: hexA(col, (0.85 - 0.6 * dem) * a), stroke: hexA(col, a), lw: 1.6 });
+          // its level, once beaten: a dashed line on to the end of the axis — the baseline the next one beat
+          if (dem > 0) {
+            const xe = lerp(x + SW / 2, XE, ease.outCubic(dem));
+            this.seg(c, at(ax, x + SW / 2, top), at(ax, xe, top), hexA(U.ash, 0.75 * a), 1.4, { dash: [6, 6] });
+            // (the newest baseline says so at the end of its line)
+            if (i === lastBeaten && dem >= 1) this.text3(c, 'BASELINE', ax, XE + 0.3, top, { size: 0.46, fam: MONOB, color: hexA(U.ash, 0.9 * a), mid: true });
+          }
         }
+        this.text3(c, st.name, ax, x, top + 0.45, { size: st.ghost ? 0.8 : 0.72, fam: MONOB, color: hexA(col, a), align: 'center' });
       });
-      // the clock running ahead of NOW
-      const CP: Pl = { o: at(ax, X(now) + 3.0, 7.0, 0.1), r: ax.r, u: ax.u };
-      this.ring3(c, CP, 0, 0, 1.0, hexA(PAPER, a), 2, { fill: hexA('#0A1A1C', a) });
+      // NOW
+      this.seg(c, at(ax, X(now), 0.4), at(ax, X(now), 12.3), hexA(GRN, a), 2.4);
+      this.text3(c, `NOW ${Math.floor(now)}`, ax, X(now) + 0.2, -0.65, { size: 0.6, fam: MONOB, color: GRN });
+      // the clock at the top of NOW, running fast: late, always
+      const CP: Pl = { o: at(ax, X(now), 13.1, 0.1), r: ax.r, u: ax.u };
+      this.ring3(c, CP, 0, 0, 0.75, hexA(PAPER, a), 2, { fill: hexA('#0A1A1C', a) });
       const ang = -t * 9;
-      this.seg(c, at(CP, 0, 0), at(CP, Math.cos(ang) * 0.85, Math.sin(ang) * 0.85), RED, 2.4);
-      this.seg(c, at(CP, 0, 0), at(CP, Math.cos(ang / 12) * 0.55, Math.sin(ang / 12) * 0.55), PAPER, 2.4);
+      this.seg(c, at(CP, 0, 0), at(CP, Math.cos(ang) * 0.62, Math.sin(ang) * 0.62), RED, 2.4);
+      this.seg(c, at(CP, 0, 0), at(CP, Math.cos(ang / 12) * 0.4, Math.sin(ang / 12) * 0.4), PAPER, 2.4);
       // the line itself
-      const P: Pl = { o: [this.nowX(t) + 0.5, 9.0, 9100 - 1.9], r: [1, 0, 0], u: [0, 1, 0] };
-      this.chunk3(c, L55, t, P, 0, 0, { size: 1.3, maxW: 16, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 2, 5], text: (x) => x.w.replace('’', "'") });
+      const P: Pl = { o: [4.6, 13.4, 9100 - 1.9], r: [1, 0, 0], u: [0, 1, 0] };
+      this.chunk3(c, L55, t, P, 0, 0, { size: 1.5, maxW: 22, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 2, 5], text: (x) => x.w.replace('’', "'") });
       void MAG;
     }
     void tPaper;

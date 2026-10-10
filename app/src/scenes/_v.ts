@@ -104,8 +104,8 @@ export interface EnvCfg {
   arcs?: number;
   /** keep a site? (keeps the action's own ground clear) */
   keep?: (x: number, z: number) => boolean;
-  /** overall strength (default 1) */
-  alpha?: number;
+  /** overall strength (default 1), or a function of the song time */
+  alpha?: number | ((t: number) => number);
   /** lattice offset, so neighbouring plates don't stand the same city (default 0) */
   seed?: number;
   /** r0 as given, not pushed out by the camera's distance to its target (plates whose target runs far away) */
@@ -186,7 +186,9 @@ export abstract class VScene extends D2Scene {
 
   private drawEnv(c: Ctx, t: number, E: EnvCfg) {
     if (!E.eq.length) return;
-    const cell = E.cell ?? 38, fl = E.floor ?? 0, A = E.alpha ?? 1, sd = E.seed ?? 0;
+    const cell = E.cell ?? 38, fl = E.floor ?? 0, sd = E.seed ?? 0;
+    const A = typeof E.alpha === 'function' ? E.alpha(t) : (E.alpha ?? 1);
+    if (A <= 0.01) return;
     const p = this.key.p, dT = Math.hypot(this.key.tg[0] - p[0], this.key.tg[1] - p[1], this.key.tg[2] - p[2]);
     const r0 = E.fixedR0 ? (E.r0 ?? 70) : Math.max(E.r0 ?? 70, dT * 1.8 + 14), r1 = Math.max(E.r1 ?? 330, r0 * 2.2);
     if (E.floorEq !== false && !MIRRORING) this.floorInscriptions(c, E, A, sd, fl);

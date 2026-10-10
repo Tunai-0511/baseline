@@ -48,7 +48,7 @@ bunx vite                                   # 在瀏覽器即時預覽
 bun scripts/render.ts video --fps 60 --samples auto --max-samples 108 --crf 17 --out ../out/Baseline.mp4
 ```
 
-加 `--scale 2` 就是真 4K（3840×2160，版面不變、只是解析度加倍）；成片 `out/Baseline-4K.mp4` 就是這樣算的。
+加 `--scale 2` 就是真 4K（3840×2160，版面不變、只是解析度加倍）；成片就是這樣算的（4K60，約 1.6 GB 以上，太大所以不放進 repo，`out/` 在 .gitignore 裡）。
 其他模式：`stills --t 18.9,19.2`（單張截圖）、`sheet --from 20 --to 35 --cols 4`（聯絡表）、
 `textqa --from 0 --to 247.2`（逐字形檢查全片文字有沒有重疊）。
 

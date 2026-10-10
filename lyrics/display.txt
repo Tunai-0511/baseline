@@ -1,0 +1,70 @@
+Perceptron drew a line, but XOR stayed unresolved,
+stack another hidden layer and the problem’s solved
+Sigmoid squashed the signal, gradients fading down to zero,
+ReLU clipped the negatives and came in as the hero
+Hand-tuned SIFT and HOG, every feature carved by hand,
+convolution learned the filters that nobody planned
+SVM, the widest margin, kernel trick and all,
+deep nets ate the benchmarks and the margins had to fall
+Depth is all you need,
+the abstract guaranteed
+You were state of the art,
+now you’re just a baseline
+Top of the leaderboard,
+until the next deadline
+Kernel tricks and hand-made features frozen on the shelf,
+the network took the crown and learned the features by itself
+N-gram counting words, a window three tokens wide,
+RNN kept a hidden state and carried it inside
+Backprop through time, the gradients vanish or explode,
+LSTM put gates along the road
+Seq2seq would squeeze a sentence through a bottleneck,
+attention let the decoder look back and double-check
+Recurrence marched in order, one step at a time,
+transformers ran in parallel and left it all behind
+Memory’s all you need,
+the abstract guaranteed
+You were state of the art,
+now you’re just a baseline
+Top of the leaderboard,
+until the next deadline
+LSTM, you held the memory for so long,
+one attention layer and the whole recurrence gone
+GANs played a two-player game until the modes collapsed,
+diffusion learned to denoise in a thousand tiny steps
+Sinusoids gave way to RoPE’s rotation,
+LayerNorm to RMS, ReLU to SwiGLU activation
+Dense became a mixture, only some experts awake,
+32 bits down to 4 for the throughput’s sake
+Full fine-tune to LoRA, a low-rank little patch,
+then just prompt it in context, no gradient to catch
+Attention’s all you need,
+the abstract guaranteed
+You were state of the art,
+now you’re just a baseline
+Top of the leaderboard,
+until the next deadline
+BERT, you read both ways, masked and bidirectional,
+decoder-only scaled up and made you optional
+RLHF trained a reward model to rank,
+DPO skipped the middleman and took it to the bank
+FlashAttention tiles it all inside the SRAM,
+no more round trips to the HBM, no traffic jam
+Context window: 2K, then a million tokens long,
+needle in a haystack, it remembers every song
+Every “all you need” is a paper with a date,
+every breakthrough’s just a baseline running late
+Scale is all you need,
+the abstract guaranteed
+You were state of the art,
+now you’re just a baseline
+Top of the leaderboard,
+until the next deadline
+And you, attention, quadratic in the length,
+a linear-time successor’s training up its strength
+Every “all you need” becomes a footnote in the end,
+cite me in related work, remember me, my friend
+I was state of the art,
+now I’m just a baseline
+Cite me in related work
+one more time

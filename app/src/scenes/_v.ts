@@ -1,0 +1,688 @@
+// v3 plate kit (2026-10-10, STORYBOARD-v3.md): Canvas2D drawing seen through a pinhole camera — the "2D that
+// simulates 3D" way of building a space (hairlines, flat fills, type and images set on planes, perspective,
+// parallax, camera flights), with screen-space notes on top. Every plate is a pure function of song time t.
+//
+//   class X extends VScene { init() { this.rig = new Rig([...]) }  frame(c, t) { this.seg(c, a, b, '#fff') … } }
+//
+// World units are arbitrary (≈ metres); y is up. A plane is an origin plus unit right/up vectors.
+import type * as THREE from 'three';
+import type { Frame, PostOverrides } from '../engine/scene';
+import { Layer2D, SCALE } from '../engine/gl';
+import { layout, F } from '../engine/type';
+import type { Word } from '../engine/lyrics';
+import { D2Scene, W, H, clamp, lerp, ease, hexA, mixHex, type Ctx, sungW, hot } from './_d2';
+import { smoothstep } from '../engine/util';
+import { Rig, K, basis, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit } from './_wire';
+
+export { Rig, K, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit, W, H, clamp, lerp, ease, hexA, mixHex, sungW, hot, F };
+export type { Ctx };
+
+/**
+ * v4 (2026-10-10, user: 「風格還是統一好了」「比不過 p(doom) 的震撼感」): ONE look for the whole film — ink, bone, and one
+ * hot accent. Magenta = the current state of the art / the word being sung; everything else lives on the ink→bone ramp
+ * (the post `unify` pass enforces it). Type: WIDE for hero words, COND for numbers and stacks, MONO for annotations.
+ */
+export const U = {
+  ink: '#0B0A0D', ink2: '#121016', panel: '#17151C', line: '#2A2731', grid: '#1E1C24', graphite: '#5C5966', ash: '#9A96A3', bone: '#EDEAF2',
+  mag: '#FF2E7E', magHot: '#FF9CC4', magDeep: '#A3104A', magDark: '#3A0A1E',
+};
+export const UF = { wide: F.archivo(125, 900), heavy: F.archivo(112, 900), cond: F.archivo(75, 900), mono: F.mono(500), monoB: F.mono(700), serif: F.serif(600, false), ital: F.serif(600, true) };
+
+export interface P2 { x: number; y: number; z: number; k: number }
+/** A plane in the world: origin, unit right, unit up. */
+export interface Pl { o: V3; r: V3; u: V3 }
+export const pl = (o: V3, r: V3 = [1, 0, 0], u: V3 = [0, 1, 0]): Pl => ({ o, r: vnorm(r), u: vnorm(u) });
+/** The floor (y = h) seen from above: right = +x, up = −z (away from a camera on +z). */
+export const floorPl = (h = 0, o: V3 = [0, h, 0]): Pl => ({ o, r: [1, 0, 0], u: [0, 0, -1] });
+/** A wall facing +z at depth z. */
+export const wallPl = (z = 0, o: V3 = [0, 0, z]): Pl => ({ o, r: [1, 0, 0], u: [0, 1, 0] });
+/** A plane rotated about the world y axis by yaw (rad), then tilted back by pitch (rad). */
+export const turnPl = (o: V3, yaw = 0, pitch = 0): Pl => {
+  let r: V3 = [Math.cos(yaw), 0, -Math.sin(yaw)];
+  let u: V3 = [0, 1, 0];
+  const n = vcross(r, u);
+  if (pitch) u = vrot(u, r, -pitch);
+  void n;
+  return { o, r, u };
+};
+export const at = (P: Pl, x: number, y: number, z = 0): V3 => {
+  const n = vcross(P.r, P.u);
+  return [P.o[0] + P.r[0] * x + P.u[0] * y + n[0] * z, P.o[1] + P.r[1] * x + P.u[1] * y + n[1] * z, P.o[2] + P.r[2] * x + P.u[2] * y + n[2] * z];
+};
+
+export interface T3 {
+  /** em size in world units */
+  size: number;
+  fam: string;
+  color?: string;
+  stroke?: string;
+  /** stroke width in screen px */
+  strokeW?: number;
+  align?: 'left' | 'center' | 'right';
+  /** extra letter spacing, in em */
+  track?: number;
+  alpha?: number;
+  glow?: number;
+  glowColor?: string;
+  /** vertical anchor: baseline (default) or the middle of the caps */
+  mid?: boolean;
+  /** per-glyph modifiers (offsets in em; sc scales the glyph about its baseline centre; a multiplies alpha) */
+  each?: (i: number, ch: string, n: number) => { dx?: number; dy?: number; sc?: number; sy?: number; a?: number; color?: string; rot?: number } | null | undefined;
+}
+
+const CAP = 0.72; // Archivo cap height / em
+
+/** True while a VScene draws its floor reflection (screen-space furniture skips itself then). */
+export let MIRRORING = false;
+/** Text runs drawn this frame (screen boxes), for the overlap QA (render.ts textqa); filled only when TEXT_QA.on. */
+export const TEXT_QA: { on: boolean; runs: { scene: string; s: string; x0: number; y0: number; x1: number; y1: number; a: number; g: number[] }[] } = { on: false, runs: [] };
+if (typeof window !== 'undefined') (window as any).__textqa = TEXT_QA;
+/** World-space stroke weight (2026-10-10 polish: hairlines vanish on a phone; everything a third heavier). */
+export const LW = 1.35;
+
+export abstract class VScene extends D2Scene {
+  /**
+   * The glossy floor (2026-10-10 polish): the frame is drawn a second time with the camera mirrored in the plane
+   * y = mirror.y, at half resolution, then laid under the frame — clipped below that plane's horizon, blurred, and
+   * fading from the horizon (grazing: strong) to the bottom of the frame (looking down: weak). `haze` is a soft band
+   * of light along the horizon. null: no floor.
+   */
+  mirror: { y: number; k: number; blur: number; haze: number; tint?: string } | null = { y: 0, k: 0.34, blur: 2.5, haze: 0.5 };
+  /** Motes of dust hanging in the air round the camera (parallax on every move); 0 = none. */
+  dust = 1;
+  private dustXYZ: Float32Array | null = null;
+  private mlayer: Layer2D | null = null;
+  rig: Rig | null = null;
+  key: Key = K([0, 0, 10], [0, 0, 0], 40);
+  R: V3 = [1, 0, 0]; U: V3 = [0, 1, 0]; Fw: V3 = [0, 0, -1];
+  f = 1;
+  near = 0.05;
+  base: DOMMatrix = new DOMMatrix();
+
+  setKey(k: Key) {
+    const b = basis(k);
+    this.R = b.R; this.U = b.U; this.Fw = b.F;
+    this.f = (H / 2) / Math.tan((k.fov * Math.PI) / 360);
+    if (MIRRORING && this.mirror) {
+      // the mirror camera: position and basis reflected in y = my (a left-handed basis: points land where their
+      // reflections appear to the real camera)
+      const my = this.mirror.y, M = (v: V3): V3 => [v[0], -v[1], v[2]];
+      this.key = { ...k, p: [k.p[0], 2 * my - k.p[1], k.p[2]], tg: [k.tg[0], 2 * my - k.tg[1], k.tg[2]] };
+      this.R = M(this.R); this.U = M(this.U); this.Fw = M(this.Fw);
+    } else this.key = k;
+  }
+
+  override draw(c: Ctx, t: number, f: Frame): PostOverrides | void {
+    this.base = c.getTransform();
+    if (this.rig) this.setKey(this.rig.at(t));
+    return this.frame(c, t, f);
+  }
+
+  /** The dust: 1400 motes in a 70 m box that follows the camera in whole cells (so they stay put in the world). */
+  private drawDust(c: Ctx, t: number) {
+    if (this.dust <= 0) return;
+    const N = 1400, B = 70;
+    const xyz = (this.dustXYZ ??= new Float32Array(N * 3));
+    const p = this.key.p, cell = (v: number) => Math.floor(v / B) * B;
+    const cx = cell(p[0]), cy = cell(p[1]), cz = cell(p[2]);
+    for (let i = 0; i < N; i++) {
+      // each mote lives in one of the 8 cells round the camera, drifting slowly
+      const h = (k: number) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
+      let x = cx + (h(1) - 0.5) * B * 2 + Math.sin(t * 0.13 + i) * 0.6;
+      let y = cy + (h(2) - 0.35) * B + Math.sin(t * 0.21 + i * 1.7) * 0.3;
+      let z = cz + (h(3) - 0.5) * B * 2 + Math.cos(t * 0.11 + i * 0.7) * 0.6;
+      // keep the box centred on the camera
+      if (x - p[0] > B) x -= 2 * B; else if (p[0] - x > B) x += 2 * B;
+      if (z - p[2] > B) z -= 2 * B; else if (p[2] - z > B) z += 2 * B;
+      xyz[i * 3] = x; xyz[i * 3 + 1] = y; xyz[i * 3 + 2] = z;
+    }
+    this.points(c, xyz, N, '#9A96A3', 1.6, 0.35 * this.dust);
+  }
+
+  override render(f: Frame, out: THREE.WebGLRenderTarget): PostOverrides {
+    const m = this.mirror;
+    if (!m || m.k <= 0) return super.render(f, out, (c) => this.drawDust(c, f.t));
+    // the mirror pass, into the half-res layer
+    const ml = (this.mlayer ??= new Layer2D(W, H, SCALE * 0.5));
+    ml.clear();
+    const mc = ml.ctx;
+    mc.save(); mc.textBaseline = 'alphabetic';
+    MIRRORING = true;
+    try { this.draw(mc, f.t, f); } finally { MIRRORING = false; }
+    mc.restore();
+    // the real camera again (every plate drives its camera with a rig)
+    if (this.rig) this.setKey(this.rig.at(f.t));
+    const camY = this.key.p[1];
+    const post = super.render(f, out, (c) => {
+      this.drawDust(c, f.t);
+      if (camY <= m.y + 1e-3) return;
+      // the horizon of y = my: where two far directions along the floor project
+      const fl = vnorm([this.Fw[0], 0, this.Fw[2]]);
+      const side = vnorm(vcross(fl, [0, 1, 0]));
+      const far = 1e4;
+      const ptA = this.pr(vadd(vadd([this.key.p[0], m.y, this.key.p[2]], vsc(fl, far)), vsc(side, far * 1.5)));
+      const ptB = this.pr(vadd(vadd([this.key.p[0], m.y, this.key.p[2]], vsc(fl, far)), vsc(side, -far * 1.5)));
+      const looksDown = vdot(this.Fw, [0, -1, 0]) > 0.999;
+      c.save();
+      c.beginPath();
+      if (looksDown || ptA.z <= 0) { c.rect(0, 0, W, H); }
+      else {
+        // the half-plane below the line A-B, as a big quad
+        const dx = ptB.x - ptA.x, dy = ptB.y - ptA.y, L = Math.hypot(dx, dy) || 1;
+        const ux = dx / L, uy = dy / L, nx = -uy, ny = ux; // normal: pointing "down" the screen when the line is level
+        const sgn = ny >= 0 ? 1 : -1;
+        const E = 6000;
+        c.moveTo(ptA.x - ux * E, ptA.y - uy * E); c.lineTo(ptA.x + ux * E, ptA.y + uy * E);
+        c.lineTo(ptA.x + ux * E + nx * sgn * E, ptA.y + uy * E + ny * sgn * E); c.lineTo(ptA.x - ux * E + nx * sgn * E, ptA.y - uy * E + ny * sgn * E);
+        c.closePath();
+      }
+      c.clip();
+      const hy = looksDown || ptA.z <= 0 ? -H : (ptA.y + ptB.y) / 2;
+      // the reflection: blurred, fading toward the bottom of the frame; Fresnel: strong at grazing views, gone when
+      // the camera looks steeply down (there the mirror would show what is behind and above it, upside down)
+      const fres = 1 - smoothstep(0.3, 0.7, -this.Fw[1]);
+      if (fres <= 0.01) { c.restore(); return; }
+      c.globalAlpha = m.k * fres;
+      c.filter = `blur(${m.blur}px)`;
+      c.drawImage(ml.canvas, 0, 0, W, H);
+      c.filter = 'none';
+      c.globalAlpha = 1;
+      const g = c.createLinearGradient(0, Math.max(hy, -H), 0, H);
+      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, hexA(this.bg.startsWith('#') ? this.bg : '#000000', 0.62));
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+      c.restore();
+      // the haze along the horizon
+      if (m.haze > 0 && !looksDown && ptA.z > 0) {
+        const tint = m.tint ?? '#9A96A3';
+        c.save();
+        const hg = c.createLinearGradient(0, hy - 110, 0, hy + 70);
+        hg.addColorStop(0, hexA(tint, 0)); hg.addColorStop(0.62, hexA(tint, 0.07 * m.haze)); hg.addColorStop(1, hexA(tint, 0));
+        c.fillStyle = hg; c.fillRect(0, hy - 110, W, 180);
+        c.restore();
+      }
+    });
+    return post;
+  }
+
+  abstract frame(c: Ctx, t: number, f: Frame): PostOverrides | void;
+
+  // ------------------------------------------------------------------ projection
+  /** camera-space coordinates (x right, y up, z forward) */
+  cs(p: V3): V3 { const d = vsub(p, this.key.p); return [vdot(d, this.R), vdot(d, this.U), vdot(d, this.Fw)]; }
+  sp(q: V3): [number, number] { const z = Math.max(q[2], 1e-6); return [W / 2 + (this.f * q[0]) / z, H / 2 - (this.f * q[1]) / z]; }
+  pr(p: V3): P2 { const q = this.cs(p); const z = Math.max(q[2], 1e-6); return { x: W / 2 + (this.f * q[0]) / z, y: H / 2 - (this.f * q[1]) / z, z: q[2], k: this.f / z }; }
+  vis(p: V3, m = 0) { const q = this.pr(p); return q.z > this.near && q.x > -m && q.x < W + m && q.y > -m && q.y < H + m; }
+
+  /** add a near-clipped segment to the current path */
+  mv(c: Ctx, a: V3, b: V3) {
+    let A = this.cs(a), B = this.cs(b);
+    const n = this.near;
+    if (A[2] < n && B[2] < n) return;
+    if (A[2] < n) A = vlerp(A, B, (n - A[2]) / (B[2] - A[2]));
+    else if (B[2] < n) B = vlerp(B, A, (n - B[2]) / (A[2] - B[2]));
+    const p = this.sp(A), q = this.sp(B);
+    c.moveTo(p[0], p[1]); c.lineTo(q[0], q[1]);
+  }
+  seg(c: Ctx, a: V3, b: V3, col: string, lw = 1.5, o: { dash?: number[]; alpha?: number; cap?: CanvasLineCap } = {}) {
+    c.save();
+    c.strokeStyle = col; c.lineWidth = lw * LW; c.lineCap = o.cap ?? 'round';
+    if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    if (o.dash) c.setLineDash(o.dash);
+    c.beginPath(); this.mv(c, a, b); c.stroke();
+    c.restore();
+  }
+  segs(c: Ctx, list: [V3, V3][], col: string, lw = 1.5, alpha = 1, dash?: number[]) {
+    if (!list.length) return;
+    c.save(); c.strokeStyle = col; c.lineWidth = lw * LW; c.lineCap = 'round'; c.globalAlpha *= alpha; if (dash) c.setLineDash(dash);
+    c.beginPath(); for (const [a, b] of list) this.mv(c, a, b); c.stroke(); c.restore();
+  }
+  /** neon: a wide soft pass under a thin hot core */
+  glowSeg(c: Ctx, a: V3, b: V3, col: string, lw = 2, glow = 10, alpha = 1) {
+    c.save(); c.globalCompositeOperation = 'lighter';
+    this.seg(c, a, b, col, lw + glow, { alpha: 0.12 * alpha });
+    this.seg(c, a, b, col, lw + glow * 0.4, { alpha: 0.25 * alpha });
+    this.seg(c, a, b, mixHex(col.length === 7 ? col : '#ffffff', '#ffffff', 0.5), lw, { alpha });
+    c.restore();
+  }
+  /** polyline through world points (near-clipped piece by piece) */
+  pl3(c: Ctx, pts: V3[], col: string, lw = 1.5, o: { close?: boolean; alpha?: number; dash?: number[]; glow?: number } = {}) {
+    if (pts.length < 2) return;
+    c.save(); c.strokeStyle = col; c.lineWidth = lw * LW; c.lineCap = 'round'; c.lineJoin = 'round';
+    if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    if (o.dash) c.setLineDash(o.dash);
+    if (o.glow) { c.shadowBlur = o.glow; c.shadowColor = col; }
+    c.beginPath();
+    let pen = false;
+    const n = this.near;
+    const N = o.close ? pts.length : pts.length - 1;
+    for (let i = 0; i < N; i++) {
+      let A = this.cs(pts[i]!), B = this.cs(pts[(i + 1) % pts.length]!);
+      if (A[2] < n && B[2] < n) { pen = false; continue; }
+      let cutA = false;
+      if (A[2] < n) { A = vlerp(A, B, (n - A[2]) / (B[2] - A[2])); cutA = true; }
+      let cutB = false;
+      if (B[2] < n) { B = vlerp(B, A, (n - B[2]) / (A[2] - B[2])); cutB = true; }
+      const p = this.sp(A), q = this.sp(B);
+      if (!pen || cutA) c.moveTo(p[0], p[1]);
+      c.lineTo(q[0], q[1]);
+      pen = !cutB;
+    }
+    c.stroke(); c.restore();
+  }
+  /** filled polygon (clipped against the near plane) */
+  fill3(c: Ctx, pts: V3[], fill: string, o: { alpha?: number; stroke?: string; lw?: number } = {}) {
+    const n = this.near;
+    const Q = pts.map((p) => this.cs(p));
+    const out: V3[] = [];
+    for (let i = 0; i < Q.length; i++) {
+      const A = Q[i]!, B = Q[(i + 1) % Q.length]!;
+      const ia = A[2] >= n, ib = B[2] >= n;
+      if (ia) out.push(A);
+      if (ia !== ib) out.push(vlerp(A, B, (n - A[2]) / (B[2] - A[2])));
+    }
+    if (out.length < 3) return;
+    c.save(); if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    c.beginPath();
+    out.forEach((q, i) => { const s = this.sp(q); if (i) c.lineTo(s[0], s[1]); else c.moveTo(s[0], s[1]); });
+    c.closePath();
+    c.fillStyle = fill; c.fill();
+    if (o.stroke) { c.strokeStyle = o.stroke; c.lineWidth = (o.lw ?? 1.5) * LW; c.lineJoin = 'round'; c.stroke(); }
+    c.restore();
+  }
+  /** a rectangle on a plane */
+  rect3(c: Ctx, P: Pl, x: number, y: number, w: number, h: number, o: { fill?: string; stroke?: string; lw?: number; alpha?: number; dash?: number[] } = {}) {
+    const q: V3[] = [at(P, x, y), at(P, x + w, y), at(P, x + w, y + h), at(P, x, y + h)];
+    if (o.fill) this.fill3(c, q, o.fill, { alpha: o.alpha });
+    if (o.stroke) this.pl3(c, q, o.stroke, o.lw ?? 1.5, { close: true, alpha: o.alpha, dash: o.dash });
+  }
+  /** wire box (axis aligned), optional faces */
+  box3(c: Ctx, a: V3, b: V3, col: string, lw = 1.5, o: { fill?: string; alpha?: number } = {}) {
+    const P: V3[] = [[a[0], a[1], a[2]], [b[0], a[1], a[2]], [b[0], a[1], b[2]], [a[0], a[1], b[2]], [a[0], b[1], a[2]], [b[0], b[1], a[2]], [b[0], b[1], b[2]], [a[0], b[1], b[2]]];
+    if (o.fill) {
+      const faces = [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]];
+      // painter: far faces first
+      const zs = faces.map((fc) => fc.reduce((s, i) => s + this.cs(P[i]!)[2], 0) / 4);
+      faces.map((fc, i) => ({ fc, z: zs[i]! })).sort((x, y) => y.z - x.z).forEach(({ fc }) => this.fill3(c, fc.map((i) => P[i]!), o.fill!, { alpha: o.alpha }));
+    }
+    const E = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+    this.segs(c, E.map(([i, j]) => [P[i!]!, P[j!]!] as [V3, V3]), col, lw, o.alpha ?? 1);
+  }
+  /** grid on a plane, fading with camera distance between fog[0] and fog[1] */
+  grid3(c: Ctx, P: Pl, x0: number, x1: number, y0: number, y1: number, step: number, col: string, lw = 1, o: { alpha?: number; fog?: [number, number]; sub?: number; dash?: number[] } = {}) {
+    const fog = o.fog ?? [1e9, 2e9];
+    const buckets: [V3, V3][][] = Array.from({ length: 6 }, () => []);
+    const sub = o.sub ?? 6;
+    const push = (A: V3, B: V3) => {
+      for (let i = 0; i < sub; i++) {
+        const a = vlerp(A, B, i / sub), b = vlerp(A, B, (i + 1) / sub);
+        const z = this.cs(vlerp(a, b, 0.5))[2];
+        const k = 1 - clamp((z - fog[0]) / (fog[1] - fog[0]));
+        if (k <= 0.02) continue;
+        buckets[Math.min(5, Math.floor(k * 6))]!.push([a, b]);
+      }
+    };
+    for (let x = Math.ceil(x0 / step) * step; x <= x1 + 1e-6; x += step) push(at(P, x, y0), at(P, x, y1));
+    for (let y = Math.ceil(y0 / step) * step; y <= y1 + 1e-6; y += step) push(at(P, x0, y), at(P, x1, y));
+    buckets.forEach((b, i) => this.segs(c, b, col, lw, (o.alpha ?? 1) * ((i + 0.5) / 6), o.dash));
+  }
+  /** a dot at a world point; r in world units (min 1 px) */
+  dot3(c: Ctx, p: V3, r: number, fill?: string, o: { stroke?: string; lw?: number; alpha?: number; px?: boolean } = {}) {
+    const q = this.pr(p);
+    if (q.z < this.near) return null;
+    const rr = o.px ? r : Math.max(0.6, r * q.k);
+    if (rr > 3000 || q.x + rr < -10 || q.x - rr > W + 10 || q.y + rr < -10 || q.y - rr > H + 10) return null;
+    c.save(); if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    c.beginPath(); c.arc(q.x, q.y, rr, 0, Math.PI * 2);
+    if (fill) { c.fillStyle = fill; c.fill(); }
+    if (o.stroke) { c.strokeStyle = o.stroke; c.lineWidth = (o.lw ?? 1.5) * LW; c.stroke(); }
+    c.restore();
+    return { ...q, r: rr };
+  }
+  /** a circle lying on a plane */
+  ring3(c: Ctx, P: Pl, x: number, y: number, r: number, col: string, lw = 1.5, o: { fill?: string; alpha?: number; a0?: number; a1?: number; n?: number; dash?: number[] } = {}) {
+    const n = o.n ?? 48, a0 = o.a0 ?? 0, a1 = o.a1 ?? Math.PI * 2;
+    const pts: V3[] = [];
+    for (let i = 0; i <= n; i++) { const a = lerp(a0, a1, i / n); pts.push(at(P, x + Math.cos(a) * r, y + Math.sin(a) * r)); }
+    if (o.fill) this.fill3(c, pts, o.fill, { alpha: o.alpha });
+    this.pl3(c, pts, col, lw, { alpha: o.alpha, dash: o.dash });
+  }
+
+  // ------------------------------------------------------------------ type on planes
+  /** text width in world units (before `each` offsets) */
+  tw3(s: string, o: { size: number; fam: string; track?: number }) {
+    const L = layout(s, o.fam, 100);
+    return (L.width + Math.max(0, Array.from(s).length - 1) * (o.track ?? 0) * 100) * (o.size / 100);
+  }
+  /**
+   * Set a string on a plane, glyph by glyph (each glyph gets its own affine from the camera, so long words
+   * on receding planes foreshorten correctly). (x, y) is the anchor on the plane (baseline, or cap middle).
+   * Returns the run's width in world units.
+   */
+  text3(c: Ctx, s: string, P: Pl, x: number, y: number, o: T3): number {
+    if (!s) return 0;
+    const L = layout(s, o.fam, 100);
+    const k = o.size / 100;
+    const tr = (o.track ?? 0) * 100;
+    const chars = Array.from(s);
+    const width = (L.width + Math.max(0, chars.length - 1) * tr) * k;
+    const x0 = (o.align ?? 'left') === 'center' ? x - width / 2 : o.align === 'right' ? x - width : x;
+    const yb = o.mid ? y - (CAP * o.size) / 2 : y;
+    c.save();
+    if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    if (o.glow) { c.shadowBlur = o.glow; c.shadowColor = o.glowColor ?? o.color ?? '#fff'; }
+    const ga = c.globalAlpha;
+    // (overlap QA: the run's screen box and its strongest alpha)
+    let bx0 = 1e9, bx1 = -1e9, by0 = 1e9, by1 = -1e9, bA = 0;
+    const gl: number[] = []; // (QA: each glyph's own box — a tilted line's run box covers the lines next to it)
+    let gbox: [number, number, number, number] | null = null;
+    const colA = (col?: string) => { const mm = col ? /rgba\([^)]*,\s*([\d.]+)\)/.exec(col) : null; return mm ? +mm[1]! : 1; };
+    for (let i = 0; i < L.glyphs.length; i++) {
+      const g = L.glyphs[i]!;
+      if (g.ch === ' ') continue;
+      const m = o.each ? o.each(i, g.ch, L.glyphs.length) : null;
+      if (o.each && m === null) continue;
+      const sc = m?.sc ?? 1, sy = (m?.sy ?? 1) * sc;
+      const gx = x0 + (g.x + i * tr) * k + (m?.dx ?? 0) * o.size;
+      const gy = yb + (m?.dy ?? 0) * o.size;
+      // glyph centre-bottom pivot for scaling
+      const cx = gx + (g.w * k) / 2;
+      const A = at(P, cx, gy);
+      const qa = this.cs(A);
+      if (qa[2] < this.near * 2) continue;
+      const Rx = at(P, cx + g.w * k * 0.5, gy), Ux = at(P, cx, gy + o.size * 0.5);
+      const pA = this.sp(qa), pR = this.sp(this.cs(Rx)), pU = this.sp(this.cs(Ux));
+      // per glyph-px (font at 100 px): screen delta for +x and for +y (canvas y down = world −up)
+      const ex = [(pR[0] - pA[0]) / (g.w * 0.5 || 1), (pR[1] - pA[1]) / (g.w * 0.5 || 1)];
+      const ey = [-(pU[0] - pA[0]) / 50, -(pU[1] - pA[1]) / 50];
+      const kx = Math.hypot(ex[0]!, ex[1]!), ky = Math.hypot(ey[0]!, ey[1]!);
+      // cull: a glyph near the camera plane off to the side projects enormous — skip anything whose box misses the
+      // frame or is many frames wide
+      {
+        const hw = (g.w * sc) / 2, up = -80 * sy, dn = 20 * sy;
+        const xs = [-hw, hw, -hw, hw], ys = [up, up, dn, dn];
+        let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+        for (let q = 0; q < 4; q++) {
+          const X = pA[0] + ex[0]! * xs[q]! + ey[0]! * ys[q]!, Y = pA[1] + ex[1]! * xs[q]! + ey[1]! * ys[q]!;
+          x0 = Math.min(x0, X); x1 = Math.max(x1, X); y0 = Math.min(y0, Y); y1 = Math.max(y1, Y);
+        }
+        if (x1 < -40 || x0 > W + 40 || y1 < -40 || y0 > H + 40) continue;
+        if (x1 - x0 > W * 3 || y1 - y0 > H * 3) continue;
+        const qr = this.cs(Rx), qu = this.cs(Ux);
+        if (qr[2] < this.near * 2 || qu[2] < this.near * 2) continue;
+        if (TEXT_QA.on) {
+          // (the QA box is the ink: cap height over the baseline, no descender allowance)
+          let a0 = 1e9, a1 = -1e9, c0 = 1e9, c1 = -1e9;
+          const qx = [-hw * 0.9, hw * 0.9, -hw * 0.9, hw * 0.9], qy = [-72 * sy, -72 * sy, 0, 0];
+          for (let q = 0; q < 4; q++) {
+            const X = pA[0] + ex[0]! * qx[q]! + ey[0]! * qy[q]!, Y = pA[1] + ex[1]! * qx[q]! + ey[1]! * qy[q]!;
+            a0 = Math.min(a0, X); a1 = Math.max(a1, X); c0 = Math.min(c0, Y); c1 = Math.max(c1, Y);
+          }
+          gbox = [a0, c0, a1, c1];
+        }
+      }
+      const px = Math.max(4, Math.min(1400, 100 * Math.max(kx * sc, ky * sy)));
+      const f = px / 100; // raster the glyph at px, so scale the matrix down by f
+      let a = (ex[0]! * sc) / f, b = (ex[1]! * sc) / f, cc = (ey[0]! * sy) / f, d = (ey[1]! * sy) / f;
+      if (m?.rot) { const cr = Math.cos(m.rot), sr = Math.sin(m.rot); [a, b, cc, d] = [a * cr + cc * sr, b * cr + d * sr, -a * sr + cc * cr, -b * sr + d * cr]; }
+      c.setTransform(this.base.multiply(new DOMMatrix([a, b, cc, d, pA[0], pA[1]])));
+      c.font = `${px}px "${o.fam}"`;
+      c.textAlign = 'center';
+      c.textBaseline = 'alphabetic';
+      c.globalAlpha = ga * (m?.a ?? 1);
+      if (c.globalAlpha <= 0.003) continue;
+      if (o.stroke) { c.strokeStyle = o.stroke; c.lineWidth = (o.strokeW ?? 2) / Math.max(1e-3, Math.hypot(a, b)); c.lineJoin = 'round'; c.strokeText(g.ch, 0, 0); }
+      if (o.color || m?.color) { c.fillStyle = m?.color ?? o.color!; c.fillText(g.ch, 0, 0); }
+      if (TEXT_QA.on && gbox) {
+        const ea = c.globalAlpha * colA(m?.color ?? o.color);
+        if (ea > 0.05) { bx0 = Math.min(bx0, gbox[0]); by0 = Math.min(by0, gbox[1]); bx1 = Math.max(bx1, gbox[2]); by1 = Math.max(by1, gbox[3]); bA = Math.max(bA, ea); if (ea > 0.45) gl.push(gbox[0], gbox[1], gbox[2], gbox[3]); }
+      }
+    }
+    c.restore();
+    if (TEXT_QA.on && !MIRRORING && bx1 > bx0) TEXT_QA.runs.push({ scene: this.ctx.id, s, x0: bx0, y0: by0, x1: bx1, y1: by1, a: bA, g: gl });
+    return width;
+  }
+  /** the plane flipped so type set on it reads left → right and upright from the current camera */
+  readable(P: Pl): Pl {
+    // seen from its back, type would read mirrored: flip u first (mirror back) …
+    let r = P.r, u = P.u;
+    const n = vcross(r, u), toCam = vsub(this.key.p, P.o);
+    if (vdot(n, toCam) < 0) u = vsc(u, -1) as V3;
+    // … then, if it runs right-to-left on screen, turn it half a turn (both axes)
+    const o = this.pr(P.o), rr = this.pr(vadd(P.o, r));
+    if (rr.x < o.x) { r = vsc(r, -1) as V3; u = vsc(u, -1) as V3; }
+    return { o: P.o, r, u };
+  }
+  /** on-screen cap height (px) of type of em size `size` at world point p */
+  capPx(p: V3, size: number) { return this.pr(p).k * size * CAP; }
+
+  /**
+   * A lyric line set on a plane in rows (wrapped at maxW world units), karaoke by glyph: upcoming in `up` (or hidden
+   * when up is ''), the sung part of the current word in `cur`, sung words in `done`. Returns word boxes in plane units.
+   */
+  say3(c: Ctx, words: Word[], t: number, P: Pl, x: number, y: number, o: T3 & { up: string; cur: string; done: string; maxW?: number; lead?: number; upper?: boolean; gap?: number; pop?: number; text?: (w: Word, i: number) => string; rise?: number; slam?: number }) {
+    const gap = (o.gap ?? 0.28) * o.size, lead = o.lead ?? o.size * 1.05;
+    const items = words.map((w, i) => { const s0 = o.text ? o.text(w, i) : w.w; const s = o.upper ? s0.toUpperCase() : s0; return { w, s, wd: this.tw3(s, o) }; });
+    const rows: (typeof items)[] = [[]];
+    let rw = 0;
+    for (const it of items) {
+      const cur = rows[rows.length - 1]!;
+      if (o.maxW && cur.length && rw + gap + it.wd > o.maxW) { rows.push([it]); rw = it.wd; } else { cur.push(it); rw += (cur.length > 1 ? gap : 0) + it.wd; }
+    }
+    const boxes: { x: number; y: number; w: number; s: string; word: Word }[] = [];
+    rows.forEach((row, ri) => {
+      const total = row.reduce((a, b) => a + b.wd, 0) + gap * (row.length - 1);
+      let xx = (o.align ?? 'left') === 'center' ? x - total / 2 : o.align === 'right' ? x - total : x;
+      const yy = y - ri * lead;
+      for (const it of row) {
+        const p = sungW(t, it.w);
+        const n = Array.from(it.s).length;
+        const pop = (o.pop ? o.pop * hot(t, it.w.start, 0.09) : 0) + (o.slam ? o.slam * Math.pow(1 - clamp((t - it.w.start) / 0.13), 3) : 0);
+        const rise = o.rise ?? 0;
+        if (t >= it.w.start || o.up) {
+          this.text3(c, it.s, P, xx, yy, {
+            ...o, align: 'left', color: undefined,
+            each: (i) => {
+              const lit = t >= it.w.start && (i + 0.5) / n <= p * 1.6 + 0.02;
+              const col = !lit ? o.up : p >= 1 ? o.done : o.cur;
+              if (!col) return null;
+              const since = t - (it.w.start + (i / n) * (it.w.end - it.w.start) / 1.6);
+              const dy = lit && rise ? -rise * Math.exp(-Math.max(0, since) * 14) : 0;
+              return { color: col, sc: 1 + pop, dy };
+            },
+          });
+        }
+        boxes.push({ x: xx, y: yy, w: it.wd, s: it.s, word: it.w });
+        xx += it.wd + gap;
+      }
+    });
+    return boxes;
+  }
+
+  // ------------------------------------------------------------------ images on planes
+  /** draw an image onto a rectangle of a plane (x, y = bottom-left; w, h world units), n×n affine cells */
+  img3(c: Ctx, img: CanvasImageSource, iw: number, ih: number, P: Pl, x: number, y: number, w: number, h: number, o: { n?: number; alpha?: number; sx?: number; sy?: number; sw?: number; sh?: number; smooth?: boolean } = {}) {
+    const n = o.n ?? 6;
+    const sx = o.sx ?? 0, sy = o.sy ?? 0, sw = o.sw ?? iw, sh = o.sh ?? ih;
+    const G: ([number, number] | null)[][] = [];
+    for (let i = 0; i <= n; i++) {
+      G.push([]);
+      for (let j = 0; j <= n; j++) {
+        const q = this.cs(at(P, x + (w * i) / n, y + h - (h * j) / n));
+        G[i]!.push(q[2] > this.near ? this.sp(q) : null);
+      }
+    }
+    c.save();
+    if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    c.imageSmoothingEnabled = o.smooth ?? true;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const p00 = G[i]![j], p10 = G[i + 1]![j], p01 = G[i]![j + 1], p11 = G[i + 1]![j + 1];
+      if (!p00 || !p10 || !p01 || !p11) continue;
+      const u0 = sx + (sw * i) / n, u1 = sx + (sw * (i + 1)) / n, v0 = sy + (sh * j) / n, v1 = sy + (sh * (j + 1)) / n;
+      this.tri(c, img, [u0, v0], [u1, v0], [u0, v1], p00, p10, p01, [u0, v0, u1, v1]);
+      this.tri(c, img, [u1, v0], [u1, v1], [u0, v1], p10, p11, p01, [u0, v0, u1, v1]);
+    }
+    c.restore();
+  }
+  private tri(c: Ctx, img: CanvasImageSource, s0: number[], s1: number[], s2: number[], d0: number[], d1: number[], d2: number[], src: number[]) {
+    const den = (s1[0]! - s0[0]!) * (s2[1]! - s0[1]!) - (s2[0]! - s0[0]!) * (s1[1]! - s0[1]!);
+    if (Math.abs(den) < 1e-9) return;
+    const a = ((d1[0]! - d0[0]!) * (s2[1]! - s0[1]!) - (d2[0]! - d0[0]!) * (s1[1]! - s0[1]!)) / den;
+    const b = ((d1[1]! - d0[1]!) * (s2[1]! - s0[1]!) - (d2[1]! - d0[1]!) * (s1[1]! - s0[1]!)) / den;
+    const cc = ((d2[0]! - d0[0]!) * (s1[0]! - s0[0]!) - (d1[0]! - d0[0]!) * (s2[0]! - s0[0]!)) / den;
+    const d = ((d2[1]! - d0[1]!) * (s1[0]! - s0[0]!) - (d1[1]! - d0[1]!) * (s2[0]! - s0[0]!)) / den;
+    const e = d0[0]! - a * s0[0]! - cc * s0[1]!;
+    const f = d0[1]! - b * s0[0]! - d * s0[1]!;
+    // clip to the triangle, grown by ~0.7 px to hide seams
+    const mx = (d0[0]! + d1[0]! + d2[0]!) / 3, my = (d0[1]! + d1[1]! + d2[1]!) / 3;
+    const grow = (p: number[]) => { const dx = p[0]! - mx, dy = p[1]! - my, l = Math.hypot(dx, dy) || 1; return [p[0]! + (dx / l) * 0.7, p[1]! + (dy / l) * 0.7]; };
+    const g0 = grow(d0), g1 = grow(d1), g2 = grow(d2);
+    c.save();
+    c.beginPath(); c.moveTo(g0[0]!, g0[1]!); c.lineTo(g1[0]!, g1[1]!); c.lineTo(g2[0]!, g2[1]!); c.closePath(); c.clip();
+    c.setTransform(this.base.multiply(new DOMMatrix([a, b, cc, d, e, f])));
+    const [u0, v0, u1, v1] = src as [number, number, number, number];
+    const pad = 1;
+    c.drawImage(img, u0 - pad, v0 - pad, u1 - u0 + 2 * pad, v1 - v0 + 2 * pad, u0 - pad, v0 - pad, u1 - u0 + 2 * pad, v1 - v0 + 2 * pad);
+    c.restore();
+  }
+
+  /**
+   * A lyric line set big, a phrase at a time (v4, the p(doom)-scale type): the words are packed greedily into chunks no
+   * wider than maxW; the chunk holding the word being sung is shown (word by word, slamming, the sung word magenta), and
+   * it cuts to the next chunk on that chunk's first word. Before the line: nothing; after it: the last chunk holds.
+   */
+  chunk3(c: Ctx, words: Word[], t: number, P: Pl, x: number, y: number, o: Partial<T3> & { size: number; maxW: number; upper?: boolean; text?: (w: Word, i: number) => string; slam?: number; hold?: number; lead?: number; rows?: number; breaks?: number[]; anchor?: (first: Word) => [number, number] }) {
+    if (!words.length || t < words[0]!.start - 0.03) return;
+    const fam = o.fam ?? UF.wide;
+    const str = (w: Word, i: number) => { const s0 = o.text ? o.text(w, i) : w.w.replace(/[,.]$/, ''); return (o.upper ?? true) ? s0.toUpperCase() : s0; };
+    const gap = 0.28 * o.size;
+    const chunks: Word[][] = [[]];
+    let rw = 0;
+    words.forEach((w, i) => {
+      const wd = this.tw3(str(w, i), { size: o.size, fam });
+      const cur = chunks[chunks.length - 1]!;
+      const brk = o.breaks ? o.breaks.includes(i) && i > 0 : cur.length > 0 && rw + gap + wd > o.maxW;
+      if (brk) { chunks.push([w]); rw = wd; } else { cur.push(w); rw += (cur.length > 1 ? gap : 0) + wd; }
+    });
+    // explicit breaks: shrink any chunk wider than maxW to fit
+    const fitK = (ch: Word[]) => { const wd = ch.reduce((a, w) => a + this.tw3(str(w, words.indexOf(w)), { size: o.size, fam }), 0) + gap * (ch.length - 1); return Math.min(1, o.maxW / Math.max(0.01, wd)); };
+    // with rows > 1, chunks are shown in groups of `rows` lines (a block that cuts as a whole)
+    const R = Math.max(1, o.rows ?? 1);
+    let ci = 0;
+    for (let k = 0; k < chunks.length; k++) if (t >= chunks[k]![0]!.start - 0.03) ci = k;
+    const g0 = Math.floor(ci / R) * R;
+    const last = words[words.length - 1]!;
+    if (o.hold !== undefined && t > last.end + o.hold) return;
+    const lead = o.lead ?? o.size * 0.95;
+    for (let r = 0; r < R && g0 + r < chunks.length; r++) {
+      const ch = chunks[g0 + r]!;
+      if (t < ch[0]!.start - 0.03) continue;
+      const kf = fitK(ch);
+      const [ax, ay] = o.anchor ? o.anchor(ch[0]!) : [x, y];
+      this.say3(c, ch, t, P, ax, ay - r * lead, { ...o, size: o.size * kf, fam, up: '', cur: o.color ?? U.mag, done: U.bone, align: o.align ?? 'center', upper: false, text: (w) => str(w, words.indexOf(w)), slam: o.slam ?? 0.35 });
+    }
+  }
+
+  /**
+   * A hero word: slams in at t0 (scale 1 + slam → 1 in 0.13 s, out-cubic) and is magenta while it is sung (t0 → t1),
+   * bone after. Returns the width in plane units.
+   */
+  hero3(c: Ctx, s: string, P: Pl, x: number, y: number, t: number, t0: number, t1: number, o: Partial<T3> & { size: number; slam?: number; col?: string; after?: string }) {
+    if (t < t0 - 0.02) return 0;
+    const k = clamp((t - t0) / 0.13);
+    const sc = 1 + (o.slam ?? 0.35) * Math.pow(1 - k, 3);
+    const col = t < t1 ? (o.col ?? U.mag) : (o.after ?? U.bone);
+    return this.text3(c, s, P, x, y, { fam: UF.wide, align: 'center', ...o, color: col, each: o.each ?? (() => ({ sc })) });
+  }
+
+  // ------------------------------------------------------------------ screen-space notes
+  /** pdoom-style callout: a dot at the world point, an elbow leader, a small label (+ sub line) */
+  note(c: Ctx, p: V3, dx: number, dy: number, label: string, o: { sub?: string; col?: string; sub2?: string; size?: number; alpha?: number; dot?: boolean; fam?: string } = {}) {
+    if (MIRRORING) return;
+    const q = this.pr(p);
+    if (q.z < this.near) return;
+    const col = o.col ?? '#EDEAF2', size = o.size ?? 15, fam = o.fam ?? F.mono(500);
+    c.save();
+    c.globalAlpha *= o.alpha ?? 1;
+    c.font = `${size}px "${fam}"`;
+    const wLab = Math.max(c.measureText(label).width, o.sub ? c.measureText(o.sub).width * 0.86 : 0);
+    const ex = q.x + dx, ey = q.y + dy;
+    const right = dx >= 0;
+    c.strokeStyle = col; c.lineWidth = 1.2;
+    c.beginPath(); c.moveTo(q.x, q.y); c.lineTo(ex, ey); c.lineTo(ex + (right ? wLab + 10 : -wLab - 10), ey); c.stroke();
+    if (o.dot ?? true) { c.fillStyle = col; c.beginPath(); c.arc(q.x, q.y, 3, 0, Math.PI * 2); c.fill(); }
+    c.fillStyle = col; c.textAlign = right ? 'left' : 'right'; c.textBaseline = 'alphabetic';
+    c.fillText(label, ex + (right ? 5 : -5), ey - 6);
+    if (o.sub) { c.font = `${size * 0.82}px "${fam}"`; c.globalAlpha *= 0.7; c.fillText(o.sub, ex + (right ? 5 : -5), ey + size * 1.05); }
+    if (o.sub2) { c.font = `${size * 0.82}px "${fam}"`; c.fillText(o.sub2, ex + (right ? 5 : -5), ey + size * 2.05); }
+    c.restore();
+  }
+  /** many small square points at world positions (fast path: no arcs, one fill per colour); size in px at depth 10 */
+  points(c: Ctx, xyz: ArrayLike<number>, n: number, col: string, size = 2, alpha = 1) {
+    c.save(); c.fillStyle = col; c.globalAlpha *= alpha;
+    const R = this.R, U = this.U, Fw = this.Fw, p0 = this.key.p, f = this.f, near = this.near;
+    for (let i = 0; i < n; i++) {
+      const dx = xyz[i * 3]! - p0[0], dy = xyz[i * 3 + 1]! - p0[1], dz = xyz[i * 3 + 2]! - p0[2];
+      const z = dx * Fw[0] + dy * Fw[1] + dz * Fw[2];
+      if (z < near) continue;
+      const x = W / 2 + (f * (dx * R[0] + dy * R[1] + dz * R[2])) / z, y = H / 2 - (f * (dx * U[0] + dy * U[1] + dz * U[2])) / z;
+      if (x < -4 || x > W + 4 || y < -4 || y > H + 4) continue;
+      const s = Math.max(0.8, Math.min(8, (size * 10) / z));
+      c.fillRect(x - s / 2, y - s / 2, s, s);
+    }
+    c.restore();
+  }
+  /**
+   * The crown (2026-10-10 polish: the filled clip-art crowns read cheap): a wireframe band in thin light — a base
+   * ring, a five-pointed top edge, struts — turning slowly, with a soft magenta core. p = centre of the band's foot.
+   */
+  crown3(c: Ctx, p: V3, s: number, t: number, col = '#EDEAF2', glow = '#FF2E7E') {
+    const n = 60, spin = t * 0.9;
+    const pt = (a: number, y: number, r: number): V3 => [p[0] + Math.cos(a) * r, p[1] + y, p[2] + Math.sin(a) * r];
+    const lo: V3[] = [], mid: V3[] = [], hi: V3[] = [];
+    for (let i = 0; i <= n; i++) {
+      const a = (i / n) * Math.PI * 2 + spin;
+      const u = ((i / n) * 5) % 1, spike = 1 - Math.abs(u - 0.5) * 2; // a sawtooth: five sharp points
+      lo.push(pt(a, 0, 0.78 * s)); mid.push(pt(a, 0.22 * s, 0.8 * s)); hi.push(pt(a, (0.32 + 0.62 * Math.pow(spike, 1.6)) * s, 0.84 * s));
+    }
+    c.save(); c.globalCompositeOperation = 'lighter';
+    const g = this.pr(pt(0, 0.4 * s, 0));
+    if (g.z > this.near) pool(c, g.x, g.y, Math.max(30, g.k * s * 1.6), glow, 0.35);
+    c.restore();
+    this.pl3(c, lo, col, 1.6); this.pl3(c, mid, col, 1.0, { alpha: 0.6 }); this.pl3(c, hi, col, 1.8, { glow: 6 });
+    for (let k = 0; k < 10; k++) { const i = Math.round((k / 10) * n); this.seg(c, lo[i]!, hi[i]!, col, 1.0, { alpha: 0.7 }); }
+    for (let k = 0; k < 5; k++) { const i = Math.round(((k + 0.5) / 5) * n); this.dot3(c, hi[i]!, 0.05 * s, '#FFFFFF'); }
+  }
+  /** the beats of the song inside [a, b) (alias kept short for plates) */
+  B(a: number, b: number) { return this.beats(a, b); }
+}
+
+// ------------------------------------------------------------------ frame furniture (screen space)
+/** corner brackets + a tiny tag in each corner: the plate's "instrument" frame */
+export function frameMarks(c: Ctx, col: string, o: { tl?: string; tr?: string; bl?: string; br?: string; inset?: number; len?: number; alpha?: number; size?: number } = {}) {
+  if (MIRRORING) return;
+  const m = o.inset ?? 36, L = o.len ?? 26, s = o.size ?? 13;
+  c.save();
+  c.globalAlpha *= o.alpha ?? 0.8;
+  c.strokeStyle = col; c.lineWidth = 1.5;
+  const corners: [number, number, number, number][] = [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]];
+  c.beginPath();
+  for (const [x, y, sx, sy] of corners) { c.moveTo(x + sx * L, y); c.lineTo(x, y); c.lineTo(x, y + sy * L); }
+  c.stroke();
+  c.fillStyle = col; c.font = `${s}px "${F.mono(500)}"`; c.textBaseline = 'alphabetic';
+  if (o.tl) { c.textAlign = 'left'; c.fillText(o.tl, m + L + 10, m + s * 0.4); }
+  if (o.tr) { c.textAlign = 'right'; c.fillText(o.tr, W - m - L - 10, m + s * 0.4); }
+  if (o.bl) { c.textAlign = 'left'; c.fillText(o.bl, m + L + 10, H - m + s * 0.35); }
+  if (o.br) { c.textAlign = 'right'; c.fillText(o.br, W - m - L - 10, H - m + s * 0.35); }
+  c.restore();
+}
+
+/** a radial vignette-ish glow pool (screen space) */
+export function pool(c: Ctx, x: number, y: number, r: number, col: string, a = 0.5) {
+  if (MIRRORING) return;
+  const g = c.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, hexA(col, a)); g.addColorStop(1, hexA(col, 0));
+  c.save(); c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); c.restore();
+}
+
+/** song-time timecode string m:ss.cc */
+export const tc = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}.${String(Math.floor((t % 1) * 100)).padStart(2, '0')}`;

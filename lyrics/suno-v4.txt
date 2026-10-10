@@ -1,0 +1,101 @@
+[Intro]
+
+[Verse 1]
+Perceptron drew a line, but X-O-R stayed unresolved,
+stack another hidden layer and the problem's solved
+Sigmoid squashed the signal, gradients fading down to zero,
+Ray-loo clipped the negatives and came in as the hero
+Hand-tuned SIFT and HOG, every feature carved by hand,
+convolution learned the filters that nobody planned
+S-V-M, the widest margin, kernel trick and all,
+deep nets ate the benchmarks and the margins had to fall
+
+[Pre-Chorus]
+Depth is all you need,
+the abstract guaranteed
+
+[Chorus]
+You were state of the art,
+now you're just a baseline
+Top of the leaderboard,
+until the next deadline
+Kernel tricks and hand-made features frozen on the shelf,
+the network took the crown and learned the features by itself
+
+[Verse 2]
+N-gram counting words, a window three tokens wide,
+R-N-N kept a hidden state and carried it inside
+Backprop through time, the gradients vanish or explode,
+L-S-T-M put gates along the road
+Seq-to-seq would squeeze a sentence through a bottleneck,
+attention let the decoder look back and double-check
+Recurrence marched in order, one step at a time,
+transformers ran in parallel and left it all behind
+
+[Pre-Chorus]
+Memory's all you need,
+the abstract guaranteed
+
+[Chorus]
+You were state of the art,
+now you're just a baseline
+Top of the leaderboard,
+until the next deadline
+L-S-T-M, you held the memory for so long,
+one attention layer and the whole recurrence gone
+
+[Drop]
+
+[Verse 3]
+GANs played a two-player game until the modes collapsed,
+diffusion learned to denoise in a thousand tiny steps
+Sinusoids gave way to Rope's rotation,
+LayerNorm to R-M-S, Ray-loo to Swee-glue activation
+Dense became a mixture, only some experts awake,
+thirty-two bits down to four for the throughput's sake
+Full fine-tune to Lora, a low-rank little patch,
+then just prompt it in context, no gradient to catch
+
+[Pre-Chorus: breakdown, drums out]
+Attention's all you need,
+the abstract guaranteed
+
+[Chorus: soft, stripped back]
+You were state of the art,
+now you're just a baseline
+Top of the leaderboard,
+until the next deadline
+Bert, you read both ways, masked and bidirectional,
+decoder-only scaled up and made you optional
+
+[Bridge]
+R-L-H-F trained a reward model to rank,
+D-P-O skipped the middleman and took it to the bank
+Flash attention tiles it all inside the S-RAM,
+no more round trips to the H-B-M, no traffic jam
+Context window: two K, then a million tokens long,
+needle in a haystack, it remembers every song
+Every "all you need" is a paper with a date,
+every breakthrough's just a baseline running late
+
+[Pre-Chorus]
+Scale is all you need,
+the abstract guaranteed
+
+[Final Chorus]
+You were state of the art,
+now you're just a baseline
+Top of the leaderboard,
+until the next deadline
+And you, attention, quadratic in the length,
+a linear-time successor's training up its strength
+Every "all you need" becomes a footnote in the end,
+cite me in related work, remember me, my friend
+
+[Drop]
+
+[Outro]
+I was state of the art,
+now I'm just a baseline
+Cite me in related work
+one more time

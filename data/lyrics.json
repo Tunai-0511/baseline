@@ -1,0 +1,3776 @@
+{
+  "lines": [
+    {
+      "i": 0,
+      "text": "Perceptron drew a line, but XOR stayed unresolved,",
+      "start": 8.68,
+      "end": 12.387,
+      "words": [
+        {
+          "w": "Perceptron",
+          "start": 8.68,
+          "end": 9.404,
+          "conf": 1.0
+        },
+        {
+          "w": "drew",
+          "start": 9.404,
+          "end": 9.68,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 9.68,
+          "end": 9.86,
+          "conf": 0.71
+        },
+        {
+          "w": "line,",
+          "start": 9.86,
+          "end": 10.1,
+          "conf": 0.98
+        },
+        {
+          "w": "but",
+          "start": 10.1,
+          "end": 10.38,
+          "conf": 0.86
+        },
+        {
+          "w": "XOR",
+          "start": 10.38,
+          "end": 10.935,
+          "conf": 0.78,
+          "syl": [
+            [
+              10.38,
+              10.62
+            ],
+            [
+              10.62,
+              10.84
+            ],
+            [
+              10.84,
+              10.935
+            ]
+          ]
+        },
+        {
+          "w": "stayed",
+          "start": 10.935,
+          "end": 11.279,
+          "conf": 0.91
+        },
+        {
+          "w": "unresolved,",
+          "start": 11.279,
+          "end": 12.387,
+          "conf": 0.93
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "text": "stack another hidden layer and the problem’s solved",
+      "start": 12.387,
+      "end": 16.073,
+      "words": [
+        {
+          "w": "stack",
+          "start": 12.387,
+          "end": 12.891,
+          "conf": 0.95
+        },
+        {
+          "w": "another",
+          "start": 12.891,
+          "end": 13.489,
+          "conf": 1.0
+        },
+        {
+          "w": "hidden",
+          "start": 13.489,
+          "end": 14.0,
+          "conf": 1.0
+        },
+        {
+          "w": "layer",
+          "start": 14.0,
+          "end": 14.54,
+          "conf": 0.85
+        },
+        {
+          "w": "and",
+          "start": 14.54,
+          "end": 14.7,
+          "conf": 0.85
+        },
+        {
+          "w": "the",
+          "start": 14.7,
+          "end": 14.816,
+          "conf": 1.0
+        },
+        {
+          "w": "problem’s",
+          "start": 14.88,
+          "end": 15.48,
+          "conf": 1.0
+        },
+        {
+          "w": "solved",
+          "start": 15.48,
+          "end": 16.073,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "text": "Sigmoid squashed the signal, gradients fading down to zero,",
+      "start": 16.073,
+      "end": 19.98,
+      "words": [
+        {
+          "w": "Sigmoid",
+          "start": 16.073,
+          "end": 16.662,
+          "conf": 0.72
+        },
+        {
+          "w": "squashed",
+          "start": 16.662,
+          "end": 17.02,
+          "conf": 1.0
+        },
+        {
+          "w": "the",
+          "start": 17.02,
+          "end": 17.116,
+          "conf": 1.0
+        },
+        {
+          "w": "signal,",
+          "start": 17.116,
+          "end": 17.68,
+          "conf": 1.0
+        },
+        {
+          "w": "gradients",
+          "start": 17.68,
+          "end": 18.099,
+          "conf": 0.97
+        },
+        {
+          "w": "fading",
+          "start": 18.099,
+          "end": 18.648,
+          "conf": 1.0
+        },
+        {
+          "w": "down",
+          "start": 18.648,
+          "end": 18.86,
+          "conf": 0.85
+        },
+        {
+          "w": "to",
+          "start": 18.86,
+          "end": 18.962,
+          "conf": 1.0
+        },
+        {
+          "w": "zero,",
+          "start": 18.962,
+          "end": 19.98,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "text": "ReLU clipped the negatives and came in as the hero",
+      "start": 19.98,
+      "end": 23.467,
+      "words": [
+        {
+          "w": "ReLU",
+          "start": 19.98,
+          "end": 20.42,
+          "conf": 0.86,
+          "syl": [
+            [
+              19.98,
+              20.22
+            ],
+            [
+              20.22,
+              20.42
+            ]
+          ]
+        },
+        {
+          "w": "clipped",
+          "start": 20.42,
+          "end": 20.7,
+          "conf": 1.0
+        },
+        {
+          "w": "the",
+          "start": 20.7,
+          "end": 20.92,
+          "conf": 1.0
+        },
+        {
+          "w": "negatives",
+          "start": 20.92,
+          "end": 21.68,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 21.68,
+          "end": 21.82,
+          "conf": 0.85
+        },
+        {
+          "w": "came",
+          "start": 21.82,
+          "end": 22.16,
+          "conf": 1.0
+        },
+        {
+          "w": "in",
+          "start": 22.16,
+          "end": 22.4,
+          "conf": 0.93
+        },
+        {
+          "w": "as",
+          "start": 22.4,
+          "end": 22.54,
+          "conf": 1.0
+        },
+        {
+          "w": "the",
+          "start": 22.54,
+          "end": 22.659,
+          "conf": 1.0
+        },
+        {
+          "w": "hero",
+          "start": 22.659,
+          "end": 23.467,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "text": "Hand-tuned SIFT and HOG, every feature carved by hand,",
+      "start": 23.467,
+      "end": 27.183,
+      "words": [
+        {
+          "w": "Hand-tuned",
+          "start": 23.467,
+          "end": 24.095,
+          "conf": 0.87,
+          "syl": [
+            [
+              23.467,
+              23.88
+            ],
+            [
+              23.88,
+              24.095
+            ]
+          ]
+        },
+        {
+          "w": "SIFT",
+          "start": 24.095,
+          "end": 24.42,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 24.42,
+          "end": 24.6,
+          "conf": 0.94
+        },
+        {
+          "w": "HOG,",
+          "start": 24.6,
+          "end": 25.093,
+          "conf": 1.0
+        },
+        {
+          "w": "every",
+          "start": 25.093,
+          "end": 25.417,
+          "conf": 1.0
+        },
+        {
+          "w": "feature",
+          "start": 25.417,
+          "end": 25.816,
+          "conf": 1.0
+        },
+        {
+          "w": "carved",
+          "start": 25.816,
+          "end": 26.275,
+          "conf": 1.0
+        },
+        {
+          "w": "by",
+          "start": 26.34,
+          "end": 26.595,
+          "conf": 1.0
+        },
+        {
+          "w": "hand,",
+          "start": 26.595,
+          "end": 27.183,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "text": "convolution learned the filters that nobody planned",
+      "start": 27.36,
+      "end": 31.12,
+      "words": [
+        {
+          "w": "convolution",
+          "start": 27.36,
+          "end": 28.2,
+          "conf": 0.85
+        },
+        {
+          "w": "learned",
+          "start": 28.2,
+          "end": 28.5,
+          "conf": 0.82
+        },
+        {
+          "w": "the",
+          "start": 28.5,
+          "end": 28.6,
+          "conf": 0.8
+        },
+        {
+          "w": "filters",
+          "start": 28.6,
+          "end": 29.2,
+          "conf": 1.0
+        },
+        {
+          "w": "that",
+          "start": 29.2,
+          "end": 29.44,
+          "conf": 1.0
+        },
+        {
+          "w": "nobody",
+          "start": 29.44,
+          "end": 30.186,
+          "conf": 1.0
+        },
+        {
+          "w": "planned",
+          "start": 30.3,
+          "end": 31.12,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 6,
+      "text": "SVM, the widest margin, kernel trick and all,",
+      "start": 31.12,
+      "end": 34.5,
+      "words": [
+        {
+          "w": "SVM,",
+          "start": 31.12,
+          "end": 31.74,
+          "conf": 0.73,
+          "syl": [
+            [
+              31.12,
+              31.28
+            ],
+            [
+              31.28,
+              31.52
+            ],
+            [
+              31.52,
+              31.74
+            ]
+          ]
+        },
+        {
+          "w": "the",
+          "start": 31.74,
+          "end": 31.843,
+          "conf": 1.0
+        },
+        {
+          "w": "widest",
+          "start": 31.843,
+          "end": 32.44,
+          "conf": 1.0
+        },
+        {
+          "w": "margin,",
+          "start": 32.44,
+          "end": 32.86,
+          "conf": 1.0
+        },
+        {
+          "w": "kernel",
+          "start": 32.86,
+          "end": 33.3,
+          "conf": 0.96
+        },
+        {
+          "w": "trick",
+          "start": 33.3,
+          "end": 33.519,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 33.584,
+          "end": 34.092,
+          "conf": 0.84
+        },
+        {
+          "w": "all,",
+          "start": 34.092,
+          "end": 34.5,
+          "conf": 0.75
+        }
+      ]
+    },
+    {
+      "i": 7,
+      "text": "deep nets ate the benchmarks and the margins had to fall",
+      "start": 34.5,
+      "end": 38.88,
+      "words": [
+        {
+          "w": "deep",
+          "start": 34.5,
+          "end": 34.74,
+          "conf": 0.81
+        },
+        {
+          "w": "nets",
+          "start": 34.74,
+          "end": 35.14,
+          "conf": 0.9
+        },
+        {
+          "w": "ate",
+          "start": 35.14,
+          "end": 35.36,
+          "conf": 0.66
+        },
+        {
+          "w": "the",
+          "start": 35.44,
+          "end": 35.64,
+          "conf": 1.0
+        },
+        {
+          "w": "benchmarks",
+          "start": 35.64,
+          "end": 36.178,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 36.178,
+          "end": 36.36,
+          "conf": 0.77
+        },
+        {
+          "w": "the",
+          "start": 36.36,
+          "end": 36.58,
+          "conf": 1.0
+        },
+        {
+          "w": "margins",
+          "start": 36.58,
+          "end": 37.036,
+          "conf": 1.0
+        },
+        {
+          "w": "had",
+          "start": 37.036,
+          "end": 37.32,
+          "conf": 1.0
+        },
+        {
+          "w": "to",
+          "start": 37.32,
+          "end": 37.57,
+          "conf": 1.0
+        },
+        {
+          "w": "fall",
+          "start": 37.57,
+          "end": 38.88,
+          "conf": 0.88
+        }
+      ]
+    },
+    {
+      "i": 8,
+      "text": "Depth is all you need,",
+      "start": 38.88,
+      "end": 42.34,
+      "words": [
+        {
+          "w": "Depth",
+          "start": 38.88,
+          "end": 39.385,
+          "conf": 0.73
+        },
+        {
+          "w": "is",
+          "start": 39.625,
+          "end": 39.879,
+          "conf": 0.77
+        },
+        {
+          "w": "all",
+          "start": 39.879,
+          "end": 40.263,
+          "conf": 0.79
+        },
+        {
+          "w": "you",
+          "start": 40.46,
+          "end": 40.74,
+          "conf": 0.71
+        },
+        {
+          "w": "need,",
+          "start": 40.74,
+          "end": 42.34,
+          "conf": 0.89
+        }
+      ]
+    },
+    {
+      "i": 9,
+      "text": "the abstract guaranteed",
+      "start": 42.34,
+      "end": 45.82,
+      "words": [
+        {
+          "w": "the",
+          "start": 42.34,
+          "end": 42.66,
+          "conf": 0.85
+        },
+        {
+          "w": "abstract",
+          "start": 42.66,
+          "end": 43.317,
+          "conf": 0.62
+        },
+        {
+          "w": "guaranteed",
+          "start": 43.48,
+          "end": 45.82,
+          "conf": 0.76
+        }
+      ]
+    },
+    {
+      "i": 10,
+      "text": "You were state of the art,",
+      "start": 45.82,
+      "end": 47.647,
+      "words": [
+        {
+          "w": "You",
+          "start": 45.82,
+          "end": 45.98,
+          "conf": 0.72
+        },
+        {
+          "w": "were",
+          "start": 45.98,
+          "end": 46.105,
+          "conf": 0.85
+        },
+        {
+          "w": "state",
+          "start": 46.105,
+          "end": 46.539,
+          "conf": 0.96
+        },
+        {
+          "w": "of",
+          "start": 46.78,
+          "end": 46.92,
+          "conf": 0.66
+        },
+        {
+          "w": "the",
+          "start": 46.92,
+          "end": 47.223,
+          "conf": 0.92
+        },
+        {
+          "w": "art,",
+          "start": 47.223,
+          "end": 47.647,
+          "conf": 0.67
+        }
+      ]
+    },
+    {
+      "i": 11,
+      "text": "now you’re just a baseline",
+      "start": 47.88,
+      "end": 49.92,
+      "words": [
+        {
+          "w": "now",
+          "start": 47.88,
+          "end": 48.146,
+          "conf": 0.98
+        },
+        {
+          "w": "you’re",
+          "start": 48.3,
+          "end": 48.535,
+          "conf": 0.79
+        },
+        {
+          "w": "just",
+          "start": 48.535,
+          "end": 48.84,
+          "conf": 0.98
+        },
+        {
+          "w": "a",
+          "start": 48.84,
+          "end": 48.919,
+          "conf": 0.97
+        },
+        {
+          "w": "baseline",
+          "start": 49.0,
+          "end": 49.92,
+          "conf": 0.98
+        }
+      ]
+    },
+    {
+      "i": 12,
+      "text": "Top of the leaderboard,",
+      "start": 49.92,
+      "end": 51.62,
+      "words": [
+        {
+          "w": "Top",
+          "start": 49.92,
+          "end": 50.181,
+          "conf": 0.8
+        },
+        {
+          "w": "of",
+          "start": 50.425,
+          "end": 50.62,
+          "conf": 0.67
+        },
+        {
+          "w": "the",
+          "start": 50.62,
+          "end": 50.86,
+          "conf": 0.86
+        },
+        {
+          "w": "leaderboard,",
+          "start": 50.86,
+          "end": 51.62,
+          "conf": 0.83
+        }
+      ]
+    },
+    {
+      "i": 13,
+      "text": "until the next deadline",
+      "start": 51.62,
+      "end": 53.6,
+      "words": [
+        {
+          "w": "until",
+          "start": 51.62,
+          "end": 52.02,
+          "conf": 0.95
+        },
+        {
+          "w": "the",
+          "start": 52.02,
+          "end": 52.14,
+          "conf": 0.84
+        },
+        {
+          "w": "next",
+          "start": 52.14,
+          "end": 52.615,
+          "conf": 0.88
+        },
+        {
+          "w": "deadline",
+          "start": 52.68,
+          "end": 53.6,
+          "conf": 0.83
+        }
+      ]
+    },
+    {
+      "i": 14,
+      "text": "Kernel tricks and hand-made features frozen on the shelf,",
+      "start": 53.6,
+      "end": 56.841,
+      "words": [
+        {
+          "w": "Kernel",
+          "start": 53.6,
+          "end": 54.02,
+          "conf": 0.85
+        },
+        {
+          "w": "tricks",
+          "start": 54.02,
+          "end": 54.381,
+          "conf": 0.96
+        },
+        {
+          "w": "and",
+          "start": 54.381,
+          "end": 54.481,
+          "conf": 0.92
+        },
+        {
+          "w": "hand-made",
+          "start": 54.481,
+          "end": 54.905,
+          "conf": 0.87,
+          "syl": [
+            [
+              54.481,
+              54.76
+            ],
+            [
+              54.76,
+              54.905
+            ]
+          ]
+        },
+        {
+          "w": "features",
+          "start": 54.905,
+          "end": 55.399,
+          "conf": 1.0
+        },
+        {
+          "w": "frozen",
+          "start": 55.399,
+          "end": 56.04,
+          "conf": 1.0
+        },
+        {
+          "w": "on",
+          "start": 56.04,
+          "end": 56.14,
+          "conf": 0.85
+        },
+        {
+          "w": "the",
+          "start": 56.14,
+          "end": 56.237,
+          "conf": 0.99
+        },
+        {
+          "w": "shelf,",
+          "start": 56.237,
+          "end": 56.841,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 15,
+      "text": "the network took the crown and learned the features by itself",
+      "start": 57.08,
+      "end": 60.572,
+      "words": [
+        {
+          "w": "the",
+          "start": 57.08,
+          "end": 57.3,
+          "conf": 0.85
+        },
+        {
+          "w": "network",
+          "start": 57.3,
+          "end": 57.68,
+          "conf": 1.0
+        },
+        {
+          "w": "took",
+          "start": 57.68,
+          "end": 58.0,
+          "conf": 0.81
+        },
+        {
+          "w": "the",
+          "start": 58.0,
+          "end": 58.14,
+          "conf": 1.0
+        },
+        {
+          "w": "crown",
+          "start": 58.14,
+          "end": 58.52,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 58.52,
+          "end": 58.7,
+          "conf": 0.91
+        },
+        {
+          "w": "learned",
+          "start": 58.7,
+          "end": 58.92,
+          "conf": 0.9
+        },
+        {
+          "w": "the",
+          "start": 58.92,
+          "end": 59.016,
+          "conf": 0.93
+        },
+        {
+          "w": "features",
+          "start": 59.016,
+          "end": 59.53,
+          "conf": 1.0
+        },
+        {
+          "w": "by",
+          "start": 59.6,
+          "end": 59.86,
+          "conf": 0.85
+        },
+        {
+          "w": "itself",
+          "start": 59.86,
+          "end": 60.572,
+          "conf": 0.97
+        }
+      ]
+    },
+    {
+      "i": 16,
+      "text": "N-gram counting words, a window three tokens wide,",
+      "start": 60.572,
+      "end": 63.99,
+      "words": [
+        {
+          "w": "N-gram",
+          "start": 60.572,
+          "end": 61.445,
+          "conf": 0.7,
+          "syl": [
+            [
+              60.572,
+              60.96
+            ],
+            [
+              60.96,
+              61.445
+            ]
+          ]
+        },
+        {
+          "w": "counting",
+          "start": 61.445,
+          "end": 61.9,
+          "conf": 0.85
+        },
+        {
+          "w": "words,",
+          "start": 61.9,
+          "end": 62.2,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 62.2,
+          "end": 62.34,
+          "conf": 0.6
+        },
+        {
+          "w": "window",
+          "start": 62.34,
+          "end": 62.747,
+          "conf": 0.89
+        },
+        {
+          "w": "three",
+          "start": 62.747,
+          "end": 63.02,
+          "conf": 1.0
+        },
+        {
+          "w": "tokens",
+          "start": 63.02,
+          "end": 63.52,
+          "conf": 1.0
+        },
+        {
+          "w": "wide,",
+          "start": 63.52,
+          "end": 63.99,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 17,
+      "text": "RNN kept a hidden state and carried it inside",
+      "start": 63.99,
+      "end": 67.771,
+      "words": [
+        {
+          "w": "RNN",
+          "start": 63.99,
+          "end": 64.68,
+          "conf": 0.95,
+          "syl": [
+            [
+              63.99,
+              64.28
+            ],
+            [
+              64.28,
+              64.468
+            ],
+            [
+              64.468,
+              64.68
+            ]
+          ]
+        },
+        {
+          "w": "kept",
+          "start": 64.68,
+          "end": 64.922,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 64.922,
+          "end": 65.037,
+          "conf": 0.97
+        },
+        {
+          "w": "hidden",
+          "start": 65.037,
+          "end": 65.451,
+          "conf": 0.96
+        },
+        {
+          "w": "state",
+          "start": 65.451,
+          "end": 65.86,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 65.86,
+          "end": 66.0,
+          "conf": 1.0
+        },
+        {
+          "w": "carried",
+          "start": 66.0,
+          "end": 66.539,
+          "conf": 1.0
+        },
+        {
+          "w": "it",
+          "start": 66.539,
+          "end": 66.88,
+          "conf": 0.77
+        },
+        {
+          "w": "inside",
+          "start": 66.88,
+          "end": 67.771,
+          "conf": 0.92
+        }
+      ]
+    },
+    {
+      "i": 18,
+      "text": "Backprop through time, the gradients vanish or explode,",
+      "start": 67.84,
+      "end": 71.572,
+      "words": [
+        {
+          "w": "Backprop",
+          "start": 67.84,
+          "end": 68.589,
+          "conf": 0.79
+        },
+        {
+          "w": "through",
+          "start": 68.589,
+          "end": 68.834,
+          "conf": 0.78
+        },
+        {
+          "w": "time,",
+          "start": 68.96,
+          "end": 69.48,
+          "conf": 0.63
+        },
+        {
+          "w": "the",
+          "start": 69.48,
+          "end": 69.66,
+          "conf": 1.0
+        },
+        {
+          "w": "gradients",
+          "start": 69.66,
+          "end": 70.16,
+          "conf": 0.97
+        },
+        {
+          "w": "vanish",
+          "start": 70.16,
+          "end": 70.674,
+          "conf": 1.0
+        },
+        {
+          "w": "or",
+          "start": 70.674,
+          "end": 70.86,
+          "conf": 0.79
+        },
+        {
+          "w": "explode,",
+          "start": 70.86,
+          "end": 71.572,
+          "conf": 0.97
+        }
+      ]
+    },
+    {
+      "i": 19,
+      "text": "LSTM put gates along the road",
+      "start": 72.05,
+      "end": 75.08,
+      "words": [
+        {
+          "w": "LSTM",
+          "start": 72.05,
+          "end": 73.34,
+          "conf": 0.7,
+          "syl": [
+            [
+              72.05,
+              72.32
+            ],
+            [
+              72.32,
+              72.62
+            ],
+            [
+              72.62,
+              72.98
+            ],
+            [
+              72.98,
+              73.34
+            ]
+          ]
+        },
+        {
+          "w": "put",
+          "start": 73.34,
+          "end": 73.483,
+          "conf": 0.81
+        },
+        {
+          "w": "gates",
+          "start": 73.6,
+          "end": 74.131,
+          "conf": 0.98
+        },
+        {
+          "w": "along",
+          "start": 74.131,
+          "end": 74.52,
+          "conf": 0.95
+        },
+        {
+          "w": "the",
+          "start": 74.52,
+          "end": 74.76,
+          "conf": 0.95
+        },
+        {
+          "w": "road",
+          "start": 74.76,
+          "end": 75.08,
+          "conf": 0.89
+        }
+      ]
+    },
+    {
+      "i": 20,
+      "text": "Seq2seq would squeeze a sentence through a bottleneck,",
+      "start": 75.08,
+      "end": 78.507,
+      "words": [
+        {
+          "w": "Seq2seq",
+          "start": 75.08,
+          "end": 75.838,
+          "conf": 0.74,
+          "syl": [
+            [
+              75.08,
+              75.42
+            ],
+            [
+              75.42,
+              75.523
+            ],
+            [
+              75.523,
+              75.838
+            ]
+          ]
+        },
+        {
+          "w": "would",
+          "start": 75.88,
+          "end": 76.002,
+          "conf": 0.85
+        },
+        {
+          "w": "squeeze",
+          "start": 76.002,
+          "end": 76.44,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 76.44,
+          "end": 76.536,
+          "conf": 0.87
+        },
+        {
+          "w": "sentence",
+          "start": 76.536,
+          "end": 76.955,
+          "conf": 0.98
+        },
+        {
+          "w": "through",
+          "start": 76.955,
+          "end": 77.34,
+          "conf": 0.99
+        },
+        {
+          "w": "a",
+          "start": 77.34,
+          "end": 77.449,
+          "conf": 0.99
+        },
+        {
+          "w": "bottleneck,",
+          "start": 77.5,
+          "end": 78.507,
+          "conf": 0.97
+        }
+      ]
+    },
+    {
+      "i": 21,
+      "text": "attention let the decoder look back and double-check",
+      "start": 78.651,
+      "end": 82.088,
+      "words": [
+        {
+          "w": "attention",
+          "start": 78.651,
+          "end": 79.32,
+          "conf": 0.85
+        },
+        {
+          "w": "let",
+          "start": 79.32,
+          "end": 79.499,
+          "conf": 0.73
+        },
+        {
+          "w": "the",
+          "start": 79.58,
+          "end": 79.78,
+          "conf": 1.0
+        },
+        {
+          "w": "decoder",
+          "start": 79.78,
+          "end": 80.46,
+          "conf": 0.93
+        },
+        {
+          "w": "look",
+          "start": 80.46,
+          "end": 80.597,
+          "conf": 0.9
+        },
+        {
+          "w": "back",
+          "start": 80.7,
+          "end": 81.0,
+          "conf": 0.92
+        },
+        {
+          "w": "and",
+          "start": 81.0,
+          "end": 81.205,
+          "conf": 1.0
+        },
+        {
+          "w": "double-check",
+          "start": 81.205,
+          "end": 82.088,
+          "conf": 0.92,
+          "syl": [
+            [
+              81.205,
+              81.699
+            ],
+            [
+              81.699,
+              82.088
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "i": 22,
+      "text": "Recurrence marched in order, one step at a time,",
+      "start": 82.363,
+      "end": 85.98,
+      "words": [
+        {
+          "w": "Recurrence",
+          "start": 82.363,
+          "end": 83.006,
+          "conf": 0.85
+        },
+        {
+          "w": "marched",
+          "start": 83.006,
+          "end": 83.3,
+          "conf": 0.9
+        },
+        {
+          "w": "in",
+          "start": 83.3,
+          "end": 83.6,
+          "conf": 1.0
+        },
+        {
+          "w": "order,",
+          "start": 83.6,
+          "end": 83.984,
+          "conf": 0.98
+        },
+        {
+          "w": "one",
+          "start": 83.984,
+          "end": 84.199,
+          "conf": 0.8
+        },
+        {
+          "w": "step",
+          "start": 84.199,
+          "end": 84.882,
+          "conf": 0.92
+        },
+        {
+          "w": "at",
+          "start": 84.882,
+          "end": 85.18,
+          "conf": 0.94
+        },
+        {
+          "w": "a",
+          "start": 85.18,
+          "end": 85.331,
+          "conf": 0.84
+        },
+        {
+          "w": "time,",
+          "start": 85.48,
+          "end": 85.98,
+          "conf": 0.7
+        }
+      ]
+    },
+    {
+      "i": 23,
+      "text": "transformers ran in parallel and left it all behind",
+      "start": 85.98,
+      "end": 90.34,
+      "words": [
+        {
+          "w": "transformers",
+          "start": 85.98,
+          "end": 86.68,
+          "conf": 0.85
+        },
+        {
+          "w": "ran",
+          "start": 86.68,
+          "end": 86.96,
+          "conf": 1.0
+        },
+        {
+          "w": "in",
+          "start": 86.96,
+          "end": 87.1,
+          "conf": 1.0
+        },
+        {
+          "w": "parallel",
+          "start": 87.1,
+          "end": 87.88,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 87.88,
+          "end": 88.04,
+          "conf": 0.82
+        },
+        {
+          "w": "left",
+          "start": 88.04,
+          "end": 88.314,
+          "conf": 1.0
+        },
+        {
+          "w": "it",
+          "start": 88.314,
+          "end": 88.64,
+          "conf": 0.83
+        },
+        {
+          "w": "all",
+          "start": 88.64,
+          "end": 88.82,
+          "conf": 0.96
+        },
+        {
+          "w": "behind",
+          "start": 88.82,
+          "end": 90.34,
+          "conf": 0.92
+        }
+      ]
+    },
+    {
+      "i": 24,
+      "text": "Memory’s all you need,",
+      "start": 90.34,
+      "end": 93.78,
+      "words": [
+        {
+          "w": "Memory’s",
+          "start": 90.34,
+          "end": 91.183,
+          "conf": 0.96
+        },
+        {
+          "w": "all",
+          "start": 91.292,
+          "end": 91.662,
+          "conf": 0.75
+        },
+        {
+          "w": "you",
+          "start": 91.966,
+          "end": 92.18,
+          "conf": 0.6
+        },
+        {
+          "w": "need,",
+          "start": 92.18,
+          "end": 93.78,
+          "conf": 0.78
+        }
+      ]
+    },
+    {
+      "i": 25,
+      "text": "the abstract guaranteed",
+      "start": 93.78,
+      "end": 97.24,
+      "words": [
+        {
+          "w": "the",
+          "start": 93.78,
+          "end": 94.18,
+          "conf": 0.81
+        },
+        {
+          "w": "abstract",
+          "start": 94.18,
+          "end": 94.74,
+          "conf": 0.77
+        },
+        {
+          "w": "guaranteed",
+          "start": 94.9,
+          "end": 97.24,
+          "conf": 0.73
+        }
+      ]
+    },
+    {
+      "i": 26,
+      "text": "You were state of the art,",
+      "start": 97.24,
+      "end": 99.075,
+      "words": [
+        {
+          "w": "You",
+          "start": 97.24,
+          "end": 97.4,
+          "conf": 0.69
+        },
+        {
+          "w": "were",
+          "start": 97.4,
+          "end": 97.523,
+          "conf": 0.85
+        },
+        {
+          "w": "state",
+          "start": 97.523,
+          "end": 97.957,
+          "conf": 0.89
+        },
+        {
+          "w": "of",
+          "start": 98.142,
+          "end": 98.34,
+          "conf": 0.58
+        },
+        {
+          "w": "the",
+          "start": 98.34,
+          "end": 98.526,
+          "conf": 0.88
+        },
+        {
+          "w": "art,",
+          "start": 98.646,
+          "end": 99.075,
+          "conf": 0.83
+        }
+      ]
+    },
+    {
+      "i": 27,
+      "text": "now you’re just a baseline",
+      "start": 99.28,
+      "end": 101.34,
+      "words": [
+        {
+          "w": "now",
+          "start": 99.28,
+          "end": 99.529,
+          "conf": 0.81
+        },
+        {
+          "w": "you’re",
+          "start": 99.7,
+          "end": 99.96,
+          "conf": 0.69
+        },
+        {
+          "w": "just",
+          "start": 99.96,
+          "end": 100.237,
+          "conf": 0.98
+        },
+        {
+          "w": "a",
+          "start": 100.237,
+          "end": 100.317,
+          "conf": 1.0
+        },
+        {
+          "w": "baseline",
+          "start": 100.42,
+          "end": 101.34,
+          "conf": 0.94
+        }
+      ]
+    },
+    {
+      "i": 28,
+      "text": "Top of the leaderboard,",
+      "start": 101.34,
+      "end": 103.02,
+      "words": [
+        {
+          "w": "Top",
+          "start": 101.34,
+          "end": 101.584,
+          "conf": 0.77
+        },
+        {
+          "w": "of",
+          "start": 101.839,
+          "end": 102.28,
+          "conf": 0.65
+        },
+        {
+          "w": "the",
+          "start": 102.28,
+          "end": 102.42,
+          "conf": 0.66
+        },
+        {
+          "w": "leaderboard,",
+          "start": 102.42,
+          "end": 103.02,
+          "conf": 0.73
+        }
+      ]
+    },
+    {
+      "i": 29,
+      "text": "until the next deadline",
+      "start": 103.02,
+      "end": 105.036,
+      "words": [
+        {
+          "w": "until",
+          "start": 103.02,
+          "end": 103.4,
+          "conf": 0.92
+        },
+        {
+          "w": "the",
+          "start": 103.4,
+          "end": 103.64,
+          "conf": 1.0
+        },
+        {
+          "w": "next",
+          "start": 103.64,
+          "end": 104.06,
+          "conf": 0.92
+        },
+        {
+          "w": "deadline",
+          "start": 104.06,
+          "end": 105.036,
+          "conf": 0.83
+        }
+      ]
+    },
+    {
+      "i": 30,
+      "text": "LSTM, you held the memory for so long,",
+      "start": 105.036,
+      "end": 108.244,
+      "words": [
+        {
+          "w": "LSTM,",
+          "start": 105.036,
+          "end": 106.14,
+          "conf": 0.76,
+          "syl": [
+            [
+              105.036,
+              105.32
+            ],
+            [
+              105.32,
+              105.64
+            ],
+            [
+              105.64,
+              106.0
+            ],
+            [
+              106.0,
+              106.14
+            ]
+          ]
+        },
+        {
+          "w": "you",
+          "start": 106.14,
+          "end": 106.268,
+          "conf": 0.96
+        },
+        {
+          "w": "held",
+          "start": 106.268,
+          "end": 106.6,
+          "conf": 0.89
+        },
+        {
+          "w": "the",
+          "start": 106.6,
+          "end": 106.82,
+          "conf": 1.0
+        },
+        {
+          "w": "memory",
+          "start": 106.82,
+          "end": 107.176,
+          "conf": 1.0
+        },
+        {
+          "w": "for",
+          "start": 107.176,
+          "end": 107.376,
+          "conf": 1.0
+        },
+        {
+          "w": "so",
+          "start": 107.376,
+          "end": 107.76,
+          "conf": 1.0
+        },
+        {
+          "w": "long,",
+          "start": 107.76,
+          "end": 108.244,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 31,
+      "text": "one attention layer and the whole recurrence gone",
+      "start": 108.673,
+      "end": 116.241,
+      "words": [
+        {
+          "w": "one",
+          "start": 108.673,
+          "end": 108.92,
+          "conf": 0.8
+        },
+        {
+          "w": "attention",
+          "start": 108.92,
+          "end": 109.58,
+          "conf": 0.95
+        },
+        {
+          "w": "layer",
+          "start": 109.58,
+          "end": 110.16,
+          "conf": 0.85
+        },
+        {
+          "w": "and",
+          "start": 110.16,
+          "end": 110.28,
+          "conf": 0.82
+        },
+        {
+          "w": "the",
+          "start": 110.28,
+          "end": 110.46,
+          "conf": 1.0
+        },
+        {
+          "w": "whole",
+          "start": 110.46,
+          "end": 110.78,
+          "conf": 0.96
+        },
+        {
+          "w": "recurrence",
+          "start": 110.78,
+          "end": 111.38,
+          "conf": 0.87
+        },
+        {
+          "w": "gone",
+          "start": 111.38,
+          "end": 116.241,
+          "conf": 0.73
+        }
+      ]
+    },
+    {
+      "i": 32,
+      "text": "GANs played a two-player game until the modes collapsed,",
+      "start": 119.84,
+      "end": 123.48,
+      "words": [
+        {
+          "w": "GANs",
+          "start": 119.84,
+          "end": 120.1,
+          "conf": 0.85
+        },
+        {
+          "w": "played",
+          "start": 120.1,
+          "end": 120.4,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 120.4,
+          "end": 120.5,
+          "conf": 0.88
+        },
+        {
+          "w": "two-player",
+          "start": 120.5,
+          "end": 121.244,
+          "conf": 0.92,
+          "syl": [
+            [
+              120.5,
+              120.76
+            ],
+            [
+              120.76,
+              121.244
+            ]
+          ]
+        },
+        {
+          "w": "game",
+          "start": 121.244,
+          "end": 121.72,
+          "conf": 0.85
+        },
+        {
+          "w": "until",
+          "start": 121.72,
+          "end": 122.12,
+          "conf": 0.85
+        },
+        {
+          "w": "the",
+          "start": 122.12,
+          "end": 122.32,
+          "conf": 0.85
+        },
+        {
+          "w": "modes",
+          "start": 122.32,
+          "end": 122.62,
+          "conf": 0.98
+        },
+        {
+          "w": "collapsed,",
+          "start": 122.62,
+          "end": 123.48,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 33,
+      "text": "diffusion learned to denoise in a thousand tiny steps",
+      "start": 123.48,
+      "end": 127.066,
+      "words": [
+        {
+          "w": "diffusion",
+          "start": 123.48,
+          "end": 124.18,
+          "conf": 0.85
+        },
+        {
+          "w": "learned",
+          "start": 124.18,
+          "end": 124.44,
+          "conf": 0.85
+        },
+        {
+          "w": "to",
+          "start": 124.44,
+          "end": 124.62,
+          "conf": 0.85
+        },
+        {
+          "w": "denoise",
+          "start": 124.62,
+          "end": 125.18,
+          "conf": 0.92
+        },
+        {
+          "w": "in",
+          "start": 125.18,
+          "end": 125.4,
+          "conf": 0.91
+        },
+        {
+          "w": "a",
+          "start": 125.4,
+          "end": 125.48,
+          "conf": 0.92
+        },
+        {
+          "w": "thousand",
+          "start": 125.54,
+          "end": 126.024,
+          "conf": 1.0
+        },
+        {
+          "w": "tiny",
+          "start": 126.024,
+          "end": 126.328,
+          "conf": 0.85
+        },
+        {
+          "w": "steps",
+          "start": 126.328,
+          "end": 127.066,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 34,
+      "text": "Sinusoids gave way to RoPE’s rotation,",
+      "start": 127.066,
+      "end": 130.1,
+      "words": [
+        {
+          "w": "Sinusoids",
+          "start": 127.066,
+          "end": 128.06,
+          "conf": 0.81
+        },
+        {
+          "w": "gave",
+          "start": 128.06,
+          "end": 128.32,
+          "conf": 1.0
+        },
+        {
+          "w": "way",
+          "start": 128.32,
+          "end": 128.782,
+          "conf": 1.0
+        },
+        {
+          "w": "to",
+          "start": 128.782,
+          "end": 128.997,
+          "conf": 0.64
+        },
+        {
+          "w": "RoPE’s",
+          "start": 128.997,
+          "end": 129.42,
+          "conf": 0.82
+        },
+        {
+          "w": "rotation,",
+          "start": 129.42,
+          "end": 130.1,
+          "conf": 0.92
+        }
+      ]
+    },
+    {
+      "i": 35,
+      "text": "LayerNorm to RMS, ReLU to SwiGLU activation",
+      "start": 130.1,
+      "end": 133.74,
+      "words": [
+        {
+          "w": "LayerNorm",
+          "start": 130.1,
+          "end": 130.82,
+          "conf": 0.92,
+          "syl": [
+            [
+              130.1,
+              130.56
+            ],
+            [
+              130.56,
+              130.82
+            ]
+          ]
+        },
+        {
+          "w": "to",
+          "start": 130.82,
+          "end": 131.047,
+          "conf": 0.84
+        },
+        {
+          "w": "RMS,",
+          "start": 131.047,
+          "end": 131.7,
+          "conf": 0.79,
+          "syl": [
+            [
+              131.047,
+              131.34
+            ],
+            [
+              131.34,
+              131.54
+            ],
+            [
+              131.54,
+              131.7
+            ]
+          ]
+        },
+        {
+          "w": "ReLU",
+          "start": 131.7,
+          "end": 132.14,
+          "conf": 0.9,
+          "syl": [
+            [
+              131.7,
+              131.94
+            ],
+            [
+              131.94,
+              132.14
+            ]
+          ]
+        },
+        {
+          "w": "to",
+          "start": 132.14,
+          "end": 132.239,
+          "conf": 0.78
+        },
+        {
+          "w": "SwiGLU",
+          "start": 132.239,
+          "end": 132.92,
+          "conf": 0.89,
+          "syl": [
+            [
+              132.239,
+              132.6
+            ],
+            [
+              132.6,
+              132.92
+            ]
+          ]
+        },
+        {
+          "w": "activation",
+          "start": 132.92,
+          "end": 133.74,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 36,
+      "text": "Dense became a mixture, only some experts awake,",
+      "start": 133.74,
+      "end": 137.178,
+      "words": [
+        {
+          "w": "Dense",
+          "start": 133.74,
+          "end": 134.365,
+          "conf": 0.8
+        },
+        {
+          "w": "became",
+          "start": 134.42,
+          "end": 134.96,
+          "conf": 0.85
+        },
+        {
+          "w": "a",
+          "start": 134.96,
+          "end": 135.06,
+          "conf": 0.83
+        },
+        {
+          "w": "mixture,",
+          "start": 135.06,
+          "end": 135.68,
+          "conf": 0.97
+        },
+        {
+          "w": "only",
+          "start": 135.68,
+          "end": 135.881,
+          "conf": 0.81
+        },
+        {
+          "w": "some",
+          "start": 135.881,
+          "end": 136.26,
+          "conf": 0.97
+        },
+        {
+          "w": "experts",
+          "start": 136.26,
+          "end": 136.759,
+          "conf": 0.86
+        },
+        {
+          "w": "awake,",
+          "start": 136.759,
+          "end": 137.178,
+          "conf": 0.73
+        }
+      ]
+    },
+    {
+      "i": 37,
+      "text": "32 bits down to 4 for the throughput’s sake",
+      "start": 137.178,
+      "end": 140.885,
+      "words": [
+        {
+          "w": "32",
+          "start": 137.178,
+          "end": 138.06,
+          "conf": 0.79,
+          "syl": [
+            [
+              137.178,
+              137.82
+            ],
+            [
+              137.82,
+              138.06
+            ]
+          ]
+        },
+        {
+          "w": "bits",
+          "start": 138.06,
+          "end": 138.28,
+          "conf": 0.84
+        },
+        {
+          "w": "down",
+          "start": 138.28,
+          "end": 138.54,
+          "conf": 0.97
+        },
+        {
+          "w": "to",
+          "start": 138.54,
+          "end": 138.64,
+          "conf": 0.87
+        },
+        {
+          "w": "4",
+          "start": 138.64,
+          "end": 139.119,
+          "conf": 1.0
+        },
+        {
+          "w": "for",
+          "start": 139.119,
+          "end": 139.44,
+          "conf": 1.0
+        },
+        {
+          "w": "the",
+          "start": 139.44,
+          "end": 139.538,
+          "conf": 1.0
+        },
+        {
+          "w": "throughput’s",
+          "start": 139.538,
+          "end": 140.436,
+          "conf": 0.89
+        },
+        {
+          "w": "sake",
+          "start": 140.436,
+          "end": 140.885,
+          "conf": 0.99
+        }
+      ]
+    },
+    {
+      "i": 38,
+      "text": "Full fine-tune to LoRA, a low-rank little patch,",
+      "start": 140.885,
+      "end": 144.66,
+      "words": [
+        {
+          "w": "Full",
+          "start": 140.885,
+          "end": 141.174,
+          "conf": 0.89
+        },
+        {
+          "w": "fine-tune",
+          "start": 141.174,
+          "end": 142.14,
+          "conf": 0.87,
+          "syl": [
+            [
+              141.174,
+              141.68
+            ],
+            [
+              141.68,
+              142.14
+            ]
+          ]
+        },
+        {
+          "w": "to",
+          "start": 142.14,
+          "end": 142.38,
+          "conf": 0.99
+        },
+        {
+          "w": "LoRA,",
+          "start": 142.38,
+          "end": 142.83,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 142.915,
+          "end": 143.28,
+          "conf": 0.84
+        },
+        {
+          "w": "low-rank",
+          "start": 143.28,
+          "end": 143.753,
+          "conf": 0.89,
+          "syl": [
+            [
+              143.28,
+              143.52
+            ],
+            [
+              143.52,
+              143.753
+            ]
+          ]
+        },
+        {
+          "w": "little",
+          "start": 143.753,
+          "end": 144.068,
+          "conf": 1.0
+        },
+        {
+          "w": "patch,",
+          "start": 144.18,
+          "end": 144.66,
+          "conf": 0.81
+        }
+      ]
+    },
+    {
+      "i": 39,
+      "text": "then just prompt it in context, no gradient to catch",
+      "start": 144.66,
+      "end": 148.62,
+      "words": [
+        {
+          "w": "then",
+          "start": 144.66,
+          "end": 144.751,
+          "conf": 0.9
+        },
+        {
+          "w": "just",
+          "start": 144.751,
+          "end": 145.08,
+          "conf": 1.0
+        },
+        {
+          "w": "prompt",
+          "start": 145.08,
+          "end": 145.38,
+          "conf": 0.92
+        },
+        {
+          "w": "it",
+          "start": 145.38,
+          "end": 145.62,
+          "conf": 0.77
+        },
+        {
+          "w": "in",
+          "start": 145.62,
+          "end": 145.78,
+          "conf": 0.82
+        },
+        {
+          "w": "context,",
+          "start": 145.78,
+          "end": 146.517,
+          "conf": 0.99
+        },
+        {
+          "w": "no",
+          "start": 146.72,
+          "end": 146.92,
+          "conf": 0.85
+        },
+        {
+          "w": "gradient",
+          "start": 146.92,
+          "end": 147.58,
+          "conf": 0.97
+        },
+        {
+          "w": "to",
+          "start": 147.58,
+          "end": 147.699,
+          "conf": 0.8
+        },
+        {
+          "w": "catch",
+          "start": 147.8,
+          "end": 148.62,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 40,
+      "text": "Attention’s all you need,",
+      "start": 148.62,
+      "end": 152.16,
+      "words": [
+        {
+          "w": "Attention’s",
+          "start": 148.62,
+          "end": 149.72,
+          "conf": 0.83
+        },
+        {
+          "w": "all",
+          "start": 149.72,
+          "end": 150.12,
+          "conf": 0.76
+        },
+        {
+          "w": "you",
+          "start": 150.12,
+          "end": 150.58,
+          "conf": 1.0
+        },
+        {
+          "w": "need,",
+          "start": 150.58,
+          "end": 152.16,
+          "conf": 0.81
+        }
+      ]
+    },
+    {
+      "i": 41,
+      "text": "the abstract guaranteed",
+      "start": 152.16,
+      "end": 155.58,
+      "words": [
+        {
+          "w": "the",
+          "start": 152.16,
+          "end": 152.434,
+          "conf": 0.84
+        },
+        {
+          "w": "abstract",
+          "start": 152.434,
+          "end": 153.207,
+          "conf": 0.78
+        },
+        {
+          "w": "guaranteed",
+          "start": 153.26,
+          "end": 155.58,
+          "conf": 0.75
+        }
+      ]
+    },
+    {
+      "i": 42,
+      "text": "You were state of the art,",
+      "start": 155.58,
+      "end": 157.347,
+      "words": [
+        {
+          "w": "You",
+          "start": 155.58,
+          "end": 155.72,
+          "conf": 0.85
+        },
+        {
+          "w": "were",
+          "start": 155.72,
+          "end": 155.851,
+          "conf": 0.86
+        },
+        {
+          "w": "state",
+          "start": 155.851,
+          "end": 156.27,
+          "conf": 0.95
+        },
+        {
+          "w": "of",
+          "start": 156.464,
+          "end": 156.7,
+          "conf": 0.76
+        },
+        {
+          "w": "the",
+          "start": 156.7,
+          "end": 156.973,
+          "conf": 0.99
+        },
+        {
+          "w": "art,",
+          "start": 156.973,
+          "end": 157.347,
+          "conf": 0.91
+        }
+      ]
+    },
+    {
+      "i": 43,
+      "text": "now you’re just a baseline",
+      "start": 157.6,
+      "end": 159.64,
+      "words": [
+        {
+          "w": "now",
+          "start": 157.6,
+          "end": 157.881,
+          "conf": 1.0
+        },
+        {
+          "w": "you’re",
+          "start": 158.041,
+          "end": 158.23,
+          "conf": 0.81
+        },
+        {
+          "w": "just",
+          "start": 158.23,
+          "end": 158.535,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 158.535,
+          "end": 158.615,
+          "conf": 1.0
+        },
+        {
+          "w": "baseline",
+          "start": 158.7,
+          "end": 159.64,
+          "conf": 0.95
+        }
+      ]
+    },
+    {
+      "i": 44,
+      "text": "Top of the leaderboard,",
+      "start": 159.64,
+      "end": 161.32,
+      "words": [
+        {
+          "w": "Top",
+          "start": 159.64,
+          "end": 159.857,
+          "conf": 0.67
+        },
+        {
+          "w": "of",
+          "start": 160.086,
+          "end": 160.28,
+          "conf": 0.75
+        },
+        {
+          "w": "the",
+          "start": 160.28,
+          "end": 160.5,
+          "conf": 0.82
+        },
+        {
+          "w": "leaderboard,",
+          "start": 160.5,
+          "end": 161.32,
+          "conf": 0.99
+        }
+      ]
+    },
+    {
+      "i": 45,
+      "text": "until the next deadline",
+      "start": 161.32,
+      "end": 163.26,
+      "words": [
+        {
+          "w": "until",
+          "start": 161.32,
+          "end": 161.68,
+          "conf": 1.0
+        },
+        {
+          "w": "the",
+          "start": 161.68,
+          "end": 161.9,
+          "conf": 0.85
+        },
+        {
+          "w": "next",
+          "start": 161.9,
+          "end": 162.261,
+          "conf": 1.0
+        },
+        {
+          "w": "deadline",
+          "start": 162.34,
+          "end": 163.26,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 46,
+      "text": "BERT, you read both ways, masked and bidirectional,",
+      "start": 163.26,
+      "end": 166.64,
+      "words": [
+        {
+          "w": "BERT,",
+          "start": 163.26,
+          "end": 163.48,
+          "conf": 0.85
+        },
+        {
+          "w": "you",
+          "start": 163.48,
+          "end": 163.72,
+          "conf": 1.0
+        },
+        {
+          "w": "read",
+          "start": 163.72,
+          "end": 163.94,
+          "conf": 1.0
+        },
+        {
+          "w": "both",
+          "start": 163.94,
+          "end": 164.142,
+          "conf": 1.0
+        },
+        {
+          "w": "ways,",
+          "start": 164.142,
+          "end": 164.62,
+          "conf": 1.0
+        },
+        {
+          "w": "masked",
+          "start": 164.62,
+          "end": 164.9,
+          "conf": 0.92
+        },
+        {
+          "w": "and",
+          "start": 164.9,
+          "end": 165.06,
+          "conf": 0.82
+        },
+        {
+          "w": "bidirectional,",
+          "start": 165.06,
+          "end": 166.64,
+          "conf": 0.92
+        }
+      ]
+    },
+    {
+      "i": 47,
+      "text": "decoder-only scaled up and made you optional",
+      "start": 166.64,
+      "end": 170.6,
+      "words": [
+        {
+          "w": "decoder-only",
+          "start": 166.64,
+          "end": 167.654,
+          "conf": 0.92,
+          "syl": [
+            [
+              166.64,
+              167.44
+            ],
+            [
+              167.44,
+              167.654
+            ]
+          ]
+        },
+        {
+          "w": "scaled",
+          "start": 167.654,
+          "end": 168.283,
+          "conf": 1.0
+        },
+        {
+          "w": "up",
+          "start": 168.283,
+          "end": 168.52,
+          "conf": 0.85
+        },
+        {
+          "w": "and",
+          "start": 168.52,
+          "end": 168.68,
+          "conf": 0.93
+        },
+        {
+          "w": "made",
+          "start": 168.68,
+          "end": 168.94,
+          "conf": 1.0
+        },
+        {
+          "w": "you",
+          "start": 168.94,
+          "end": 169.18,
+          "conf": 1.0
+        },
+        {
+          "w": "optional",
+          "start": 169.18,
+          "end": 170.6,
+          "conf": 0.93
+        }
+      ]
+    },
+    {
+      "i": 48,
+      "text": "RLHF trained a reward model to rank,",
+      "start": 170.6,
+      "end": 173.44,
+      "words": [
+        {
+          "w": "RLHF",
+          "start": 170.6,
+          "end": 171.38,
+          "conf": 0.88,
+          "syl": [
+            [
+              170.6,
+              170.8
+            ],
+            [
+              170.8,
+              170.94
+            ],
+            [
+              170.94,
+              171.24
+            ],
+            [
+              171.24,
+              171.38
+            ]
+          ]
+        },
+        {
+          "w": "trained",
+          "start": 171.38,
+          "end": 171.72,
+          "conf": 0.96
+        },
+        {
+          "w": "a",
+          "start": 171.72,
+          "end": 171.9,
+          "conf": 0.83
+        },
+        {
+          "w": "reward",
+          "start": 171.9,
+          "end": 172.32,
+          "conf": 1.0
+        },
+        {
+          "w": "model",
+          "start": 172.32,
+          "end": 172.76,
+          "conf": 1.0
+        },
+        {
+          "w": "to",
+          "start": 172.76,
+          "end": 173.02,
+          "conf": 0.94
+        },
+        {
+          "w": "rank,",
+          "start": 173.02,
+          "end": 173.44,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 49,
+      "text": "DPO skipped the middleman and took it to the bank",
+      "start": 173.44,
+      "end": 177.217,
+      "words": [
+        {
+          "w": "DPO",
+          "start": 173.44,
+          "end": 174.46,
+          "conf": 0.86,
+          "syl": [
+            [
+              173.44,
+              173.66
+            ],
+            [
+              173.66,
+              174.04
+            ],
+            [
+              174.04,
+              174.46
+            ]
+          ]
+        },
+        {
+          "w": "skipped",
+          "start": 174.46,
+          "end": 174.843,
+          "conf": 0.82
+        },
+        {
+          "w": "the",
+          "start": 174.843,
+          "end": 175.0,
+          "conf": 0.98
+        },
+        {
+          "w": "middleman",
+          "start": 175.0,
+          "end": 175.8,
+          "conf": 1.0
+        },
+        {
+          "w": "and",
+          "start": 175.8,
+          "end": 175.945,
+          "conf": 0.85
+        },
+        {
+          "w": "took",
+          "start": 175.945,
+          "end": 176.06,
+          "conf": 0.98
+        },
+        {
+          "w": "it",
+          "start": 176.155,
+          "end": 176.36,
+          "conf": 0.9
+        },
+        {
+          "w": "to",
+          "start": 176.36,
+          "end": 176.64,
+          "conf": 1.0
+        },
+        {
+          "w": "the",
+          "start": 176.64,
+          "end": 176.763,
+          "conf": 1.0
+        },
+        {
+          "w": "bank",
+          "start": 176.82,
+          "end": 177.217,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 50,
+      "text": "FlashAttention tiles it all inside the SRAM,",
+      "start": 177.217,
+      "end": 180.68,
+      "words": [
+        {
+          "w": "FlashAttention",
+          "start": 177.217,
+          "end": 178.18,
+          "conf": 0.91,
+          "syl": [
+            [
+              177.217,
+              177.6
+            ],
+            [
+              177.6,
+              178.18
+            ]
+          ]
+        },
+        {
+          "w": "tiles",
+          "start": 178.18,
+          "end": 178.58,
+          "conf": 0.71
+        },
+        {
+          "w": "it",
+          "start": 178.58,
+          "end": 178.76,
+          "conf": 0.78
+        },
+        {
+          "w": "all",
+          "start": 178.76,
+          "end": 178.96,
+          "conf": 1.0
+        },
+        {
+          "w": "inside",
+          "start": 178.96,
+          "end": 179.34,
+          "conf": 0.98
+        },
+        {
+          "w": "the",
+          "start": 179.34,
+          "end": 179.64,
+          "conf": 0.96
+        },
+        {
+          "w": "SRAM,",
+          "start": 179.64,
+          "end": 180.68,
+          "conf": 0.92,
+          "syl": [
+            [
+              179.64,
+              180.02
+            ],
+            [
+              180.02,
+              180.68
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "i": 51,
+      "text": "no more round trips to the HBM, no traffic jam",
+      "start": 180.68,
+      "end": 184.541,
+      "words": [
+        {
+          "w": "no",
+          "start": 180.68,
+          "end": 180.88,
+          "conf": 0.81
+        },
+        {
+          "w": "more",
+          "start": 180.88,
+          "end": 181.16,
+          "conf": 0.87
+        },
+        {
+          "w": "round",
+          "start": 181.16,
+          "end": 181.58,
+          "conf": 0.9
+        },
+        {
+          "w": "trips",
+          "start": 181.58,
+          "end": 181.8,
+          "conf": 1.0
+        },
+        {
+          "w": "to",
+          "start": 181.8,
+          "end": 182.06,
+          "conf": 0.97
+        },
+        {
+          "w": "the",
+          "start": 182.06,
+          "end": 182.3,
+          "conf": 0.84
+        },
+        {
+          "w": "HBM,",
+          "start": 182.3,
+          "end": 182.94,
+          "conf": 0.74,
+          "syl": [
+            [
+              182.3,
+              182.5
+            ],
+            [
+              182.5,
+              182.72
+            ],
+            [
+              182.72,
+              182.94
+            ]
+          ]
+        },
+        {
+          "w": "no",
+          "start": 182.94,
+          "end": 183.458,
+          "conf": 0.9
+        },
+        {
+          "w": "traffic",
+          "start": 183.56,
+          "end": 184.04,
+          "conf": 0.85
+        },
+        {
+          "w": "jam",
+          "start": 184.04,
+          "end": 184.541,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 52,
+      "text": "Context window: 2K, then a million tokens long,",
+      "start": 184.541,
+      "end": 188.18,
+      "words": [
+        {
+          "w": "Context",
+          "start": 184.541,
+          "end": 184.98,
+          "conf": 0.87
+        },
+        {
+          "w": "window:",
+          "start": 184.98,
+          "end": 185.429,
+          "conf": 0.87
+        },
+        {
+          "w": "2K,",
+          "start": 185.6,
+          "end": 186.24,
+          "conf": 0.91,
+          "syl": [
+            [
+              185.6,
+              185.718
+            ],
+            [
+              185.718,
+              186.24
+            ]
+          ]
+        },
+        {
+          "w": "then",
+          "start": 186.24,
+          "end": 186.62,
+          "conf": 0.79
+        },
+        {
+          "w": "a",
+          "start": 186.62,
+          "end": 186.78,
+          "conf": 0.88
+        },
+        {
+          "w": "million",
+          "start": 186.78,
+          "end": 187.22,
+          "conf": 1.0
+        },
+        {
+          "w": "tokens",
+          "start": 187.22,
+          "end": 187.7,
+          "conf": 0.81
+        },
+        {
+          "w": "long,",
+          "start": 187.7,
+          "end": 188.18,
+          "conf": 0.96
+        }
+      ]
+    },
+    {
+      "i": 53,
+      "text": "needle in a haystack, it remembers every song",
+      "start": 188.18,
+      "end": 191.9,
+      "words": [
+        {
+          "w": "needle",
+          "start": 188.18,
+          "end": 188.691,
+          "conf": 0.99
+        },
+        {
+          "w": "in",
+          "start": 189.07,
+          "end": 189.32,
+          "conf": 0.77
+        },
+        {
+          "w": "a",
+          "start": 189.32,
+          "end": 189.42,
+          "conf": 0.84
+        },
+        {
+          "w": "haystack,",
+          "start": 189.42,
+          "end": 189.9,
+          "conf": 1.0
+        },
+        {
+          "w": "it",
+          "start": 189.9,
+          "end": 190.16,
+          "conf": 0.65
+        },
+        {
+          "w": "remembers",
+          "start": 190.16,
+          "end": 190.916,
+          "conf": 1.0
+        },
+        {
+          "w": "every",
+          "start": 190.916,
+          "end": 191.166,
+          "conf": 1.0
+        },
+        {
+          "w": "song",
+          "start": 191.166,
+          "end": 191.9,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 54,
+      "text": "Every “all you need” is a paper with a date,",
+      "start": 191.9,
+      "end": 195.5,
+      "words": [
+        {
+          "w": "Every",
+          "start": 191.9,
+          "end": 192.34,
+          "conf": 0.77
+        },
+        {
+          "w": "“all",
+          "start": 192.34,
+          "end": 192.7,
+          "conf": 0.74
+        },
+        {
+          "w": "you",
+          "start": 192.7,
+          "end": 193.1,
+          "conf": 0.77
+        },
+        {
+          "w": "need”",
+          "start": 193.1,
+          "end": 193.68,
+          "conf": 0.84
+        },
+        {
+          "w": "is",
+          "start": 193.68,
+          "end": 193.86,
+          "conf": 0.85
+        },
+        {
+          "w": "a",
+          "start": 193.86,
+          "end": 193.939,
+          "conf": 0.91
+        },
+        {
+          "w": "paper",
+          "start": 193.98,
+          "end": 194.36,
+          "conf": 0.89
+        },
+        {
+          "w": "with",
+          "start": 194.36,
+          "end": 194.74,
+          "conf": 0.81
+        },
+        {
+          "w": "a",
+          "start": 194.74,
+          "end": 194.88,
+          "conf": 0.82
+        },
+        {
+          "w": "date,",
+          "start": 194.88,
+          "end": 195.5,
+          "conf": 0.92
+        }
+      ]
+    },
+    {
+      "i": 55,
+      "text": "every breakthrough’s just a baseline running late",
+      "start": 195.5,
+      "end": 199.008,
+      "words": [
+        {
+          "w": "every",
+          "start": 195.5,
+          "end": 195.78,
+          "conf": 0.85
+        },
+        {
+          "w": "breakthrough’s",
+          "start": 195.78,
+          "end": 196.658,
+          "conf": 0.84
+        },
+        {
+          "w": "just",
+          "start": 196.658,
+          "end": 196.977,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 196.977,
+          "end": 197.122,
+          "conf": 0.95
+        },
+        {
+          "w": "baseline",
+          "start": 197.16,
+          "end": 198.12,
+          "conf": 1.0
+        },
+        {
+          "w": "running",
+          "start": 198.12,
+          "end": 198.54,
+          "conf": 0.85
+        },
+        {
+          "w": "late",
+          "start": 198.54,
+          "end": 199.008,
+          "conf": 0.75
+        }
+      ]
+    },
+    {
+      "i": 56,
+      "text": "Scale is all you need,",
+      "start": 199.197,
+      "end": 202.8,
+      "words": [
+        {
+          "w": "Scale",
+          "start": 199.197,
+          "end": 199.776,
+          "conf": 0.75
+        },
+        {
+          "w": "is",
+          "start": 200.09,
+          "end": 200.39,
+          "conf": 0.85
+        },
+        {
+          "w": "all",
+          "start": 200.39,
+          "end": 200.74,
+          "conf": 0.92
+        },
+        {
+          "w": "you",
+          "start": 200.74,
+          "end": 201.2,
+          "conf": 1.0
+        },
+        {
+          "w": "need,",
+          "start": 201.2,
+          "end": 202.8,
+          "conf": 0.83
+        }
+      ]
+    },
+    {
+      "i": 57,
+      "text": "the abstract guaranteed",
+      "start": 202.8,
+      "end": 206.18,
+      "words": [
+        {
+          "w": "the",
+          "start": 202.8,
+          "end": 203.18,
+          "conf": 0.85
+        },
+        {
+          "w": "abstract",
+          "start": 203.18,
+          "end": 203.717,
+          "conf": 0.77
+        },
+        {
+          "w": "guaranteed",
+          "start": 203.88,
+          "end": 206.18,
+          "conf": 0.78
+        }
+      ]
+    },
+    {
+      "i": 58,
+      "text": "You were state of the art,",
+      "start": 206.18,
+      "end": 207.977,
+      "words": [
+        {
+          "w": "You",
+          "start": 206.18,
+          "end": 206.34,
+          "conf": 0.85
+        },
+        {
+          "w": "were",
+          "start": 206.34,
+          "end": 206.461,
+          "conf": 0.9
+        },
+        {
+          "w": "state",
+          "start": 206.461,
+          "end": 206.93,
+          "conf": 0.96
+        },
+        {
+          "w": "of",
+          "start": 207.109,
+          "end": 207.26,
+          "conf": 0.69
+        },
+        {
+          "w": "the",
+          "start": 207.26,
+          "end": 207.473,
+          "conf": 0.86
+        },
+        {
+          "w": "art,",
+          "start": 207.563,
+          "end": 207.977,
+          "conf": 0.65
+        }
+      ]
+    },
+    {
+      "i": 59,
+      "text": "now you’re just a baseline",
+      "start": 208.22,
+      "end": 210.2,
+      "words": [
+        {
+          "w": "now",
+          "start": 208.22,
+          "end": 208.456,
+          "conf": 0.84
+        },
+        {
+          "w": "you’re",
+          "start": 208.6,
+          "end": 208.83,
+          "conf": 0.8
+        },
+        {
+          "w": "just",
+          "start": 208.83,
+          "end": 209.13,
+          "conf": 0.96
+        },
+        {
+          "w": "a",
+          "start": 209.13,
+          "end": 209.21,
+          "conf": 1.0
+        },
+        {
+          "w": "baseline",
+          "start": 209.32,
+          "end": 210.2,
+          "conf": 0.97
+        }
+      ]
+    },
+    {
+      "i": 60,
+      "text": "Top of the leaderboard,",
+      "start": 210.2,
+      "end": 211.88,
+      "words": [
+        {
+          "w": "Top",
+          "start": 210.2,
+          "end": 210.457,
+          "conf": 0.75
+        },
+        {
+          "w": "of",
+          "start": 210.706,
+          "end": 210.9,
+          "conf": 0.65
+        },
+        {
+          "w": "the",
+          "start": 210.9,
+          "end": 211.1,
+          "conf": 0.82
+        },
+        {
+          "w": "leaderboard,",
+          "start": 211.1,
+          "end": 211.88,
+          "conf": 0.75
+        }
+      ]
+    },
+    {
+      "i": 61,
+      "text": "until the next deadline",
+      "start": 211.88,
+      "end": 213.86,
+      "words": [
+        {
+          "w": "until",
+          "start": 211.88,
+          "end": 212.22,
+          "conf": 0.92
+        },
+        {
+          "w": "the",
+          "start": 212.22,
+          "end": 212.36,
+          "conf": 0.88
+        },
+        {
+          "w": "next",
+          "start": 212.36,
+          "end": 212.836,
+          "conf": 0.98
+        },
+        {
+          "w": "deadline",
+          "start": 212.9,
+          "end": 213.86,
+          "conf": 0.82
+        }
+      ]
+    },
+    {
+      "i": 62,
+      "text": "And you, attention, quadratic in the length,",
+      "start": 213.86,
+      "end": 216.972,
+      "words": [
+        {
+          "w": "And",
+          "start": 213.86,
+          "end": 214.06,
+          "conf": 0.85
+        },
+        {
+          "w": "you,",
+          "start": 214.06,
+          "end": 214.333,
+          "conf": 1.0
+        },
+        {
+          "w": "attention,",
+          "start": 214.52,
+          "end": 215.171,
+          "conf": 0.99
+        },
+        {
+          "w": "quadratic",
+          "start": 215.38,
+          "end": 215.979,
+          "conf": 1.0
+        },
+        {
+          "w": "in",
+          "start": 216.094,
+          "end": 216.32,
+          "conf": 0.88
+        },
+        {
+          "w": "the",
+          "start": 216.32,
+          "end": 216.54,
+          "conf": 0.76
+        },
+        {
+          "w": "length,",
+          "start": 216.54,
+          "end": 216.972,
+          "conf": 0.99
+        }
+      ]
+    },
+    {
+      "i": 63,
+      "text": "a linear-time successor’s training up its strength",
+      "start": 217.24,
+      "end": 220.653,
+      "words": [
+        {
+          "w": "a",
+          "start": 217.24,
+          "end": 217.42,
+          "conf": 0.76
+        },
+        {
+          "w": "linear-time",
+          "start": 217.42,
+          "end": 218.059,
+          "conf": 0.88,
+          "syl": [
+            [
+              217.42,
+              217.78
+            ],
+            [
+              217.78,
+              218.059
+            ]
+          ]
+        },
+        {
+          "w": "successor’s",
+          "start": 218.059,
+          "end": 218.72,
+          "conf": 0.92
+        },
+        {
+          "w": "training",
+          "start": 218.72,
+          "end": 219.76,
+          "conf": 1.0
+        },
+        {
+          "w": "up",
+          "start": 219.76,
+          "end": 219.84,
+          "conf": 0.58
+        },
+        {
+          "w": "its",
+          "start": 219.84,
+          "end": 219.975,
+          "conf": 0.59
+        },
+        {
+          "w": "strength",
+          "start": 219.975,
+          "end": 220.653,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 64,
+      "text": "Every “all you need” becomes a footnote in the end,",
+      "start": 220.653,
+      "end": 224.116,
+      "words": [
+        {
+          "w": "Every",
+          "start": 220.653,
+          "end": 221.24,
+          "conf": 0.83
+        },
+        {
+          "w": "“all",
+          "start": 221.24,
+          "end": 221.48,
+          "conf": 0.65
+        },
+        {
+          "w": "you",
+          "start": 221.48,
+          "end": 221.92,
+          "conf": 1.0
+        },
+        {
+          "w": "need”",
+          "start": 221.92,
+          "end": 222.16,
+          "conf": 0.82
+        },
+        {
+          "w": "becomes",
+          "start": 222.16,
+          "end": 222.609,
+          "conf": 1.0
+        },
+        {
+          "w": "a",
+          "start": 222.609,
+          "end": 222.709,
+          "conf": 1.0
+        },
+        {
+          "w": "footnote",
+          "start": 222.709,
+          "end": 223.36,
+          "conf": 1.0
+        },
+        {
+          "w": "in",
+          "start": 223.36,
+          "end": 223.5,
+          "conf": 0.85
+        },
+        {
+          "w": "the",
+          "start": 223.5,
+          "end": 223.66,
+          "conf": 0.96
+        },
+        {
+          "w": "end,",
+          "start": 223.66,
+          "end": 224.116,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 65,
+      "text": "cite me in related work, remember me, my friend",
+      "start": 224.116,
+      "end": 227.653,
+      "words": [
+        {
+          "w": "cite",
+          "start": 224.116,
+          "end": 224.44,
+          "conf": 0.92
+        },
+        {
+          "w": "me",
+          "start": 224.44,
+          "end": 224.7,
+          "conf": 1.0
+        },
+        {
+          "w": "in",
+          "start": 224.7,
+          "end": 224.88,
+          "conf": 1.0
+        },
+        {
+          "w": "related",
+          "start": 224.88,
+          "end": 225.453,
+          "conf": 1.0
+        },
+        {
+          "w": "work,",
+          "start": 225.453,
+          "end": 225.986,
+          "conf": 1.0
+        },
+        {
+          "w": "remember",
+          "start": 226.2,
+          "end": 226.86,
+          "conf": 0.85
+        },
+        {
+          "w": "me,",
+          "start": 226.86,
+          "end": 227.06,
+          "conf": 0.85
+        },
+        {
+          "w": "my",
+          "start": 227.06,
+          "end": 227.189,
+          "conf": 1.0
+        },
+        {
+          "w": "friend",
+          "start": 227.189,
+          "end": 227.653,
+          "conf": 1.0
+        }
+      ]
+    },
+    {
+      "i": 66,
+      "text": "I was state of the art,",
+      "start": 233.6,
+      "end": 236.767,
+      "words": [
+        {
+          "w": "I",
+          "start": 233.6,
+          "end": 233.679,
+          "conf": 0.6
+        },
+        {
+          "w": "was",
+          "start": 234.06,
+          "end": 234.377,
+          "conf": 0.6
+        },
+        {
+          "w": "state",
+          "start": 234.377,
+          "end": 234.9,
+          "conf": 0.64
+        },
+        {
+          "w": "of",
+          "start": 234.9,
+          "end": 235.02,
+          "conf": 0.58
+        },
+        {
+          "w": "the",
+          "start": 235.02,
+          "end": 235.4,
+          "conf": 0.67
+        },
+        {
+          "w": "art,",
+          "start": 235.4,
+          "end": 236.767,
+          "conf": 0.6
+        }
+      ]
+    },
+    {
+      "i": 67,
+      "text": "now I’m just a baseline",
+      "start": 237.55,
+      "end": 241.197,
+      "words": [
+        {
+          "w": "now",
+          "start": 237.55,
+          "end": 237.63,
+          "conf": 0.6
+        },
+        {
+          "w": "I’m",
+          "start": 238.1,
+          "end": 238.6,
+          "conf": 0.6
+        },
+        {
+          "w": "just",
+          "start": 238.6,
+          "end": 238.84,
+          "conf": 0.7
+        },
+        {
+          "w": "a",
+          "start": 238.84,
+          "end": 238.98,
+          "conf": 0.7
+        },
+        {
+          "w": "baseline",
+          "start": 238.98,
+          "end": 241.197,
+          "conf": 0.75
+        }
+      ]
+    },
+    {
+      "i": 68,
+      "text": "Cite me in related work",
+      "start": 242.0,
+      "end": 244.155,
+      "words": [
+        {
+          "w": "Cite",
+          "start": 242.0,
+          "end": 242.37,
+          "conf": 0.7
+        },
+        {
+          "w": "me",
+          "start": 242.37,
+          "end": 242.64,
+          "conf": 0.75
+        },
+        {
+          "w": "in",
+          "start": 242.64,
+          "end": 242.84,
+          "conf": 0.99
+        },
+        {
+          "w": "related",
+          "start": 242.84,
+          "end": 243.5,
+          "conf": 1.0
+        },
+        {
+          "w": "work",
+          "start": 243.5,
+          "end": 244.155,
+          "conf": 0.85
+        }
+      ]
+    },
+    {
+      "i": 69,
+      "text": "one more time",
+      "start": 245.273,
+      "end": 246.061,
+      "words": [
+        {
+          "w": "one",
+          "start": 245.273,
+          "end": 245.5,
+          "conf": 0.85
+        },
+        {
+          "w": "more",
+          "start": 245.5,
+          "end": 245.72,
+          "conf": 1.0
+        },
+        {
+          "w": "time",
+          "start": 245.72,
+          "end": 246.061,
+          "conf": 1.0
+        }
+      ]
+    }
+  ],
+  "extras": [
+    {
+      "start": 0.17,
+      "end": 7.59,
+      "desc": "unlisted vocal (backing vocal / ad-lib / breath)"
+    },
+    {
+      "start": 8.03,
+      "end": 8.58,
+      "desc": "unlisted vocal (backing vocal / ad-lib / breath)"
+    },
+    {
+      "start": 116.53,
+      "end": 119.74,
+      "desc": "unlisted vocal (backing vocal / ad-lib / breath)"
+    },
+    {
+      "start": 228.76,
+      "end": 233.96,
+      "desc": "unlisted vocal (backing vocal / ad-lib / breath)"
+    },
+    {
+      "start": 241.36,
+      "end": 241.9,
+      "desc": "unlisted vocal (backing vocal / ad-lib / breath)"
+    }
+  ],
+  "notes": "Timeline = the Suno WAV (audio/baseline.wav). Method adapted from mexicat/pdoom-video: CTC emissions of the Demucs vocal stem from MMS_FA and wav2vec2-large-lv60k (mono, L, R), one global constrained Viterbi pass, signal-based refinement, Whisper cross-check."
+}

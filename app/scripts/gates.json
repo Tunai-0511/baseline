@@ -1,0 +1,105 @@
+{
+  "_doc": "V4 gate thresholds + the slice's static tables, read by scripts/gates.py (bun scripts/render.ts gates). Owner: tooling. KITS §22 lists each gate; keys marked (proposed) in §22.3 are the tool's own operational choices where the brief gives no number.",
+  "light": {
+    "section_luma": [0.26, 0.34],
+    "shot_luma_min": 0.24,
+    "p2_max": 0.02,
+    "p2_share_min": 0.95,
+    "murk_max": 15.0,
+    "top5_min": 0.22,
+    "edge_max": 0.08,
+    "neutral_ab_max": 2.0,
+    "neutral_chroma": 10.0,
+    "neutral_L": [12.0, 90.0],
+    "pool_group_max": 3,
+    "pool_frames_max": 0.10,
+    "key_share_min": 0.75,
+    "key_ratio": 0.92,
+    "key_blur_w": 0.03,
+    "key_expand_caps": 3.0,
+    "key_expand_w": 0.10,
+    "labels_max": 3,
+    "label_cap_px": 14,
+    "label_contrast": 1.5,
+    "haze_max": 2.0,
+    "magenta_ratio_min": 0.60,
+    "magenta_step_s": 0.1
+  },
+  "flight": {
+    "median_min": 0.45,
+    "share06_min": 0.25,
+    "fast_ws": 1.5,
+    "fast_frames60": 3,
+    "static_ws": 0.08,
+    "static_max_s": 0.4,
+    "hitstop_motion": 1.0,
+    "flying_ws": 0.3,
+    "fg_gap_max_s": 1.2,
+    "fg_depth_frac": 0.004,
+    "fg_flow_frac": 0.005,
+    "fg_flow_ws": 2.0
+  },
+  "lyrics": {
+    "word_speed_max": 0.5,
+    "caps": { "STATE": 160, "NOW": 200, "BASELINE": 180, "LEADERBOARD": 200, "DEADLINE": 300, "CROWN": 120, "GUARANTEED": 90 },
+    "cap_default": 70,
+    "onset_hit_levels": ["M", "L", "XL", "XXL"],
+    "onset_window": { "default": 0.25, "GUARANTEED": 1.0 },
+    "ash_max": 0.35,
+    "old_coc_min": 1.5,
+    "old_after_s": 0.7,
+    "unsung_contrast_max": 1.5,
+    "unsung_cap_min": 8,
+    "letter_min": 1.5,
+    "debounce_frames60": 3
+  },
+  "impacts": {
+    "levels": {
+      "L": { "cam_min": 2.0, "surge": [0.12, 0.20] },
+      "XL": { "cam_min": 2.0, "surge": [0.15, 0.25] },
+      "XXL": { "cam_min": 2.0, "surge": [0.15, 0.25] }
+    },
+    "surge_frames60": [2, 4],
+    "pre": [-0.40, -0.12],
+    "win": [-0.03, 0.30],
+    "brownout_min": 0.02,
+    "brownout_s": 0.6,
+    "contact_frames60": 4,
+    "p2_contact_max": 0.03,
+    "word_max": 0.5,
+    "fragments_min": 3,
+    "fragments_s": 0.5,
+    "fleck_frame_max": 10,
+    "fleck_run_frames60": 4,
+    "post_flash_max": 0.03,
+    "post_exposure_max": 1.15
+  },
+  "cuts": {
+    "ghost_alpha_max": 0.05,
+    "light_iou_min": 0.25,
+    "shape_ncc_min": 0.35,
+    "motion_cos_min": 0.8,
+    "motion_ws_min": 0.6
+  },
+  "perf": { "p95_ms": 25.0, "idle_load_max": 2.0 },
+  "exempt_static": [[38.908, 39.40, "H01 open hold"], [60.79, 60.995, "C5 settle (H03)"]],
+  "shots": [
+    ["P1", 38.908, 43.4833], ["P2", 43.4833, 45.812],
+    ["C1", 45.812, 48.8333], ["C2", 48.8333, 53.5833], ["C3", 53.5833, 56.85], ["C4", 56.85, 60.5833], ["C5", 60.5833, 60.995]
+  ],
+  "sections": [["pre1", 38.908, 45.812], ["chorus1", 45.812, 60.995]],
+  "static": {
+    "_doc": "The slice's cuts and hits as director review 3 marked them (out/wip/p1v3/review3/tools/marks_r2.json, impacts.py): `gates.py video --static` (calibration on an old render) and the hit fallback when no plate registers (lyricReg.hits) or exposes { t, level } lists.",
+    "cuts": [38.908, 43.4833, 45.812, 48.8333, 53.5833, 56.85, 60.5833, 60.995],
+    "hits": [
+      [39.879, "S", "plug IS"], [40.46, "S", "plug YOU"], [40.749, "S", "vertigo"], [41.67, "S", "tear"], [42.13, "M", "flare"],
+      [42.589, "S", "handshake"], [42.704, "S", "deck1"], [42.819, "S", "deck2"], [42.934, "S", "deck3"], [43.049, "S", "deck4"],
+      [43.164, "S", "deck6"], [43.279, "S", "seal"], [44.433, "L", "LATCH"], [45.355, "S", "hat1"], [45.54, "L", "launch"],
+      [46.273, "L", "BRAKE"], [47.88, "XXL", "NOW"], [48.111, "L", "after"], [48.572, "M", "m48.57"], [48.846, "L", "A"],
+      [49.035, "L", "BASE"], [49.954, "M", "lift"], [50.409, "S", "s50.41"], [50.878, "M", "dock"], [51.794, "S", "s51.79"],
+      [52.255, "S", "s52.26"], [52.728, "L", "DEADLINE"], [53.642, "M", "door1"], [54.093, "M", "door2"], [54.558, "M", "door3"],
+      [55.015, "M", "door4"], [55.935, "S", "s55.94"], [56.855, "M", "compressor"], [57.328, "S", "s57.33"], [57.777, "M", "pluck"],
+      [58.246, "L", "SEAT"], [60.095, "S", "tilt"], [60.528, "S", "tile"]
+    ]
+  }
+}

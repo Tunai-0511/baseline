@@ -1,0 +1,25 @@
+.DS_Store
+node_modules/
+.vite/
+**/__pycache__/
+
+# renders — the finished film (out/Baseline.mp4) is too large for git
+out/
+
+# analysis: Python env, model weights, stems and intermediates (regenerable, large)
+analysis/.venv/
+analysis/.cache/
+analysis/stems/
+analysis/work/
+analysis/qa/
+
+# tools: Python env, downloaded datasets and training runs (regenerable, large)
+tools/.venv/
+tools/data/*.npz
+tools/data/cifar10-hf/
+tools/data/conv1/
+tools/data/conv1_runA/
+tools/data/conv1_runB/
+tools/data/conv1_seq/
+tools/data/ibp/
+tools/data/tiny_tf/

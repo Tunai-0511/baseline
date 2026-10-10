@@ -18,6 +18,7 @@ MoE 路由、INT4 量化、LoRA rank-8、Bradley–Terry 獎勵、FlashAttention
 | `app/src/timeline.ts`、`direction.ts` | 各段落用哪個場景，以及鏡頭撞擊與轉場 |
 | `app/scripts/render.ts` | 算圖、截圖、聯絡表、文字重疊檢查 |
 | `app/public/data/` | 畫面用的計算結果（由 `tools/data/` 的腳本產生） |
+| `app/eq.json` | 畫面上的 71 條公式（TeX，取自各篇原始論文）；`bun scripts/eq.ts` 用 MathJax 排版成 `public/eq/` |
 | `analysis/` | 逐字對齊與節拍分析 → `data/lyrics.json`、`data/audio.json` |
 | `tools/` | 資料產生腳本：conv1 訓練、BPE 等 |
 | `audio/baseline.wav` | 歌曲 |

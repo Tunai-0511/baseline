@@ -7,8 +7,9 @@
 //              this film sang; one beam from now back to it, and the retrieval map all green
 //   dates    — the four claims of the pre-choruses on a wall, each stamped with its date: DEPTH 2015-12-10, MEMORY
 //              1997-11-15, ATTENTION 2017-06-12, SCALE 2020-01-23
-//   late     — the same four as spikes on a time axis; NOW sweeps right and every spike it passes sinks to the
-//              baseline; a clock runs ahead of it
+//   late     — the same four on a time axis as a staircase of records: NOW sweeps right and each claim rises, higher
+//              than the one before, on its word; the one it beat turns grey, its level run out as a dashed baseline;
+//              on LATE an unnamed next step rises over SCALE; a clock runs ahead of NOW
 // Style: archive tape — warm amber and paper white on teal-black; each claim in its pre-chorus colour.
 import type { Frame, PostOverrides } from '../engine/scene';
 import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, pool, tc, clamp, lerp, ease, hexA, mixHex, hot, F, W, H, U, type Ctx } from './_v';

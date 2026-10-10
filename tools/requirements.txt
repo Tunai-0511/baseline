@@ -1,0 +1,8 @@
+# The data tools' environment (tools/data/*.py, tools/conv1/, tools/bpe/), Python 3.12.
+#   uv venv --python 3.12 tools/.venv && uv pip install --python tools/.venv -r tools/requirements.txt
+numpy==2.5.3
+scipy==1.18.1
+torch==2.14.1
+torchvision==0.29.1
+pillow==12.3.0
+opencv-python-headless==5.0.0.93

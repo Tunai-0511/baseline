@@ -1,5 +1,7 @@
 # Baseline
 
+![Baseline](cover/cover-1280x720.jpg)
+
 一支 4 分 07 秒的音樂影片，主題是 AI 架構怎麼登上 state of the art、又怎麼被下一代擠成 baseline：
 感知器、SVM、卷積、RNN／LSTM、注意力、GAN、diffusion、MoE、量化、LoRA、RLHF／DPO、FlashAttention、長上下文……
 
@@ -8,6 +10,15 @@
 每一格畫面都由歌曲時間算出（Canvas2D 針孔相機的 2D 模擬 3D，加 WebGL 後製），歌詞長在場景裡的物件上，不用字幕。
 畫面上的數字都來自真的計算：用 CIFAR-10 訓練的 conv1 濾波器、SVM 擬合、BPTT 梯度、LSTM 閘門、GAN 模式崩塌、
 MoE 路由、INT4 量化、LoRA rank-8、Bradley–Terry 獎勵、FlashAttention 分塊、needle-in-a-haystack 等。
+
+## 文件
+
+| 文件 | 內容 |
+| --- | --- |
+| [docs/DESIGN.md](docs/DESIGN.md) | 設計：原則、色彩、字、鏡頭、公式城市、四種重複結構、封面 |
+| [docs/SHOTLIST.md](docs/SHOTLIST.md) | 分鏡表：25 個場景、118 個鏡頭，每個鏡頭的時間、唱到的字與畫面；[docs/frames/](docs/frames/) 是每秒一格的縮圖 |
+| [docs/MAKING.md](docs/MAKING.md) | 怎麼做的：歌、逐字對齊、真實資料、公式、引擎架構、算圖、品質檢查、改版歷程 |
+| [docs/DESCRIPTION.md](docs/DESCRIPTION.md) | 影片簡介（中英）、章節、歌詞、製作名單、標籤 |
 
 ## 目錄
 
@@ -20,10 +31,11 @@ MoE 路由、INT4 量化、LoRA rank-8、Bradley–Terry 獎勵、FlashAttention
 | `app/public/data/` | 畫面用的計算結果（由 `tools/data/` 的腳本產生） |
 | `app/eq.json` | 畫面上的 71 條公式（TeX，取自各篇原始論文）；`bun scripts/eq.ts` 用 MathJax 排版成 `public/eq/` |
 | `analysis/` | 逐字對齊與節拍分析 → `data/lyrics.json`、`data/audio.json` |
-| `tools/` | 資料產生腳本：conv1 訓練、BPE 等 |
+| `tools/` | 資料產生腳本：conv1 訓練、BPE 等（環境：`tools/requirements.txt`） |
+| `cover/` | 封面（3840 × 2160 PNG、1280 × 720 JPG），由 `app/src/scenes/cover.ts` 算出 |
+| `docs/` | 設計、分鏡、製作說明、影片簡介 |
 | `audio/baseline.wav` | 歌曲 |
 | `lyrics/suno-v4.txt` | 歌詞 |
-| `STORYBOARD-v3.md` | 分鏡 |
 
 ## 執行
 
@@ -36,7 +48,7 @@ bunx vite                                   # 在瀏覽器即時預覽
 bun scripts/render.ts video --fps 60 --samples auto --max-samples 108 --crf 17 --out ../out/Baseline.mp4
 ```
 
-加 `--scale 2` 就是真 4K（3840×2160，版面不變、只是解析度加倍）。
+加 `--scale 2` 就是真 4K（3840×2160，版面不變、只是解析度加倍）；成片 `out/Baseline-4K.mp4` 就是這樣算的。
 其他模式：`stills --t 18.9,19.2`（單張截圖）、`sheet --from 20 --to 35 --cols 4`（聯絡表）、
 `textqa --from 0 --to 247.2`（逐字形檢查全片文字有沒有重疊）。
 

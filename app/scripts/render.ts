@@ -1306,6 +1306,35 @@ try {
     const rows = [...groups.entries()].sort((a, b) => a[1].t0 - b[1].t0);
     for (const [k, g] of rows) console.log(`${g.t0.toFixed(2)}–${g.t1.toFixed(2)}  ×${g.n}  overlap ${g.k.toFixed(2)}  h ${g.h}px  ${k}`);
     console.log(`${rows.length} overlapping pairs`);
+  } else if (mode === 'dump') {
+    // the film's structure as JSON (for the docs): timeline entries, each plate's camera shots and hits, the
+    // formulas of its city, the seams and the film camera's hits, and the lyrics with word times
+    const out = opt('out', path.join(ROOT, 'docs/data/structure.json'))!;
+    const d = await page.evaluate(() => {
+      const P = (window as any).__mv, E = P.engine;
+      const r3 = (x: number) => Math.round(x * 1000) / 1000;
+      const entries = E.timeline.map((e: any) => {
+        const sc = E.loaded.get(e.id)?.scene;
+        const rig = sc?.rig;
+        return {
+          id: e.id, start: r3(e.start), end: r3(e.end), params: e.params ?? {},
+          shots: rig ? rig.shots.map((s: any) => ({ name: s.name ?? '', t0: r3(s.t0), snap: s.snap ?? 0 })) : [],
+          hits: rig ? rig.hits.map((h: any) => ({ t: r3(h.t), amp: h.amp })) : [],
+          formulas: sc?.env?.eq ?? [],
+        };
+      });
+      const dir = E.direction ?? { seams: [], hits: [] };
+      return {
+        duration: P.duration,
+        entries,
+        seams: dir.seams.map((s: any) => ({ a: s.a, b: s.b, kind: s.kind, at: r3(s.at), pre: s.pre, post: s.post })),
+        filmHits: dir.hits.map((h: any) => ({ t: r3(h.t), z: h.z, shake: h.shake, shock: h.shock })),
+        lyrics: E.lyrics.lines.map((l: any) => ({ text: l.text, start: r3(l.words[0].start), end: r3(l.words[l.words.length - 1].end), words: l.words.map((w: any) => [w.w, r3(w.start), r3(w.end)]) })),
+      };
+    });
+    mkdirSync(path.dirname(out), { recursive: true });
+    await Bun.write(out, JSON.stringify(d, null, 1));
+    console.log(`${out}  ${d.entries.length} entries, ${d.entries.reduce((a: number, e: any) => a + e.shots.length, 0)} shots, ${d.seams.length} seams`);
   } else if (mode === 'lyricvis') {
     // is the word being sung readable on screen? Every --step (default 0.05 s): each word in [start, max(end,
     // start + 0.3)) needs a type run containing it (any plate), alpha > 0.45, glyphs ≥ --min-h px tall (default

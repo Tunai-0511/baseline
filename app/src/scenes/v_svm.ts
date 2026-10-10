@@ -3,8 +3,9 @@
 // the decision blade rises between the classes and the street widens until its two fences touch the three support
 // vectors: 2/‖w‖ = 3.29. Next door, rings that no line can split are lifted by φ(x) = (x₁, x₂, x₁² + x₂²) into a bowl
 // and one level plane cuts them (z = 25.2) — the circle it leaves on the floor is the kernel SVM's boundary. Then the
-// ImageNet top-5 error bars (28.2, 25.8 → 16.4, 11.7, 6.7, 3.6): a deep net, a train of black conv slabs, drives along
-// the chart and bites each bar down to its year. Back in the yard the margin fences fall flat.
+// ImageNet top-5 error bars (28.2, 25.8 → 16.4, 11.7, 6.7, 3.6): the deep-net years start at 2011's height and each is
+// crushed down to its error on a hit of ATE THE BENCHMARKS, the network that did it named under it (AlexNet, ZFNet,
+// GoogLeNet, ResNet). Back in the yard the margin fences fall flat.
 // Style: paper-light plot — warm grey ground, ink, orange (+1) and teal (−1), the deep net in black.
 import type { Frame, PostOverrides } from '../engine/scene';
 import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, tc, clamp, lerp, ease, hexA, hot, F, W, H, vlerp, orbit, U, type Ctx } from './_v';

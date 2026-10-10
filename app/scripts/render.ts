@@ -1253,10 +1253,31 @@ try {
       Q.on = true;
       const gh = (g: number[]) => { let m = 0; for (let i = 0; i < g.length; i += 4) m = Math.max(m, g[i + 3]! - g[i + 1]!); return m; };
       const ga = (g: number[]) => { let s = 0; for (let i = 0; i < g.length; i += 4) s += (g[i + 2]! - g[i]!) * (g[i + 3]! - g[i + 1]!); return s; };
+      // point in a convex screen quad (either winding)
+      const inQ = (q: number[], x: number, y: number) => {
+        let pos = 0, neg = 0;
+        for (let i = 0; i < 4; i++) {
+          const ax = q[2 * i]!, ay = q[2 * i + 1]!, bx = q[(2 * i + 2) % 8]!, by = q[(2 * i + 3) % 8]!;
+          const cr = (bx - ax) * (y - ay) - (by - ay) * (x - ax);
+          if (cr > 0) pos++; else if (cr < 0) neg++;
+        }
+        return pos === 0 || neg === 0;
+      };
+      const qArea = (q: number[]) => { let a = 0; for (let i = 0; i < 4; i++) a += q[2 * i]! * q[(2 * i + 3) % 8]! - q[(2 * i + 2) % 8]! * q[2 * i + 1]!; return Math.abs(a) / 2; };
+      const qH = (q: number[]) => Math.max(q[1]!, q[3]!, q[5]!, q[7]!) - Math.min(q[1]!, q[3]!, q[5]!, q[7]!);
       for (let t = from; t < to; t += step) {
         Q.runs.length = 0;
+        Q.rects.length = 0;
         P.still(t);
         const R = Q.runs.filter((r: any) => r.a > 0.45 && r.g.length && gh(r.g) > minH && r.x1 > 0 && r.x0 < 1920 && r.y1 > 0 && r.y0 < 1080);
+        // type running over the border of the outlined box it sits in: most of the run's glyph corners inside a
+        // small box, some outside (big panels and type much taller than the box are lyrics passing over, not labels)
+        for (const r of R) for (const b of Q.rects) {
+          if (b.scene !== r.scene || qArea(b.q) > 0.08 * 1920 * 1080 || gh(r.g) > 0.7 * qH(b.q)) continue;
+          let inn = 0, tot = 0;
+          for (let i = 0; i < r.g.length; i += 4) for (const [x, y] of [[r.g[i], r.g[i + 1]], [r.g[i + 2], r.g[i + 1]], [r.g[i], r.g[i + 3]], [r.g[i + 2], r.g[i + 3]]]) { tot++; if (inQ(b.q, x, y)) inn++; }
+          if (inn >= 0.75 * tot && inn < tot) out.push({ t: Math.round(t * 100) / 100, a: r.s, b: '[BOX BORDER]', k: Math.round((1 - inn / tot) * 100) / 100, scene: r.scene, h: Math.round(gh(r.g)) });
+        }
         for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) {
           const A = R[i], B = R[j];
           if (A.scene !== B.scene || A.s === B.s) continue;

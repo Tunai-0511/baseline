@@ -27,6 +27,7 @@ export default class Svm extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['svm_primal', 'svm_dual', 'rbf', 'margin', 'kerneltrick', 'convlayer'], seed: 4 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     this.L6 = ly.lines[6]!.words; this.L7 = ly.lines[7]!.words;
     try { const d = await (await fetch('data/svm_fit.json')).json(); this.lin = d.linear; this.ker = d.kernel; } catch { /* frame only */ }
@@ -78,6 +79,8 @@ export default class Svm extends VScene {
     {
       const k = ease.outBack(clamp((t - tSvm.start) / 0.25), 1.8);
       this.text3(c, 'SVM', wallY, -1, 3.0, { size: 6.0 * k, fam: WIDE, color: t < tSvm.end ? U.mag : INK, align: 'center', alpha: 1 - clamp((t - tKer.start) / 0.4) });
+      // the hard-margin problem, painted under the name (Cortes & Vapnik)
+      this.eqFit(c, 'svm_primal', wallY, -1, 1.15, 14, 1.25, { color: INK, alpha: 0.85 * clamp((t - (tSvm.start + 0.3)) / 0.3) * (1 - clamp((t - tKer.start) / 0.4)) });
     }
     if (this.lin && t > tWide.start - 0.05) {
       const tg = this.lin.tangent, nm = this.lin.normal;
@@ -96,7 +99,8 @@ export default class Svm extends VScene {
     if (t > tDeep.start - 0.03) {
       const CP: Pl = wallPl(CH.z - 0.5);
       const i0 = L7.indexOf(tAte);
-      this.say3(c, L7.slice(i0, L7.indexOf(tBench) + 1), t, wallPl(CH.z + 1.6), CH.x0 + CH.dx * 3.0, 10.2, { size: 1.75, slam: 0.35, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4, alpha: 1 - clamp((t - tMarg.start) / 0.4) });
+      // (held in frame with DEEP NETS: fixed on the chart wall, the camera's pan ran its end off the right edge)
+      this.say3(c, L7.slice(i0, L7.indexOf(tBench) + 1), t, wallPl(CH.z + 1.6), this.key.tg[0] + 0.3, 9.3, { size: 1.75, slam: 0.35, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4, alpha: 1 - clamp((t - (tMarg.start - 0.3)) / 0.15) });
     }
     // AND THE MARGINS HAD TO FALL, the last word huge
     if (t > tMarg.start - 0.25) {
@@ -272,7 +276,8 @@ export default class Svm extends VScene {
       const col = deep ? (bitten ? ORA : MUTE) : TEAL;
       this.box3(c, [x - 1.3, 0, CH.z - 1.3], [x + 1.3, h, CH.z + 0.3], hexA(INK, a), 1.3, { fill: hexA(col, 0.85 * a) });
       this.text3(c, yr, CP, x, -1.0, { size: 0.6, fam: MONOB, color: hexA(INK, a), align: 'center' });
-      if (!deep || bitten) this.text3(c, err.toFixed(1), wallPl(CH.z + 0.32), x, h + 0.35, { size: 0.62, fam: MONOB, color: hexA(deep ? RED : INK, a), align: 'center' });
+      // (a bitten bar's value shows once the bar has settled: on the way down it ran through the lyric)
+      if (!deep || bitten) this.text3(c, err.toFixed(1), wallPl(CH.z + 0.32), x, h + 0.35, { size: 0.62, fam: MONOB, color: hexA(deep ? RED : INK, a * (deep ? clamp((k - 0.85) / 0.15) : 1)), align: 'center' });
       // the bitten-off chunk falls
       if (deep && bitten) {
         const dt = (x + 1.0 - head) / 9;
@@ -297,10 +302,14 @@ export default class Svm extends VScene {
       if (i < slabs.length - 1) this.box3(c, [x1 - 0.5, 0.4 + ht * 0.4, TRAIN_Z - 0.4], [x1 - 0.1, 0.4 + ht * 0.4 + 0.4, TRAIN_Z], '#FF6A1F', 1.2);
       x = x1 + 0.6;
     });
-    // DEEP NETS on the lead slab, conv labels on the others
+    // DEEP NETS lands and holds its place in the frame while the camera pans with the train under it (riding the
+    // lead slab, or fixed in the world, it slid across the frame, smeared by the motion)
     const LP: Pl = wallPl(TRAIN_Z + 2.65);
     const dw = this.L7[0]!, nw = this.L7[1]!;
-    this.say3(c, [dw, nw], t, LP, head + 6.2, 6.3, { size: 2.1, slam: 0.4, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4 });
+    // (on the chart's front plane, above ATE THE BENCHMARKS — it read upside down in order below it — and clear of
+    // the bitten bars' values)
+    void LP;
+    this.say3(c, [dw, nw], t, wallPl(CH.z + 1.6), this.key.tg[0] + 0.3, 11.35, { size: 2.1, slam: 0.55, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.25, glow: 16, glowColor: U.ink, alpha: 1 - clamp((t - (tMarg - 0.3)) / 0.15) });
     // (the spec line goes as the first bar is bitten: the bitten bars' values come down through its height)
     const xBite = CH.x0 + (BARS.length - 1) * CH.dx + 1.0, specA = clamp((head - xBite) / 2.5);
     if (specA > 0) this.text3(c, 'CONV1 11×11 · CONV2 5×5 · CONV3–5 3×3 · FC 4096 · FC 4096 · SOFTMAX 1000', LP, head, 5.2, { size: 0.36, fam: MONO, color: hexA(INK, 0.75 * specA) });

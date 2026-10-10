@@ -26,6 +26,7 @@ export default class Align extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['bt', 'rlhf', 'dpo', 'flash_m', 'flash_l', 'flash_io'], seed: 13, keep: (_x, z) => Math.abs(z) > 34 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);

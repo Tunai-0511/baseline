@@ -33,6 +33,7 @@ export default class Seq1 extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['ngram', 'rnn', 'bptt', 'lstm_f', 'lstm_i', 'lstm_c', 'lstm_h'], seed: 7, keep: (_x, z) => Math.abs(z) > 34 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);
@@ -117,7 +118,7 @@ export default class Seq1 extends VScene {
       const lit = sung ? 1 : 0.18;
       this.box3(c, [q.x - WL / 2, 0.3, -WD / 2], [q.x + WL / 2, 0.3 + WH, WD / 2], hexA(sung ? SOD : STEEL, 0.6 + 0.4 * lit), 1.3, { fill: mixHex('#0A1024', '#2A1A08', 0.5 * lit) });
       const side: Pl = { o: [q.x, 0.3 + WH / 2, WD / 2 + 0.01], r: [1, 0, 0], u: [0, 1, 0] };
-      const size = Math.min(0.62, (WL - 0.2) / Math.max(1, q.s.length * 0.62));
+      const size = Math.min(0.62, (WL - 0.35) / Math.max(1e-3, this.tw3(q.s, { size: 1, fam: COND }))); // (real width, not a per-letter guess)
       this.text3(c, q.s, side, 0, 0, { size, fam: COND, color: sung ? mixHex(BONE, '#FFFFFF', hotk) : hexA(BONE, 0.25), align: 'center', mid: true, glow: hotk * 14, glowColor: SOD });
       // couplers
       if (i < this.toks.length - 1) this.seg(c, [q.x + WL / 2, 0.55, 0], [q.x + PITCH - WL / 2, 0.55, 0], STEEL, 1.4);
@@ -310,6 +311,9 @@ export default class Seq1 extends VScene {
     const P: Pl = { o: [gx, 5.6, -0.4], r: [1, 0, 0], u: [0, 1, 0] };
     for (const sx of [-3.4, 3.4]) this.seg(c, [gx + sx, 0, -0.4], [gx + sx, 5.0, -0.4], hexA(STEEL, a), 2);
     this.rect3(c, P, -3.6, -0.6, 7.2, 2.0, { fill: hexA('#081A10', 0.95 * a), stroke: hexA(GRN, 0.8 * a), lw: 1.4 });
+    // the cell-state update on a plate hung under the sign (Hochreiter & Schmidhuber's c_t, with the forget gate)
+    this.rect3(c, P, -3.6, -1.95, 7.2, 1.15, { fill: hexA('#081A10', 0.95 * a), stroke: hexA(GRN, 0.5 * a), lw: 1.1 });
+    this.eqFit(c, 'lstm_c', P, 0, -1.375, 6.4, 0.7, { color: BONE, alpha: 0.95 * a });
     const k = ease.outBack(clamp((t - t19) / 0.25), 1.6);
     this.text3(c, 'LSTM', P, 0, 0.4, { size: 1.6 * k, fam: WIDE, color: t < ws[0]!.end ? U.mag : BONE, align: 'center', mid: true, glow: 12, glowColor: U.ink, alpha: a });
     // (the line rides above the gantry sign, clear of LSTM)

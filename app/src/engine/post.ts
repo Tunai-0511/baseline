@@ -183,6 +183,9 @@ export interface PostParams {
   unify: number;
 }
 
+/** Global light trim over every scene's bloom / halation (2026-10-10: the light read too strong). */
+export const LIGHT = { bloom: 0.55, halation: 0.5, threshold: 0.08 };
+
 export const DEFAULT_POST: PostParams = {
   exposure: 1,
   bloom: 0.55,
@@ -371,11 +374,12 @@ ${SCALE === 1 ? `        float g1 = hash12(gl_FragCoord.xy + fract(time * 13.37)
   }
 
   /** Apply the chain: src (HDR linear) -> out (sRGB 8-bit target or screen). */
+  // (the threshold rises with LIGHT.threshold so only real highlights bloom)
   render(renderer: THREE.WebGLRenderer, src: THREE.Texture, hud: THREE.Texture, out: THREE.WebGLRenderTarget | null, p: PostParams, time: number) {
     // bloom pyramid
     this.prefilter.u.src!.value = src;
     (this.prefilter.u.texel!.value as THREE.Vector2).set(1 / W, 1 / H);
-    this.prefilter.u.threshold!.value = p.bloomThreshold;
+    this.prefilter.u.threshold!.value = p.bloomThreshold + LIGHT.threshold;
     this.prefilter.u.knee!.value = p.bloomKnee;
     this.prefilter.render(renderer, this.mips[0]!);
     for (let i = 1; i < MIPS; i++) {
@@ -401,8 +405,9 @@ ${SCALE === 1 ? `        float g1 = hash12(gl_FragCoord.xy + fract(time * 13.37)
     f.haloTex!.value = this.ups[3]!.texture;
     f.hudTex!.value = hud;
     f.exposure!.value = p.exposure;
-    f.bloom!.value = p.bloom / 3; // pyramid sums ~MIPS levels; normalize
-    f.halation!.value = p.halation;
+    // (LIGHT: the whole film's glow, turned down — the user found the light too strong)
+    f.bloom!.value = (p.bloom / 3) * LIGHT.bloom; // pyramid sums ~MIPS levels; normalize
+    f.halation!.value = p.halation * LIGHT.halation;
     const hc = p.halationColor ?? DEFAULT_POST.halationColor;
     (f.halationColor!.value as THREE.Vector3).set(hc[0], hc[1], hc[2]);
     f.radial!.value = p.radial;

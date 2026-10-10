@@ -3,6 +3,7 @@ import { Engine, type AdaptiveSampling } from './engine/engine';
 import { PW, PH, SCALE } from './engine/gl';
 import { makeTimeline } from './timeline';
 import { makeDirection } from './direction';
+import { loadEq } from './scenes/_eq';
 
 const params = new URLSearchParams(location.search);
 const EXPORT = params.has('export');
@@ -23,6 +24,7 @@ declare global {
 let TIMELINE: typeof engine.timeline = [];
 
 async function boot() {
+  await loadEq(); // every formula rasterized before the first frame (frames must not depend on load timing)
   const onlySet = ONLY ? new Set(ONLY.split(',')) : null;
   await engine.init(onlySet ? (e) => onlySet.has(e.id) : undefined);
   TIMELINE = engine.timeline;

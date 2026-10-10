@@ -45,6 +45,7 @@ export default class Gen2 extends VScene {
 
   override async init() {
     this.bg = U.ink;
+    this.env = { eq: ['gan', 'ddpm_fwd', 'ddpm_loss', 'rope', 'rope_rot', 'rmsnorm', 'swiglu'], seed: 10, keep: (x, z) => Math.abs(z) > 34 && !(z < 0 && z > -130 && (Math.abs(x - 70) < 40 || Math.abs(x - 140) < 40)) }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);

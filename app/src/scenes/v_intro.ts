@@ -60,6 +60,7 @@ export default class Intro extends VScene {
 
   override init() {
     this.bg = BG;
+    this.env = { eq: ['perc_out', 'perc_rule', 'mlp', 'xor', 'backprop', 'chainrule'], seed: 1 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics, au = this.ctx.audio;
     this.L0 = ly.lines[0]!.words; this.L1 = ly.lines[1]!.words;
     const bp = 60 / au.bpm;
@@ -263,15 +264,19 @@ export default class Intro extends VScene {
 
   private titleBlock(c: Ctx, t: number) {
     const P = floorPl(0);
-    const x = -14.5, y = 6.5, w = 7.2, h = 3.0;
+    // (the block is measured around its lines: drawn at a fixed 7.2 × 3, THE LINE ran over its right edge and the
+    // sheet number over the divider)
+    const tT = { size: 0.95, fam: WIDE }, tS = { size: 0.34, fam: MONO };
+    const wDwg = this.tw3('DWG 00 · SHEET 1 OF 1', tS), wScale = this.tw3('SCALE 1 : 1', tS);
+    const w = Math.max(this.tw3('THE LINE', tT) + 0.8, wDwg + wScale + 1.2), h = 3.0, x = -14.5, y = 6.5;
     const a = clamp((t - 2.6) / 1.0) * 0.85;
     if (a <= 0) return;
     this.rect3(c, P, x, y, w, h, { stroke: hexA(CYAN, a), lw: 1.3 });
     this.seg(c, at(P, x, y + 1.0), at(P, x + w, y + 1.0), hexA(CYAN, a), 1);
-    this.seg(c, at(P, x + 4.2, y), at(P, x + 4.2, y + 1.0), hexA(CYAN, a), 1);
-    this.text3(c, 'THE LINE', P, x + 0.3, y + 1.6, { size: 0.95, fam: WIDE, color: hexA(BONE, a) });
-    this.text3(c, 'DWG 00 · SHEET 1 OF 1', P, x + 0.3, y + 0.4, { size: 0.34, fam: MONO, color: hexA(CYAN, a) });
-    this.text3(c, 'SCALE 1 : 1', P, x + 4.4, y + 0.4, { size: 0.34, fam: MONO, color: hexA(CYAN, a) });
+    this.seg(c, at(P, x + wDwg + 0.6, y), at(P, x + wDwg + 0.6, y + 1.0), hexA(CYAN, a), 1);
+    this.text3(c, 'THE LINE', P, x + 0.4, y + 1.6, { ...tT, color: hexA(BONE, a) });
+    this.text3(c, 'DWG 00 · SHEET 1 OF 1', P, x + 0.3, y + 0.4, { ...tS, color: hexA(CYAN, a) });
+    this.text3(c, 'SCALE 1 : 1', P, x + wDwg + 0.9, y + 0.4, { ...tS, color: hexA(CYAN, a) });
     this.text3(c, '1958', P, 9.5, 9.0, { size: 4.2, fam: WIDE, color: hexA('#2C5C98', clamp((t - 3.5) / 1.5) * 0.6), align: 'center' });
   }
 
@@ -358,7 +363,7 @@ export default class Intro extends VScene {
     }
     // (the rule goes as XOR lands in front of it: its ends stuck out round the big word)
     const tX = L0.find((w) => /XOR/.test(w.w))!.start;
-    if (t > tPer && t < tX + 0.2) this.text3(c, 'w ← w + η (y − ŷ) x', P, 0, 1.3, { size: 0.55, fam: MONO, color: hexA(BONE, 0.9), align: 'center', alpha: clamp((t - tPer - 0.3) / 0.4) * (1 - clamp((t - (tX - 0.1)) / 0.25)) });
+    if (t > tPer && t < tX + 0.2) this.eq3(c, 'perc_rule', P, 0, 1.25, 0.78, { color: BONE, alpha: 0.9 * clamp((t - tPer - 0.3) / 0.4) * (1 - clamp((t - (tX - 0.1)) / 0.25)), qa: true });
     // (to the right, past the hidden plane — seen through the plane it read in pieces — and gone as SOLVED ✓ is stamped
     // across it)
     const tSv = L1.find((w) => /solved/.test(w.w))!.start;

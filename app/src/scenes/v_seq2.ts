@@ -25,6 +25,7 @@ export default class Seq2 extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['seq2seq', 'bahdanau_e', 'bahdanau_a', 'attention', 'multihead', 'lstm_c'], seed: 8, arcs: 10, keep: (_x, z) => Math.abs(z) > 34 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);
@@ -149,7 +150,8 @@ export default class Seq2 extends VScene {
     this.box3(c, [x - (WL / 2) * sq, y, -(WD / 2) * sq], [x + (WL / 2) * sq, y + WH * sq, (WD / 2) * sq], hexA(lit > 0.5 ? col : STEEL, 0.55 + 0.45 * lit), 1.3, { fill: mixHex('#0A1024', '#2A1A08', 0.5 * lit) });
     if (sq > 0.3) {
       const side: Pl = { o: [x, y + (WH / 2) * sq, (WD / 2) * sq + 0.01], r: [1, 0, 0], u: [0, 1, 0] };
-      const size = Math.min(0.56, (WL - 0.2) / Math.max(1, s.length * 0.62)) * sq;
+      // (sized from the real width: estimated per letter, PARALLEL and LEFT ran past the wagon's ends)
+      const size = Math.min(0.56, (WL - 0.35) / Math.max(1e-3, this.tw3(s, { size: 1, fam: COND }))) * sq;
       this.text3(c, s, side, 0, 0, { size, fam: COND, color: lit > 0.5 ? mixHex(BONE, '#FFFFFF', hotk) : hexA(BONE, 0.3), align: 'center', mid: true, glow: hotk * 12, glowColor: col });
     }
   }
@@ -253,7 +255,9 @@ export default class Seq2 extends VScene {
     for (const b of beats) if (t >= b) step++;
     const stepK = beats.length ? ease.outCubic(clamp((t - (beats[Math.max(0, step - 1)] ?? tRec)) / 0.22)) : 0;
     const sgn: Pl = { o: [GATE, 4.6, 0], r: [1, 0, 0], u: [0, 1, 0] };
-    this.rect3(c, sgn, -3.2, -0.55, 6.4, 1.5, { fill: '#06200F', stroke: hexA(GRN, 0.8), lw: 1.3 });
+    // (the board is as wide as its longest line plus a margin: at 6.4 the AT ONCE line ran into both ends)
+    const bw = this.tw3('t = 1 … n  AT ONCE', { size: 0.62, fam: MONOB }) + 1.1;
+    this.rect3(c, sgn, -bw / 2, -0.55, bw, 1.5, { fill: '#06200F', stroke: hexA(GRN, 0.8), lw: 1.3 });
     this.text3(c, t < tTr ? `t = ${Math.max(1, step)}` : 't = 1 … n  AT ONCE', sgn, 0, 0.2, { size: 0.62, fam: MONOB, color: GRN, align: 'center', mid: true });
     c.restore();
     // the wagons: L22's words queue and pass one per beat; at "transformers" L23's words appear all at once

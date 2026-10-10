@@ -29,6 +29,7 @@ export default class Fall extends VScene {
 
   override init() {
     this.bg = BG;
+    this.env = { eq: ['attention', 'resnet', 'lstm_c', 'gan', 'convlayer', 'svm_primal', 'perc_rule', 'relu'], seed: 17 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start + 1);
     this.L66 = ly.lines[i0]!.words; this.L67 = ly.lines[i0 + 1]!.words;

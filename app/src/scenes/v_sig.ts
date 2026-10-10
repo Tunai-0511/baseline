@@ -27,6 +27,7 @@ export default class Sig extends VScene {
 
   override init() {
     this.bg = BG;
+    this.env = { eq: ['sigmoid', 'dsigmoid', 'vanish', 'relu', 'backprop', 'chainrule'], seed: 2 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     this.L2 = ly.lines[2]!.words; this.L3 = ly.lines[3]!.words;
     const w = (L: Word[], re: RegExp) => L.find((x) => re.test(x.w))!;

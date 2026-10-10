@@ -25,6 +25,8 @@ export default class Gone extends VScene {
 
   override init() {
     this.bg = BG;
+    // the city round the chain: the Transformer's own equations, and attention strung between the towers
+    this.env = { eq: ['attention', 'multihead', 'posenc', 'head', 'ffn', 'layernorm', 'lstm_c', 'bptt'], arcs: 16, focus: [16, 0, 0] };
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L30 = ly.lines[i0]!.words; this.L31 = ly.lines[i0 + 1]!.words;
@@ -32,6 +34,7 @@ export default class Gone extends VScene {
     const s = this.ctx.start, e = this.ctx.end;
     const w30 = (re: RegExp) => this.L30.find((x) => re.test(x.w))!, w31 = (re: RegExp) => this.L31.find((x) => re.test(x.w))!;
     const tMem = w30(/memory/).start, tLong = w30(/long/).start, tOne = this.L31[0]!.start, tLayer = w31(/layer/).start, tRec = w31(/recurrence/).start, tGone = w31(/gone/).start;
+    this.env!.flash = [tLayer, tGone, this.tDrop]; // (the city answers the slab's landing, GONE and the drop)
     const tDrop = this.tDrop;
     this.rig = new Rig([
       { t0: s, name: 'cell', key: (t) => { const k = ease.inOutQuad(clamp((t - s) / (tMem - s))); return K([lerp(-6, -4, k), lerp(4.5, 5.2, k), lerp(11, 13, k)], [lerp(1.5, 3.5, k), 2.2, 0], 46, 0.03); } },
@@ -104,7 +107,7 @@ export default class Gone extends VScene {
       if (head > 0) {
         this.text3(c, 'LSTM,', front, -1.4, 5.6, { size: 2.3 * k, fam: WIDE, color: t < tLSTM.end ? U.mag : BONE, glow: 14, glowColor: U.ink, alpha: head });
         // (under the cell-state highway, not across it: its × and + showed through YOU)
-        this.say3(c, [w30(/you/), tHeld, w30(/^the$/), tMem], t, front, -1.4, 3.1, { size: 1.15, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, upper: true, rise: 0.3, alpha: head });
+        this.say3(c, [w30(/you/), tHeld, w30(/^the$/), tMem], t, front, -1.4, 3.1, { size: 1.15, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, upper: true, rise: 0.3, alpha: head, glow: 16, glowColor: U.ink });
       }
       // FOR SO LONG strung out along the highway into the distance
       if (t > tFor.start - 0.02) {
@@ -244,5 +247,14 @@ export default class Gone extends VScene {
       this.pl3(c, pts, HEADS[hd]!, 1.2 + 3.6 * wgt, { alpha: a });
     }
     this.text3(c, `LAYER ${l + 1}`, P, cx - w / 2 + 0.4, -d / 2 + 0.4, { size: 0.5, fam: MONOB, color: hexA(MAG, 0.9) });
+    // the layer's own equations, engraved in it: scaled dot-product attention in front of the tokens, multi-head behind
+    if (l === 0) {
+      const R = this.readable(P);
+      const fa = on * clamp((t - (this.ctx.start + 0.4)) / 0.6);
+      if (fa > 0.02) {
+        this.eqFit(c, 'attention', R, cx, -3.3, w * 0.62, 2.6, { color: BONE, alpha: 0.85 * fa });
+        this.eqFit(c, 'multihead', R, cx, 3.6, w * 0.5, 1.6, { color: U.ash, alpha: 0.6 * fa, qa: false });
+      }
+    }
   }
 }

@@ -11,7 +11,8 @@ import { Layer2D, SCALE } from '../engine/gl';
 import { layout, F } from '../engine/type';
 import type { Word } from '../engine/lyrics';
 import { D2Scene, W, H, clamp, lerp, ease, hexA, mixHex, type Ctx, sungW, hot } from './_d2';
-import { smoothstep } from '../engine/util';
+import { smoothstep, hash } from '../engine/util';
+import { eqImage } from './_eq';
 import { Rig, K, basis, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit } from './_wire';
 
 export { Rig, K, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit, W, H, clamp, lerp, ease, hexA, mixHex, sungW, hot, F };
@@ -75,10 +76,46 @@ const CAP = 0.72; // Archivo cap height / em
 /** True while a VScene draws its floor reflection (screen-space furniture skips itself then). */
 export let MIRRORING = false;
 /** Text runs drawn this frame (screen boxes), for the overlap QA (render.ts textqa); filled only when TEXT_QA.on. */
-export const TEXT_QA: { on: boolean; runs: { scene: string; s: string; x0: number; y0: number; x1: number; y1: number; a: number; g: number[] }[] } = { on: false, runs: [] };
+export const TEXT_QA: { on: boolean; runs: { scene: string; s: string; x0: number; y0: number; x1: number; y1: number; a: number; g: number[] }[]; rects: { scene: string; q: number[] }[] } = { on: false, runs: [], rects: [] };
 if (typeof window !== 'undefined') (window as any).__textqa = TEXT_QA;
 /** World-space stroke weight (2026-10-10 polish: hairlines vanish on a phone; everything a third heavier). */
 export const LW = 1.35;
+
+/**
+ * The world round a plate (2026-10-10, "the background is too empty"): a city standing far off on the floor — walls
+ * carrying the plate's formulas, typeset from the papers, and stacks of layer plates that pulse up on the beat.
+ * World-anchored on a lattice, so they keep their place as the camera travels; only sites between r0 and r1 from
+ * the camera stand, and never nearer than 1.5 × the camera's distance to its target (they never cover the action).
+ */
+export interface EnvCfg {
+  /** formulas for the walls (keys of app/eq.json), handed out in turn */
+  eq: string[];
+  /** what the walls face (default the origin) */
+  focus?: V3;
+  /** lattice spacing (default 38) */
+  cell?: number;
+  /** nearest / farthest a structure stands from the camera (default 50 / 240) */
+  r0?: number; r1?: number;
+  /** the floor's height (default 0) */
+  floor?: number;
+  /** share of lattice sites standing something (default 0.62) and of those, the layer towers (default 0.42) */
+  density?: number; towers?: number;
+  /** attention arcs strung between the towers' tops (default 0) */
+  arcs?: number;
+  /** keep a site? (keeps the action's own ground clear) */
+  keep?: (x: number, z: number) => boolean;
+  /** overall strength (default 1) */
+  alpha?: number;
+  /** lattice offset, so neighbouring plates don't stand the same city (default 0) */
+  seed?: number;
+  /** r0 as given, not pushed out by the camera's distance to its target (plates whose target runs far away) */
+  fixedR0?: boolean;
+  /** formulas engraved flat in the floor round the focus — what a camera looking down sees (default on); no
+   *  inscription nearer the focus than floorKeep (default 16) */
+  floorEq?: boolean; floorKeep?: number;
+  /** the song's hits (s): on each, a magenta wave climbs every tower of the city and the walls' tops flash */
+  flash?: number[];
+}
 
 export abstract class VScene extends D2Scene {
   /**
@@ -115,7 +152,205 @@ export abstract class VScene extends D2Scene {
   override draw(c: Ctx, t: number, f: Frame): PostOverrides | void {
     this.base = c.getTransform();
     if (this.rig) this.setKey(this.rig.at(t));
+    if (this.env) this.drawEnv(c, t, this.env);
     return this.frame(c, t, f);
+  }
+
+  /** the plate's world (see EnvCfg); set it in init */
+  env: EnvCfg | null = null;
+
+  private drawEnv(c: Ctx, t: number, E: EnvCfg) {
+    if (!E.eq.length) return;
+    const cell = E.cell ?? 38, fl = E.floor ?? 0, A = E.alpha ?? 1, sd = E.seed ?? 0;
+    const p = this.key.p, dT = Math.hypot(this.key.tg[0] - p[0], this.key.tg[1] - p[1], this.key.tg[2] - p[2]);
+    const r0 = E.fixedR0 ? (E.r0 ?? 70) : Math.max(E.r0 ?? 70, dT * 1.8 + 14), r1 = Math.max(E.r1 ?? 330, r0 * 2.2);
+    if (E.floorEq !== false && !MIRRORING) this.floorInscriptions(c, E, A, sd, fl);
+    const dens = E.density ?? 0.5, tw = E.towers ?? 0.42;
+    // the glow along the horizon the city stands against (a backlight, low: it gives the skyline a silhouette)
+    {
+      const fwd = vnorm([this.Fw[0], 0, this.Fw[2]]);
+      const hz = this.cs(vadd([p[0], fl, p[2]], vsc(fwd, 5000)));
+      if (hz[2] > 0 && Math.abs(this.Fw[1]) < 0.8) {
+        const hy = this.sp(hz)[1];
+        if (hy > -H * 0.3 && hy < H * 1.3) {
+          c.save();
+          const g = c.createLinearGradient(0, hy - H * 0.32, 0, hy + H * 0.06);
+          g.addColorStop(0, hexA(U.magDark, 0)); g.addColorStop(0.8, hexA(U.magDark, 0.42 * A)); g.addColorStop(1, hexA(U.magDark, 0));
+          c.fillStyle = g; c.fillRect(0, hy - H * 0.32, W, H * 0.38);
+          c.restore();
+        }
+      }
+    }
+    const focus = E.focus ?? [0, 0, 0];
+    type Site = { i: number; j: number; x: number; z: number; d: number; a: number; tower: boolean };
+    const sites: Site[] = [];
+    const i0 = Math.floor((p[0] - r1) / cell), i1 = Math.floor((p[0] + r1) / cell);
+    const j0 = Math.floor((p[2] - r1) / cell), j1 = Math.floor((p[2] + r1) / cell);
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
+      if (hash(i, j, 11 + sd) > dens) continue;
+      const x = (i + 0.15 + 0.7 * hash(i, j, 12 + sd)) * cell, z = (j + 0.15 + 0.7 * hash(i, j, 13 + sd)) * cell;
+      if (E.keep && !E.keep(x, z)) continue;
+      const d = Math.hypot(x - p[0], z - p[2]);
+      if (d < r0 * 0.85 || d > r1) continue;
+      // in front of the camera, roughly (a wide margin: the structures are big)
+      const q = this.cs([x, fl + 12, z]);
+      if (q[2] < 0 || Math.abs(q[0]) > q[2] * 2.2 + 40) continue;
+      const a = A * smoothstep(r0 * 0.85, r0 * 1.25, d) * (1 - smoothstep(r1 * 0.62, r1, d));
+      if (a > 0.01) sites.push({ i, j, x, z, d, a, tower: hash(i, j, 14 + sd) < tw });
+    }
+    sites.sort((s1, s2) => s2.d - s1.d);
+    const kick = this.beatPulse(t, 0.16);
+    // the latest hit's wave: u climbs 0 → 1 over 0.55 s, strength fading over 0.9 s
+    let wu = -1, wa = 0;
+    for (const tf of E.flash ?? []) { const dt = t - tf; if (dt >= 0 && dt < 0.9) { wu = dt / 0.55; wa = 1 - dt / 0.9; } }
+    const tops: V3[] = [];
+    let wi = 0;
+    for (const S of sites) {
+      const hh = (k: number) => hash(S.i, S.j, k + sd);
+      if (S.tower) {
+        // a stack of layer plates; a pulse runs up it from every beat
+        const s = 4 + 4 * hh(21), nL = 16 + Math.floor(32 * hh(22)), gap = 1.6 + 0.9 * hh(23), yaw = hh(24) * Math.PI;
+        const cx = Math.cos(yaw) * s, sx = Math.sin(yaw) * s;
+        const corner = (k: number, y: number): V3 => {
+          const u = k === 0 || k === 3 ? -1 : 1, v = k < 2 ? -1 : 1;
+          return [S.x + u * cx - v * sx, y, S.z + u * sx + v * cx];
+        };
+        const lb = this.lastBeat(t), run = (t - lb.t0) / 0.55; // the pulse climbs the stack in 0.55 s
+        const dim: [V3, V3][] = [], hot: [V3, V3][] = [];
+        const wave: [V3, V3][] = [];
+        for (let k = 0; k < nL; k++) {
+          const y = fl + 0.6 + k * gap;
+          const inWave = wa > 0 && Math.abs(wu - k / nL) < 0.1;
+          const lit = Math.abs(run * nL - k) < 1.5 && run < 1.2;
+          const L = inWave ? wave : lit ? hot : dim;
+          for (let e = 0; e < 4; e++) L.push([corner(e, y), corner((e + 1) % 4, y)]);
+        }
+        if (wave.length) this.segs(c, wave, U.mag, 2.4, Math.min(1, 1.2 * wa) * S.a);
+        const yTop = fl + 0.6 + (nL - 1) * gap;
+        for (let e = 0; e < 4; e++) dim.push([corner(e, fl), corner(e, yTop + 1.2)]);
+        this.segs(c, dim, U.graphite, 1.1, 0.75 * S.a);
+        if (hot.length) this.segs(c, hot, U.mag, 1.6, 0.85 * S.a * (0.5 + 0.5 * kick));
+        tops.push([S.x, yTop + 1.2, S.z]);
+      } else {
+        // a wall of formulas: a dark slab, its main formula large, a second one under it
+        const w = 38 + 30 * hh(31), h = 13 + 11 * hh(32), lift = hh(33) < 0.45 ? 0 : 6 + 16 * hh(34);
+        const dx = focus[0] - S.x, dz = focus[2] - S.z, dl = Math.hypot(dx, dz) || 1;
+        const n: V3 = [dx / dl, 0, dz / dl];
+        const P0: Pl = { o: [S.x, fl + lift, S.z], r: [n[2], 0, -n[0]], u: [0, 1, 0] };
+        const P = this.readable(P0);
+        const q = [at(P, -w / 2, 0), at(P, w / 2, 0), at(P, w / 2, h), at(P, -w / 2, h)];
+        this.fill3(c, q, hexA(U.ink2, 0.94 * S.a));
+        this.pl3(c, q, U.line, 1.2, { close: true, alpha: S.a });
+        this.seg(c, at(P, -w / 2, h), at(P, w / 2, h), wa > 0 ? mixHex(U.ash, U.mag, wa) : hexA(U.ash, 0.55 * S.a), 1.4 + 1.6 * wa);
+        if (lift > 0) for (const ux of [-0.32, 0.32]) this.seg(c, at(P, ux * w, 0), [at(P, ux * w, 0)[0], fl, at(P, ux * w, 0)[2]], hexA(U.graphite, 0.8 * S.a), 1.2);
+        const k1 = E.eq[wi++ % E.eq.length]!, k2 = E.eq[(wi + Math.floor(hh(35) * 7)) % E.eq.length]!;
+        if (MIRRORING) continue; // (in the floor's blurred reflection the slab is enough; the type costs time)
+        const e1 = eqImage(k1, U.bone), e2 = eqImage(k2, U.ash);
+        if (e1) {
+          const em = Math.min((0.84 * w) / e1.box.w, (0.5 * h) / e1.box.h);
+          this.eq3(c, k1, P, 0, h * 0.62, em, { color: U.bone, alpha: 0.55 * S.a, v: 'mid' });
+          this.seg(c, at(P, -0.42 * w, h * 0.62 - (e1.box.h * em) / 2 - 0.5), at(P, -0.42 * w + Math.min(0.84 * w, e1.box.w * em) * 0.3, h * 0.62 - (e1.box.h * em) / 2 - 0.5), hexA(U.mag, 0.8 * S.a), 1.6);
+        }
+        if (e2 && k2 !== k1) {
+          const em2 = Math.min((0.6 * w) / e2.box.w, (0.2 * h) / e2.box.h);
+          this.eq3(c, k2, P, 0, h * 0.2, em2, { color: U.ash, alpha: 0.42 * S.a, v: 'mid' });
+        }
+      }
+    }
+    // attention arcs strung between the towers' tops
+    const na = Math.min(E.arcs ?? 0, (tops.length * (tops.length - 1)) / 2);
+    for (let k = 0, m = 0; k < tops.length && m < na; k++) for (let l = k + 1; l < tops.length && m < na; l++, m++) {
+      const a3 = tops[k]!, b3 = tops[l]!, span = Math.hypot(b3[0] - a3[0], b3[2] - a3[2]);
+      const pts: V3[] = [];
+      for (let u = 0; u <= 16; u++) { const v = u / 16; pts.push([lerp(a3[0], b3[0], v), lerp(a3[1], b3[1], v) + Math.sin(Math.PI * v) * span * 0.35, lerp(a3[2], b3[2], v)]); }
+      this.pl3(c, pts, (k + l) % 3 ? U.ash : U.mag, 1.1, { alpha: 0.35 * A });
+    }
+  }
+
+  /** formulas engraved flat in the floor: a world lattice of inscriptions round the camera, kept off the focus */
+  private floorInscriptions(c: Ctx, E: EnvCfg, A: number, sd: number, fl: number) {
+    const cell = 26, p = this.key.p, R = 150, keep = E.floorKeep ?? 16, focus = E.focus ?? [0, 0, 0];
+    if (p[1] < fl + 0.5) return;
+    for (let i = Math.floor((p[0] - R) / cell); i <= Math.floor((p[0] + R) / cell); i++) for (let j = Math.floor((p[2] - R) / cell); j <= Math.floor((p[2] + R) / cell); j++) {
+      if (hash(i, j, 51 + sd) > 0.42) continue;
+      const x = (i + 0.2 + 0.6 * hash(i, j, 52 + sd)) * cell, z = (j + 0.2 + 0.6 * hash(i, j, 53 + sd)) * cell;
+      if (Math.hypot(x - focus[0], z - focus[2]) < keep) continue; // (not E.keep: engraved in the floor, they cover nothing)
+      const d = Math.hypot(x - p[0], z - p[2], fl - p[1]);
+      const a = A * 0.3 * (1 - smoothstep(R * 0.5, R, d));
+      if (a < 0.02) continue;
+      const q = this.cs([x, fl, z]);
+      if (q[2] < 1 || Math.abs(q[0]) > q[2] * 2 + 30) continue;
+      const key = E.eq[Math.floor(hash(i, j, 54 + sd) * E.eq.length) % E.eq.length]!;
+      const yaw = (Math.floor(hash(i, j, 55 + sd) * 4) * Math.PI) / 2 + (hash(i, j, 56 + sd) - 0.5) * 0.3;
+      const P = this.readable({ o: [x, fl + 0.01, z], r: [Math.cos(yaw), 0, -Math.sin(yaw)], u: [-Math.sin(yaw), 0, -Math.cos(yaw)] });
+      this.eq3(c, key, P, 0, 0, 1.6 + 1.6 * hash(i, j, 57 + sd), { color: U.bone, alpha: a, v: 'mid' });
+    }
+  }
+
+  /**
+   * An image on a plane as a grid of affine cells (no clipping: cheap). Each cell's affine map fits its four
+   * projected corners; n defaults from the projected size. For type and line art seen from in front.
+   */
+  quad3(c: Ctx, img: CanvasImageSource, iw: number, ih: number, P: Pl, x: number, y: number, w: number, h: number, o: { n?: number; alpha?: number } = {}) {
+    const cq = [at(P, x, y + h), at(P, x + w, y + h), at(P, x, y), at(P, x + w, y)].map((p) => this.cs(p));
+    if (cq.some((q) => q[2] < this.near * 4)) return;
+    const sq = cq.map((q) => this.sp(q));
+    const span = Math.max(Math.hypot(sq[1]![0] - sq[0]![0], sq[1]![1] - sq[0]![1]), Math.hypot(sq[2]![0] - sq[0]![0], sq[2]![1] - sq[0]![1]));
+    if (span < 2) return;
+    const n = o.n ?? Math.max(1, Math.min(6, Math.ceil(span / 320)));
+    const G: [number, number][][] = [];
+    for (let i = 0; i <= n; i++) { G.push([]); for (let j = 0; j <= n; j++) G[i]!.push(this.sp(this.cs(at(P, x + (w * i) / n, y + h - (h * j) / n)))); }
+    c.save();
+    if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
+    c.imageSmoothingEnabled = true;
+    const cw = iw / n, ch = ih / n;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const p00 = G[i]![j]!, p10 = G[i + 1]![j]!, p01 = G[i]![j + 1]!, p11 = G[i + 1]![j + 1]!;
+      const Xx = (p10[0] - p00[0] + p11[0] - p01[0]) / 2 / cw, Xy = (p10[1] - p00[1] + p11[1] - p01[1]) / 2 / cw;
+      const Yx = (p01[0] - p00[0] + p11[0] - p10[0]) / 2 / ch, Yy = (p01[1] - p00[1] + p11[1] - p10[1]) / 2 / ch;
+      const mx = (p00[0] + p10[0] + p01[0] + p11[0]) / 4, my = (p00[1] + p10[1] + p01[1] + p11[1]) / 4;
+      const ox = mx - (Xx * cw + Yx * ch) / 2, oy = my - (Xy * cw + Yy * ch) / 2;
+      c.setTransform(this.base.multiply(new DOMMatrix([Xx, Xy, Yx, Yy, ox, oy])));
+      c.drawImage(img, i * cw, j * ch, cw, ch, 0, 0, cw, ch);
+    }
+    c.restore();
+  }
+
+  /**
+   * A typeset formula (app/eq.json) on a plane. em: the world height of one em; (x, y) the anchor — the baseline
+   * (v 'base', default), the box's middle ('mid') or its top ('top'). Returns the formula's world width.
+   */
+  eq3(c: Ctx, key: string, P: Pl, x: number, y: number, em: number, o: { color?: string; alpha?: number; align?: 'left' | 'center' | 'right'; v?: 'base' | 'mid' | 'top'; n?: number; qa?: boolean } = {}): number {
+    const e = eqImage(key, o.color ?? U.bone);
+    if (!e) return 0;
+    const w = e.box.w * em, h = e.box.h * em;
+    const x0 = (o.align ?? 'center') === 'center' ? x - w / 2 : o.align === 'right' ? x - w : x;
+    const yb = o.v === 'mid' ? y - h / 2 : o.v === 'top' ? y - h : y - e.box.d * em;
+    this.quad3(c, e.img, e.img.width, e.img.height, P, x0, yb, w, h, { alpha: o.alpha, n: o.n });
+    // (overlap QA for formulas set in the action, not the city's: the box in 8 slices, like glyphs)
+    if (o.qa && TEXT_QA.on && !MIRRORING && (o.alpha ?? 1) * c.globalAlpha > 0.45) {
+      const g: number[] = [];
+      let bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9;
+      for (let k = 0; k < 8; k++) {
+        const cs = [at(P, x0 + (w * k) / 8, yb), at(P, x0 + (w * (k + 1)) / 8, yb), at(P, x0 + (w * k) / 8, yb + h), at(P, x0 + (w * (k + 1)) / 8, yb + h)].map((pp) => this.cs(pp));
+        if (cs.some((q) => q[2] < this.near)) continue;
+        const sp = cs.map((q) => this.sp(q));
+        const xs = sp.map((q) => q[0]), ys = sp.map((q) => q[1]);
+        g.push(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
+        bx0 = Math.min(bx0, ...xs); by0 = Math.min(by0, ...ys); bx1 = Math.max(bx1, ...xs); by1 = Math.max(by1, ...ys);
+      }
+      if (g.length) TEXT_QA.runs.push({ scene: this.ctx.id, s: `eq:${key}`, x0: bx0, y0: by0, x1: bx1, y1: by1, a: (o.alpha ?? 1) * c.globalAlpha, g });
+    }
+    return w;
+  }
+  /** a formula fitted into a box maxW × maxH centred at (x, y) on P; returns its em */
+  eqFit(c: Ctx, key: string, P: Pl, x: number, y: number, maxW: number, maxH: number, o: { color?: string; alpha?: number; align?: 'left' | 'center' | 'right'; n?: number; qa?: boolean } = {}): number {
+    const e = eqImage(key, o.color ?? U.bone);
+    if (!e) return 0;
+    const em = Math.min(maxW / e.box.w, maxH / e.box.h);
+    const xa = (o.align ?? 'center') === 'center' ? x : o.align === 'right' ? x + maxW / 2 : x - maxW / 2;
+    this.eq3(c, key, P, xa, y, em, { ...o, v: 'mid', qa: o.qa ?? true });
+    return em;
   }
 
   /** The dust: 1400 motes in a 70 m box that follows the camera in whole cells (so they stay put in the world). */
@@ -294,6 +529,19 @@ export abstract class VScene extends D2Scene {
     const q: V3[] = [at(P, x, y), at(P, x + w, y), at(P, x + w, y + h), at(P, x, y + h)];
     if (o.fill) this.fill3(c, q, o.fill, { alpha: o.alpha });
     if (o.stroke) this.pl3(c, q, o.stroke, o.lw ?? 1.5, { close: true, alpha: o.alpha, dash: o.dash });
+    // (box QA: an outlined box's screen quad, to find type that runs over its border)
+    if (TEXT_QA.on && !MIRRORING && o.stroke && (o.alpha ?? 1) * c.globalAlpha > 0.3) {
+      const cq = q.map((p) => this.cs(p));
+      if (cq.every((p) => p[2] > this.near)) TEXT_QA.rects.push({ scene: this.ctx.id, q: cq.flatMap((p) => this.sp(p)) });
+    }
+  }
+  /** a boxed label: the box is sized to the text, so the type never runs over its border */
+  label3(c: Ctx, s: string, P: Pl, x: number, y: number, o: T3 & { fill?: string; stroke?: string; lw?: number; padX?: number; padY?: number }) {
+    const w = this.tw3(s, o), h = CAP * o.size;
+    const px = o.padX ?? 0.45 * o.size, py = o.padY ?? 0.45 * o.size;
+    const x0 = (o.align ?? 'left') === 'center' ? x - w / 2 : o.align === 'right' ? x - w : x;
+    this.rect3(c, P, x0 - px, y - h / 2 - py, w + 2 * px, h + 2 * py, { fill: o.fill, stroke: o.stroke, lw: o.lw, alpha: o.alpha });
+    return this.text3(c, s, P, x, y, { ...o, mid: true });
   }
   /** wire box (axis aligned), optional faces */
   box3(c: Ctx, a: V3, b: V3, col: string, lw = 1.5, o: { fill?: string; alpha?: number } = {}) {
@@ -369,7 +617,14 @@ export abstract class VScene extends D2Scene {
     const yb = o.mid ? y - (CAP * o.size) / 2 : y;
     c.save();
     if (o.alpha !== undefined) c.globalAlpha *= o.alpha;
-    if (o.glow) { c.shadowBlur = o.glow; c.shadowColor = o.glowColor ?? o.color ?? '#fff'; }
+    if (o.glow) {
+      // (2026-10-10, "the light is too strong": a coloured glow is kept to a tight, half-strength halo; the dark
+      // ones that keep type legible over busy ground stay as they were)
+      const gc = o.glowColor ?? o.color ?? '#fff';
+      const m = /^#([0-9a-f]{6})$/i.exec(gc);
+      const lum = m ? (0.2126 * parseInt(m[1]!.slice(0, 2), 16) + 0.7152 * parseInt(m[1]!.slice(2, 4), 16) + 0.0722 * parseInt(m[1]!.slice(4, 6), 16)) / 255 : 0.5;
+      if (lum > 0.2 && m) { c.shadowBlur = o.glow * 0.6; c.shadowColor = hexA(gc, 0.5); } else { c.shadowBlur = o.glow; c.shadowColor = gc; }
+    }
     const ga = c.globalAlpha;
     // (overlap QA: the run's screen box and its strongest alpha)
     let bx0 = 1e9, bx1 = -1e9, by0 = 1e9, by1 = -1e9, bA = 0;

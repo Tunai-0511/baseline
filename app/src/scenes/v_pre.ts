@@ -39,12 +39,21 @@ export default class Pre extends VScene {
   override async init() {
     this.claim = (this.ctx.params.key as Key) ?? 'depth';
     this.bg = PAL[this.claim].bg;
+    // the city round the claim: walls of the claimed ingredient's own equations (2026-10-10)
+    const EQ: Record<Key, string[]> = {
+      depth: ['resnet', 'batchnorm', 'convlayer', 'backprop'],
+      memory: ['lstm_c', 'lstm_h', 'lstm_f', 'lstm_i', 'bptt'],
+      attention: ['attention', 'multihead', 'head', 'posenc'],
+      scale: ['scaling', 'chinchilla', 'compute', 'params'],
+    };
+    this.env = { eq: EQ[this.claim], seed: 20 + Object.keys(EQ).indexOf(this.claim) };
     const ly = this.ctx.lyrics;
     // the two lines of this pre-chorus: the first line starting inside the window, and the next
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.Wd = [...ly.lines[i0]!.words, ...ly.lines[i0 + 1]!.words];
     if (this.claim === 'attention') { try { this.attn = await (await fetch('data/attn_lyrics.json')).json(); } catch { /* */ } }
     const X = this.Wd[0]!, tAll = this.w(/^all$/).start, tYou = this.w(/^you$/).start, tNeed = this.w(/need/), tThe = this.w(/^the$/).start, tAbs = this.w(/abstract/).start, tG = this.w(/guaranteed/).start;
+    this.env!.flash = [tNeed.start, tG]; // (the city answers the claim's last word and the seal)
     const tIs = this.Wd.find((x) => /^is$/.test(x.w))?.start ?? X.end;
     const s = this.ctx.start, e = this.ctx.end;
     let shots: ConstructorParameters<typeof Rig>[0];
@@ -73,15 +82,17 @@ export default class Pre extends VScene {
         { t0: s, name: 'stairs', key: (t) => { const v = this.stairView(t); return K([v.x + 0.22 * v.d, v.y + 0.12 * v.d, v.d], [v.x, v.y, 0], 44, -0.03); } },
       ];
     }
-    // the last 0.45 s: push into the ∎ — the next chorus opens out of its magenta
+    // the last half second: a push all the way into the ∎ — it fills the frame for the last few frames, and the next
+    // chorus opens out of the same magenta (stopping short of it, the cut to the dark chorus read as a hard cut)
     const lastShot = shots[shots.length - 1]!, f0 = lastShot.key;
     lastShot.key = (t) => {
       const k0 = f0(t);
-      const kk = ease.inQuad(clamp((t - (e - 0.45)) / 0.45));
+      const kk = ease.inCubic(clamp((t - (e - 0.52)) / 0.46));
       if (kk <= 0) return k0;
       const S = this.sealAt();
-      const pEnd: V3 = [S.c[0] + S.n[0] * S.r * 0.75, S.c[1] + S.n[1] * S.r * 0.75, S.c[2] + S.n[2] * S.r * 0.75];
-      return { ...k0, p: vlerp(k0.p, pEnd, kk), tg: vlerp(k0.tg, S.c, kk) };
+      const d = 0.2 * (2 * S.r); // (the ∎'s side is 0.45 R ≈ 0.9 r: from 0.2 R away it covers the whole frame)
+      const pEnd: V3 = [S.c[0] + S.n[0] * d, S.c[1] + S.n[1] * d, S.c[2] + S.n[2] * d];
+      return { ...k0, p: vlerp(k0.p, pEnd, kk), tg: vlerp(k0.tg, S.c, Math.min(1, kk * 1.6)) };
     };
     this.rig = new Rig(shots, [{ t: X.start, amp: 0.8 }, { t: tAll, amp: 0.4 }, { t: tYou, amp: 0.4 }, { t: tNeed.start, amp: 0.6 }, { t: tAbs, amp: 0.3 }, { t: tG, amp: 1.8 }], 0.7, 51);
   }

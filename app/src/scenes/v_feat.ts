@@ -33,6 +33,7 @@ export default class Feat extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['hog', 'sift', 'conv', 'convlayer', 'sgd', 'relu'], seed: 3 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     this.L4 = ly.lines[4]!.words; this.L5 = ly.lines[5]!.words;
     const w = (L: Word[], re: RegExp) => L.find((x) => re.test(x.w))!;
@@ -332,6 +333,8 @@ export default class Feat extends VScene {
     if (this.fmap && rows > 0) this.img3(c, this.fmap, 32, 64, fm, 0, 6.4 - rows * 0.1, 3.2, rows * 0.1, { sy: 0, sh: rows, n: 4, smooth: false, alpha: a });
     if (this.fmap && colsInRow > 0) this.img3(c, this.fmap, 32, 64, fm, 0, 6.4 - (rows + 1) * 0.1, colsInRow * 0.1, 0.1, { sy: rows, sh: 1, sw: colsInRow, n: 1, smooth: false, alpha: a });
     this.text3(c, '32 × 64 · STRIDE 2', fm, 0, -0.75, { size: 0.32, fam: MONO, color: hexA(ICE, 0.8 * a) });
+    // what the kernel computes, typeset under the map
+    this.eqFit(c, 'conv', fm, 1.7, -1.75, 4.6, 0.75, { color: ICE, alpha: 0.9 * a });
     if (n >= N) return;
     // the kernel on the plate (11 × 11 px) and the pyramid to the output pixel
     const i = n % 32, j = Math.floor(n / 32);

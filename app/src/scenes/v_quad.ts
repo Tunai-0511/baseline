@@ -18,6 +18,7 @@ export default class Quad extends VScene {
 
   override init() {
     this.bg = BG;
+    this.env = { eq: ['quad', 'attention', 'linattn', 'ssm', 'causal', 'flash_io'], seed: 15, arcs: 12, keep: (x, z) => Math.max(Math.abs(x), Math.abs(z)) > 90, floorKeep: 0 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L62 = ly.lines[i0]!.words; this.L63 = ly.lines[i0 + 1]!.words;
@@ -100,7 +101,7 @@ export default class Quad extends VScene {
       // (rows well apart — the square is seen at a grazing angle, which squeezes the gaps between them — and the block
       // pulled toward the far edge: the camera looks at the far half, and IN THE LENGTH at −0.37 fell off the bottom
       // of the frame onto the n² counter)
-      if (t >= tAtt.start) { const kk = ease.outBack(clamp((t - tAtt.start) / 0.25), 1.6); this.text3(c, 'ATTENTION,', SQ, 0, sideNow * 0.26, { size: sideNow * 0.13 * kk, fam: WIDE, color: '#FFFFFF', align: 'center', mid: true, glow: 22, glowColor: U.ink }); }
+      if (t >= tAtt.start) { const kk = ease.outBack(clamp((t - tAtt.start) / 0.25), 1.6); this.text3(c, 'ATTENTION,', SQ, 0, sideNow * 0.26, { size: sideNow * 0.105 * kk, fam: WIDE, color: '#FFFFFF', align: 'center', mid: true, glow: 22, glowColor: U.ink }); }
       if (t >= tQ.start) this.text3(c, 'QUADRATIC', SQ, 0, sideNow * 0.04, { size: sideNow * 0.11, fam: WIDE, color: t < tQ.end ? U.mag : BONE, align: 'center', mid: true, glow: 22, glowColor: U.ink });
       // IN THE LENGTH stops growing with the square at n = 4,096: the camera cannot keep up with it (that is the
       // point), and at the next doubling LENGTH ran off the bottom of the frame while it was being sung

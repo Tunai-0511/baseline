@@ -24,6 +24,7 @@ export default class Stop extends VScene {
 
   override init() {
     this.bg = BG;
+    this.env = { eq: ['perc_rule', 'svm_primal', 'lstm_c', 'attention', 'gan', 'ddpm_loss', 'resnet', 'dpo', 'scaling'], seed: 16 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L64 = ly.lines[i0]!.words; this.L65 = ly.lines[i0 + 1]!.words;

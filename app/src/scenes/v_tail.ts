@@ -18,6 +18,7 @@ export default class Tail extends VScene {
 
   override init() {
     this.bg = BG;
+    this.env = { eq: ['perc_rule', 'attention', 'scaling', 'clm'], seed: 18, density: 0.35 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.5);
     this.L68 = ly.lines[i0]!.words; this.L69 = ly.lines[i0 + 1]!.words;

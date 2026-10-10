@@ -31,6 +31,7 @@ export default class Ctx2 extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['ppl', 'rope', 'alibi', 'posinterp', 'attention', 'clm'], seed: 14, keep: (x) => Math.abs(x) > 40, r0: 60, fixedR0: true, floorKeep: 0 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);

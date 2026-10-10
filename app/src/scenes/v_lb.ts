@@ -48,11 +48,20 @@ export default class Lb extends VScene {
     this.n = Number(this.ctx.params.n ?? 1);
     this.b = BOARDS[this.n] ?? BOARDS[1]!;
     this.bg = U.ink;
+    // the city round the board: the benchmark's own metric, and the new champion's equations (2026-10-10)
+    const EQ: Record<number, string[]> = {
+      1: ['top5', 'convlayer', 'relu', 'sgd'],
+      2: ['bleu', 'attention', 'multihead', 'seq2seq'],
+      3: ['lambada', 'clm', 'scaling', 'causal'],
+      4: ['compute', 'chinchilla', 'params', 'scaling'],
+    };
+    this.env = { eq: EQ[this.n] ?? EQ[1]!, seed: 30 + this.n, arcs: this.n >= 2 ? 8 : 0 };
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);
     const s = this.ctx.start, e = this.ctx.end;
     const tNow = this.L[1]![0]!.start, tBase = this.w(1, /baseline/).start, tTop = this.L[2]![0]!.start, tLead = this.w(2, /leaderboard/).start, tUntil = this.L[3]![0]!.start, tDead = this.w(3, /deadline/).start;
+    this.env!.flash = [tNow, tBase, tDead]; // (the city answers the challenger's slam, BASELINE and the deadline)
     // the plate's fall: it stops on every word of "now you're just a" (a clunk per word), then the floor on "baseline"
     const fallWords = this.L[1]!.slice(0, -1);
     this.knots = [{ t: tNow + 0.08, y: YT - 0.4 }];
@@ -64,7 +73,16 @@ export default class Lb extends VScene {
     this.knots.push({ t: tBase, y: 0.06 });
     const cold = this.b.mode === 'cold', big = this.b.mode === 'hard' || this.b.mode === 'over' ? 1.35 : 1;
     this.rig = new Rig([
-      { t0: s, name: 'state', key: (t) => { const k = ease.inOutQuad(clamp((t - s) / (tNow - s))); return K([lerp(3.5, 1.2, k), YT + lerp(2.4, 3.0, k), lerp(19, 15.5, k)], [0, YT + TH * 0.5 + 0.2, 0], 42, lerp(-0.03, 0.01, k)); } },
+      // (the chorus opens out of the pre-chorus's ∎: the camera starts against the slab's face, filled magenta, and
+      // pulls back as the magenta drains into the LED face)
+      { t0: s, name: 'state', key: (t) => {
+        const k = ease.inOutQuad(clamp((t - s) / (tNow - s)));
+        const base = K([lerp(3.5, 1.2, k), YT + lerp(2.4, 3.0, k), lerp(19, 15.5, k)], [0, YT + TH * 0.5 + 0.2, 0], 42, lerp(-0.03, 0.01, k));
+        const o = ease.outCubic(clamp((t - s) / 0.7));
+        if (o >= 1) return base;
+        const pc: V3 = [0, YT + TH * 0.5, 2.0], tgc: V3 = [0, YT + TH * 0.5, 0];
+        return { ...base, p: vlerp(pc, base.p, o), tg: vlerp(tgc, base.tg, o) };
+      } },
       { t0: tNow + 0.1, snap: 0.14, name: 'dive', key: (t) => { const y = this.fallY(t); return K([6.5, y + 2.2, PZ + 12.5], [0.6, y - 0.4, PZ - 0.5], 48, 0.04); } },
       { t0: tBase - 0.03, name: 'floor', key: (t) => { const k = ease.outCubic(clamp((t - tBase) / (tTop - tBase))); return K([0, lerp(15.5, 17.5, k), BZ + 2.4], [0, 0, BZ + 2.4], 52, 0, [0, 0, -1]); } },
       { t0: tTop - 0.03, name: 'crane', key: (t) => {
@@ -191,6 +209,9 @@ export default class Lb extends VScene {
     const P: Pl = { o: [0, y0, 0.36], r: [1, 0, 0], u: [0, 1, 0] };
     this.box3(c, [-RW, y0, -0.35], [RW, y0 + TH, 0.35], U.mag, 2.4, { fill: '#12050C' });
     this.ledFace(c, t, y0, RW, TH, 0.8 + 0.2 * this.beatPulse(t, 0.12));
+    // the ∎'s magenta, draining into the face as the camera pulls back (see the 'state' shot)
+    const om = 1 - ease.inOutQuad(clamp((t - this.ctx.start) / 0.55));
+    if (om > 0.01) this.rect3(c, { o: [0, y0, 0.385], r: [1, 0, 0], u: [0, 1, 0] }, -RW, 0, 2 * RW, TH, { fill: hexA(U.mag, om) });
     // the crown on its roof
     this.crown(c, [-RW + 1.4, y0 + TH + 0.65, 0], 0.85);
     // YOU WERE, small, top-left; STATE OF / THE ART, giant, word by word

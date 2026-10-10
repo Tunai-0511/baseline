@@ -27,6 +27,7 @@ export default class Shelf extends VScene {
 
   override async init() {
     this.bg = BG;
+    this.env = { eq: ['kerneltrick', 'rbf', 'hog', 'convlayer', 'backprop', 'sgd'], seed: 6 }; // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L14 = ly.lines[i0]!.words; this.L15 = ly.lines[i0 + 1]!.words;

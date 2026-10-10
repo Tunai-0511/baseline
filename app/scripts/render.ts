@@ -263,7 +263,7 @@ async function video(url: string, from: number, to: number, fps: number, out: st
     websocket: {
       maxPayloadLength: Math.max(64 * 1024 * 1024, OW * OH * 3 + 1024),
       open(ws) { sockets[ws.data.k] = ws; if (failure) ws.close(); },
-      close(ws, code, reason) { if (!failure && !ending) console.error(`\nworker ${ws.data.k} socket closed (${code}${reason ? ` ${reason}` : ''})`); },
+      close(ws, code, reason) { if (!failure && written < total) console.error(`\nworker ${ws.data.k} socket closed (${code}${reason ? ` ${reason}` : ''}) at frame ${written}/${total}`); },
       message(ws, msg) {
         if (failure) return;
         try {

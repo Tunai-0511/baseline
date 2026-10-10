@@ -96,7 +96,7 @@ bloom（全片統一減半）、halation、色差、顆粒、暗角、`unify` �
 - **第一條線就是 baseline**：片頭繪圖機畫的 y = 0，就是之後每個冠軍摔下來落地的那條線，也是片尾畫新線的地方。
 - **夜車是這首歌自己**：主歌二的每節車廂是一個唱到的字，n-gram、RNN、LSTM、seq2seq、注意力都在處理「這首歌」本身。
 - **針是第一個字**：上下文視窗段落裡，乾草堆中的針是 token 0，也就是這部片唱的第一個字 Perceptron 的 P。
-- **紀錄的樓梯**：「every breakthrough's just a baseline running late」——每個宣言在它的字上升起，一階比一階高；被超越的變灰，它的高度延伸成一條虛線，就是下一個要打敗的 baseline；最後一個未命名的 ? ? ? 升得比 SCALE 還高。紀錄不會掉下來，只會被超越。
+- **紀錄的樓梯**：「every breakthrough's just a baseline running late」——橫軸是真實時間，每個宣言立在它代表論文的發表日（LSTM 1997-11-15、ResNet 2015-12-10、Transformer 2017-06-12、Scaling Laws 2020-01-23），長條寬約一年，所以 DEPTH 和 ATTENTION 相隔一年半也不會疊在一起；高度不是數據，只表示一階比一階高。每個宣言在它的字上升起，被超越的變灰，它的高度延伸成一條虛線，就是下一個要打敗的 baseline。NOW 停在 2026（現在），x 軸往右延伸成虛線的未來，三根未命名的「?」一根比一根高：下一個紀錄還沒有名字，但一定會來，SCALE 也只是還沒被超越的 baseline。紀錄不會掉下來，只會被超越。
 - **長條被壓下去**：ImageNet 的錯誤率在 ATE、THE、BENCH-、-MARKS 四個拍點上一根根被壓到該年的數值，底下標出是哪個網路做到的。
 
 ## 9. 封面

@@ -31,7 +31,7 @@ MoE 路由、INT4 量化、LoRA rank-8、Bradley–Terry 獎勵、FlashAttention
 | `app/public/data/` | 畫面用的計算結果（由 `tools/data/` 的腳本產生） |
 | `app/eq.json` | 畫面上的 71 條公式（TeX，取自各篇原始論文）；`bun scripts/eq.ts` 用 MathJax 排版成 `public/eq/` |
 | `analysis/` | 逐字對齊與節拍分析 → `data/lyrics.json`、`data/audio.json` |
-| `tools/` | 資料產生腳本：conv1 訓練、BPE 等（環境：`tools/requirements.txt`） |
+| `tools/` | 資料產生腳本：conv1 訓練、BPE 等（環境：`tools/requirements.txt`）；`tools/video/` 把重算的一小段無損接回 4K 母帶 |
 | `cover/` | 封面（3840 × 2160 PNG、1280 × 720 JPG），由 `app/src/scenes/cover.ts` 算出 |
 | `docs/` | 設計、分鏡、製作說明、影片簡介 |
 | `audio/baseline.wav` | 歌曲 |
@@ -48,7 +48,7 @@ bunx vite                                   # 在瀏覽器即時預覽
 bun scripts/render.ts video --fps 60 --samples auto --max-samples 108 --crf 17 --out ../out/Baseline.mp4
 ```
 
-加 `--scale 2` 就是真 4K（3840×2160，版面不變、只是解析度加倍）；成片就是這樣算的（4K60，約 1.6 GB 以上，太大所以不放進 repo，`out/` 在 .gitignore 裡）。
+加 `--scale 2` 就是真 4K（3840×2160，版面不變、只是解析度加倍）；成片就是這樣算的（4K60：母帶約 17 GB、上傳版約 2.6 GB，太大所以不放進 repo，`out/` 在 .gitignore 裡）。
 其他模式：`stills --t 18.9,19.2`（單張截圖）、`sheet --from 20 --to 35 --cols 4`（聯絡表）、
 `textqa --from 0 --to 247.2`（逐字形檢查全片文字有沒有重疊）。
 

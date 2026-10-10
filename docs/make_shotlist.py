@@ -147,7 +147,7 @@ SHOTS = {
     ('bridgeB', 'needle'): '磁帶最遠端的乾草堆裡有一根針：token 0，PERCEPTRON 的 P（這部片唱的第一個字）；一道光從現在回到它；NEEDLE IN A HAYSTACK。',
     ('bridgeB', 'map'): '檢索地圖（上下文長度 × 針的深度）全部綠色；IT REMEMBERS EVERY SONG。',
     ('bridgeB', 'stones'): '四句宣言是一排黑玻璃墓碑，每塊刻著宣言與 GUARANTEED ∎，在 DATE 上刻出日期（1997-11-15、2015-12-10、2017-06-12、2020-01-23）；EVERY "ALL YOU NEED" / IS A PAPER / WITH A DATE 掛在碑上方。',
-    ('bridgeB', 'late'): '時間軸上的紀錄樓梯：NOW 往右掃，每唱一個字就有一個宣言升起，一階比一階高（MEMORY → DEPTH → ATTENTION → SCALE）；被超越的變灰，頂端延伸成虛線的 BASELINE；在 LATE 上一個未命名的 ? ? ? 升得比 SCALE 還高；時鐘在 NOW 頂端快轉。',
+    ('bridgeB', 'late'): '時間軸上的紀錄樓梯（橫軸是真實年份，每個宣言立在它代表論文的發表日；高度只表示一階比一階高）：NOW 往右掃，每唱一個字就有一個宣言升起（MEMORY 1997 → DEPTH 2015 → ATTENTION 2017 → SCALE 2020）；被超越的變灰，頂端延伸成虛線的 BASELINE；唱到 RUNNING 時 NOW 停在 2026（現在），x 軸往右延伸成虛線的未來，三根未命名的 ? 一根比一根高地升起，SCALE 也成了 baseline；時鐘在 NOW 頂端快轉。',
     ('pre4', 'stairs'): '對數—對數平面上的冪律線，每唱一個字鏡頭退後一個數量級，SCALE 的每個字母都比上一個大十倍；超出資料的部分畫成虛線 EXTRAPOLATED；石碑與 ∎。',
     ('chorus4', 'state'): '同 chorus 1，排行榜換成參數量（BIGGER IS BETTER?），過載的一輪。',
     ('chorus4', 'dive'): '最重的一次砸落。',

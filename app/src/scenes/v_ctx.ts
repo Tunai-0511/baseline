@@ -7,9 +7,10 @@
 //              this film sang; one beam from now back to it, and the retrieval map all green
 //   dates    — the four claims of the pre-choruses on a wall, each stamped with its date: DEPTH 2015-12-10, MEMORY
 //              1997-11-15, ATTENTION 2017-06-12, SCALE 2020-01-23
-//   late     — the same four on a time axis as a staircase of records: NOW sweeps right and each claim rises, higher
-//              than the one before, on its word; the one it beat turns grey, its level run out as a dashed baseline;
-//              on LATE an unnamed next step rises over SCALE; a clock runs ahead of NOW
+//   late     — the same four on a time axis as a staircase of records (each at its paper's real date; the heights are
+//              only an order): NOW sweeps right to 2026 and each claim rises, higher than the one before, on its word;
+//              the one it beat turns grey, its level run out as a dashed baseline; past NOW the axis runs on, dashed,
+//              into the future, and on RUNNING LATE unnamed steps rise there — ? ? ? — higher again; a clock runs on
 // Style: archive tape — warm amber and paper white on teal-black; each claim in its pre-chorus colour.
 import type { Frame, PostOverrides } from '../engine/scene';
 import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, pool, tc, clamp, lerp, ease, hexA, mixHex, hot, F, W, H, U, type Ctx } from './_v';
@@ -32,7 +33,7 @@ export default class Ctx2 extends VScene {
 
   override async init() {
     this.bg = BG;
-    this.env = { eq: ['ppl', 'rope', 'alibi', 'posinterp', 'attention', 'clm'], seed: 14, keep: (x) => Math.abs(x) > 40, r0: 60, fixedR0: true, floorKeep: 0, alpha: (t) => 1 - 0.5 * clamp((t - (this.L[3]![0]!.start - 0.3)) / 0.4) }; // (dimmer behind the records' staircase) // the city round the plate: walls of this plate's formulas (2026-10-10)
+    this.env = { eq: ['ppl', 'rope', 'alibi', 'posinterp', 'attention', 'clm'], seed: 14, keep: (x) => Math.abs(x) > 40, r0: 60, fixedR0: true, floorKeep: 0, alpha: (t) => 1 - 0.65 * clamp((t - (this.L[3]![0]!.start - 0.3)) / 0.4) }; // (dimmer behind the records' staircase, so its names read over the walls) // the city round the plate: walls of this plate's formulas (2026-10-10)
     const ly = this.ctx.lyrics;
     const i0 = ly.lines.findIndex((l) => l.words[0]!.start >= this.ctx.start - 0.3);
     this.L = [0, 1, 2, 3].map((k) => ly.lines[i0 + k]!.words);
@@ -63,19 +64,20 @@ export default class Ctx2 extends VScene {
       } },
       // (the whole axis in frame, nearly still: the records stack up as a staircase and that only reads if every
       // step is seen — following NOW, one spike at a time came up and went down, and it read as noise)
-      { t0: t55 - 0.05, snap: 0.25, name: 'late', key: (t) => { const k = ease.inOutQuad(clamp((t - t55) / 3.6)); return K([lerp(6.0, 8.4, k), lerp(6.4, 7.0, k), 9098 + lerp(24.5, 22.5, k)], [7.2, 6.2, 9098], 46, -0.01); } },
+      // (2026-10-11: back and up a little — the axis now runs on past NOW into the future, and the line sits higher)
+      { t0: t55 - 0.05, snap: 0.25, name: 'late', key: (t) => { const k = ease.inOutQuad(clamp((t - t55) / 3.6)); return K([lerp(8.0, 10.4, k), lerp(7.9, 8.4, k), 9098 + lerp(26.5, 25.0, k)], [9.2, 7.45, 9098], 46, -0.01); } },
     ], [{ t: t2k, amp: 0.6 }, { t: tMil, amp: 1.2 }, { t: t53, amp: 0.6 }, { t: tDate, amp: 1.4 }, { t: t55, amp: 0.6 }], 0.8, 151);
   }
 
   /** NOW on the axis: it passes each claim's year on a word of the line (MEMORY on EVERY, DEPTH on BREAKTHROUGH'S,
-   *  ATTENTION on JUST, SCALE on BASELINE) and the next, unnamed one on LATE */
+   *  ATTENTION on JUST, SCALE on BASELINE) and reaches 2026, today, on RUNNING, and stays */
   private nowKeys: [number, number][] = [];
   private nowYear(t: number) {
     if (!this.nowKeys.length) {
       const L55 = this.L[3]!, w = (re: RegExp) => L55.find((x) => re.test(x.w))!;
       this.nowKeys = [
         [L55[0]!.start - 0.35, 1995.0], [L55[0]!.start + 0.12, 1998.3], [w(/breakthrough/).start + 0.15, 2016.3],
-        [w(/^just$/).start + 0.08, 2017.8], [w(/baseline/).start + 0.08, 2020.4], [w(/late/).start + 0.1, 2025.2],
+        [w(/^just$/).start + 0.08, 2017.8], [w(/baseline/).start + 0.08, 2020.4], [w(/running/).start + 0.25, 2026.0],
         [L55[L55.length - 1]!.end + 0.4, 2026.0],
       ];
     }
@@ -111,7 +113,7 @@ export default class Ctx2 extends VScene {
     pool(c, W * 0.5, H * 0.5, 1000, '#163236', 0.5);
     if (t < t54 + 0.3) this.tape(c, t);
     if (t > t54 - 0.6) this.wallOfDates(c, t);
-    frameMarks(c, U.ash, { tl: 'BASELINE · THE TAPE', tr: t < t53 ? 'CONTEXT WINDOW' : t < t54 ? 'NEEDLE: TOKEN 0 · "P"' : 'CLAIMS · DATED', bl: '2020 — 2024', br: tc(t), alpha: 0.6 });
+    frameMarks(c, U.ash, { tl: 'BASELINE · THE TAPE', tr: t < t53 ? 'CONTEXT WINDOW' : t < t54 ? 'NEEDLE: TOKEN 0 · "P"' : 'CLAIMS · DATED', bl: t < t55 - 0.05 ? '2020 — 2024' : '1995 — 2026 — ?', br: tc(t), alpha: 0.6 });
     return { bloom: 0.8, bloomThreshold: 0.55, halation: 0.2, ca: 0.3 + 1.6 * hot(t, L[2]!.find((x) => /date/.test(x.w))!.start, 0.12), grain: 0.05, vignette: 0.32, zoom: 1 + 0.01 * kick };
   }
 
@@ -266,46 +268,66 @@ export default class Ctx2 extends VScene {
       const anchor = (w: Word): [number, number] => [this.rig ? this.rig.at(w.start).tg[0] : 0, 0];
       c.save(); c.globalAlpha *= 1 - clamp((t - t55.start) / 0.4); this.chunk3(c, L54, t, P, 0, 0, { anchor, size: 1.05, maxW: 15, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 4, 7], text: (x) => x.w.replace(/[“”]/g, '"').replace(',', '') }); c.restore();
     }
-    // late: the records on a time axis. NOW sweeps right; as it passes each claim's year the claim rises as a step,
-    // higher than the one before (the new state of the art) — and the one before turns grey, its top run out as a
-    // dashed line: the level the next one had to beat, now just a baseline. On LATE an unnamed next step rises over
-    // SCALE, and SCALE becomes a baseline too. (2026-10-10: the spikes used to shoot up and sink back, which read as
-    // noise; a record never goes down, it only gets beaten.)
+    // late: the records on a time axis — each claim at its paper's real date; the heights are only an order, each
+    // higher than the last. NOW sweeps right; as it passes each claim's year the claim rises as a step (the new state
+    // of the art) — and the one before turns grey, its top run out as a dashed line to NOW: the level the next one
+    // had to beat, now just a baseline. NOW stops at 2026, today; past it the axis runs on, dashed, into the future,
+    // and on RUNNING LATE unnamed steps rise there — ?, ?, ? — each higher again: SCALE becomes a baseline too.
+    // (2026-10-10: the spikes used to shoot up and sink back, which read as noise; a record never goes down, it only
+    // gets beaten. 2026-10-11: NOW stopped at 2025 with the next one in the past, and the steps, 1.6 wide, were wider
+    // than the year and a half between DEPTH and ATTENTION, so the two overlapped: now 0.9 wide, about a year.)
     if (t > t55.start - 0.3) {
       const a = clamp((t - t55.start + 0.3) / 0.4);
       const ax: Pl = wallPl(9100 - 2, [0, 0, 9100 - 2]);
-      const X = (yr: number) => -6 + (yr - 1995) * 0.85, Y0 = 1.0, XE = X(2026);
-      this.seg(c, at(ax, X(1995), Y0), at(ax, XE, Y0), hexA(PAPER, a), 2);
-      for (let yr = 1995; yr <= 2025; yr += 5) { this.seg(c, at(ax, X(yr), Y0 - 0.2), at(ax, X(yr), Y0 + 0.2), hexA(PAPER, a), 1.4); this.text3(c, String(yr), ax, X(yr), 0.2, { size: 0.42, fam: MONO, color: hexA(PAPER, 0.8 * a), align: 'center' }); }
+      const X = (yr: number) => -6 + (yr - 1995) * 0.85, Y0 = 1.0, XN = X(2026), XF = X(2031.6);
+      // the axis: solid up to today, then dashed into the future, with an arrow
+      this.seg(c, at(ax, X(1995), Y0), at(ax, XN, Y0), hexA(PAPER, a), 2);
+      this.seg(c, at(ax, XN, Y0), at(ax, XF, Y0), hexA(PAPER, 0.55 * a), 2, { dash: [7, 6] });
+      for (const s of [1, -1]) this.seg(c, at(ax, XF, Y0), at(ax, XF - 0.4, Y0 + 0.25 * s), hexA(PAPER, 0.55 * a), 2);
+      for (let yr = 1995; yr <= 2030; yr += 5) {
+        const ya = (yr > 2026 ? 0.5 : 1) * a;
+        this.seg(c, at(ax, X(yr), Y0 - 0.2), at(ax, X(yr), Y0 + 0.2), hexA(PAPER, ya), 1.4);
+        this.text3(c, String(yr), ax, X(yr), 0.2, { size: 0.42, fam: MONO, color: hexA(PAPER, 0.8 * ya), align: 'center' });
+      }
       this.text3(c, 'BASELINE', ax, X(1995) - 0.35, Y0, { size: 0.36, fam: MONOB, color: hexA(PAPER, 0.7 * a), align: 'right', mid: true });
       const now = this.nowYear(t);
-      // the steps: MEMORY, DEPTH, ATTENTION, SCALE, then the next one — each higher than the last
-      const STEPS = [...CLAIMS.map((cl) => ({ name: cl.s.split(' ')[0]!.replace("'S", ''), year: cl.year, ghost: false })), { name: '? ? ?', year: 2025.0, ghost: true }];
-      const H = [2.0, 4.0, 6.0, 8.0, 10.2], SW = 1.6;
+      // the steps: MEMORY, DEPTH, ATTENTION, SCALE — each higher than the last — then, past NOW, the ones to come
+      const STEPS = CLAIMS.map((cl) => ({ name: cl.s.split(' ')[0]!.replace("'S", ''), year: cl.year }));
+      const H = [2.0, 4.0, 6.0, 8.0], SW = 0.9;
+      const FUT: [number, number, number][] = [[2027.8, 9.6, 1], [2029.1, 11.0, 0.7], [2030.4, 12.4, 0.45]]; // year, height, alpha
+      // (up as NOW reaches today, on RUNNING: rising on LATE they were gone in the whip before they could be read)
+      const tRun = L55.find((x) => /running/.test(x.w))!.start, tFut = (j: number) => tRun + 0.3 + j * 0.12;
       const tLand = STEPS.map((st) => this.yearTime(st.year));
+      const tBeat = STEPS.map((_, i) => (i + 1 < STEPS.length ? tLand[i + 1]! : tFut(0))); // when a higher one lands
       let lastBeaten = -1; // the newest baseline: the highest step a later one has beaten
-      for (let i = 0; i + 1 < STEPS.length; i++) if (t >= tLand[i + 1]!) lastBeaten = i;
+      for (let i = 0; i < STEPS.length; i++) if (t >= tBeat[i]!) lastBeaten = i;
       STEPS.forEach((st, i) => {
         const tl = tLand[i]!;
         if (t < tl - 0.02) return;
         const rise = ease.outBack(clamp((t - tl) / 0.28), 1.5), h = H[i]! * rise, x = X(st.year);
-        const beaten = i + 1 < STEPS.length && t >= tLand[i + 1]!; // a higher one has landed
-        const dem = beaten ? clamp((t - tLand[i + 1]!) / 0.25) : 0;
-        const col = st.ghost ? MAG : mixHex(MAG, U.ash, dem);
+        const dem = t >= tBeat[i]! ? clamp((t - tBeat[i]!) / 0.25) : 0;
+        const col = mixHex(MAG, U.ash, dem);
         const top = Y0 + h;
-        if (st.ghost) {
-          this.rect3(c, ax, x - SW / 2, Y0, SW, h, { stroke: hexA(MAG, a), lw: 2, dash: [6, 5] });
-        } else {
-          this.rect3(c, ax, x - SW / 2, Y0, SW, h, { fill: hexA(col, (0.85 - 0.6 * dem) * a), stroke: hexA(col, a), lw: 1.6 });
-          // its level, once beaten: a dashed line on to the end of the axis — the baseline the next one beat
-          if (dem > 0) {
-            const xe = lerp(x + SW / 2, XE, ease.outCubic(dem));
-            this.seg(c, at(ax, x + SW / 2, top), at(ax, xe, top), hexA(U.ash, 0.75 * a), 1.4, { dash: [6, 6] });
-            // (the newest baseline says so at the end of its line)
-            if (i === lastBeaten && dem >= 1) this.text3(c, 'BASELINE', ax, XE + 0.3, top, { size: 0.46, fam: MONOB, color: hexA(U.ash, 0.9 * a), mid: true });
-          }
+        this.rect3(c, ax, x - SW / 2, Y0, SW, h, { fill: hexA(col, (0.85 - 0.6 * dem) * a), stroke: hexA(col, a), lw: 1.6 });
+        // its level, once beaten: a dashed line on to NOW — the baseline the next one beat
+        if (dem > 0) {
+          const xe = lerp(x + SW / 2, XN, ease.outCubic(dem));
+          this.seg(c, at(ax, x + SW / 2, top), at(ax, xe, top), hexA(U.ash, 0.75 * a), 1.4, { dash: [6, 6] });
+          // (the newest baseline says so at the end of its line, just short of NOW)
+          if (i === lastBeaten && dem >= 1) this.text3(c, 'BASELINE', ax, XN - 0.35, top + 0.2, { size: 0.42, fam: MONOB, color: hexA(U.ash, 0.9 * a), align: 'right' });
         }
-        this.text3(c, st.name, ax, x, top + 0.45, { size: st.ghost ? 0.8 : 0.72, fam: MONOB, color: hexA(col, a), align: 'center' });
+        // (a name wider than its step is pulled left, never into the taller step on its right — 2026-10-11)
+        const lo = { size: 0.72, fam: MONOB };
+        const nextL = i + 1 < STEPS.length ? X(STEPS[i + 1]!.year) - SW / 2 - 0.2 : Infinity;
+        this.text3(c, st.name, ax, Math.min(x, nextL - this.tw3(st.name, lo) / 2), top + 0.45, { ...lo, color: hexA(col, a), align: 'center' });
+      });
+      // the future: unnamed, dashed, each higher again, fainter the further off
+      FUT.forEach(([yr, hh, al], j) => {
+        const tj = tFut(j);
+        if (t < tj - 0.02) return;
+        const h = hh * ease.outBack(clamp((t - tj) / 0.3), 1.5), x = X(yr), fa = a * al;
+        this.rect3(c, ax, x - SW / 2, Y0, SW, h, { fill: hexA(MAG, 0.08 * fa), stroke: hexA(MAG, fa), lw: 2, dash: [6, 5] });
+        this.text3(c, '?', ax, x, Y0 + h + 0.45, { size: 0.8, fam: MONOB, color: hexA(MAG, fa), align: 'center' });
       });
       // NOW
       this.seg(c, at(ax, X(now), 0.4), at(ax, X(now), 12.3), hexA(GRN, a), 2.4);
@@ -316,8 +338,8 @@ export default class Ctx2 extends VScene {
       const ang = -t * 9;
       this.seg(c, at(CP, 0, 0), at(CP, Math.cos(ang) * 0.62, Math.sin(ang) * 0.62), RED, 2.4);
       this.seg(c, at(CP, 0, 0), at(CP, Math.cos(ang / 12) * 0.4, Math.sin(ang / 12) * 0.4), PAPER, 2.4);
-      // the line itself
-      const P: Pl = { o: [4.6, 13.4, 9100 - 1.9], r: [1, 0, 0], u: [0, 1, 0] };
+      // the line itself (over the clock's path, never through it)
+      const P: Pl = { o: [6.5, 15.0, 9100 - 1.9], r: [1, 0, 0], u: [0, 1, 0] };
       this.chunk3(c, L55, t, P, 0, 0, { size: 1.5, maxW: 22, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 2, 5], text: (x) => x.w.replace('’', "'") });
       void MAG;
     }

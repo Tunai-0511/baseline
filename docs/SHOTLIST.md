@@ -402,7 +402,7 @@ RLHF 的獎勵模型掃描四個答案並排序；DPO 用吊車把中間人吊�
 | 3:08.13–3:09.85 | `needle` | 0.3 | needle in a haystack, | 磁帶最遠端的乾草堆裡有一根針：token 0，PERCEPTRON 的 P（這部片唱的第一個字）；一道光從現在回到它；NEEDLE IN A HAYSTACK。 |
 | 3:09.85–3:11.85 | `map` | 0.3 | it remembers every song | 檢索地圖（上下文長度 × 針的深度）全部綠色；IT REMEMBERS EVERY SONG。 |
 | 3:11.85–3:15.45 | `stones` | 0 | Every “all you need” is a paper with a date, | 四句宣言是一排黑玻璃墓碑，每塊刻著宣言與 GUARANTEED ∎，在 DATE 上刻出日期（1997-11-15、2015-12-10、2017-06-12、2020-01-23）；EVERY "ALL YOU NEED" / IS A PAPER / WITH A DATE 掛在碑上方。 |
-| 3:15.45–3:18.98 | `late` | 0.25 | every breakthrough’s just a baseline running late | 時間軸上的紀錄樓梯：NOW 往右掃，每唱一個字就有一個宣言升起，一階比一階高（MEMORY → DEPTH → ATTENTION → SCALE）；被超越的變灰，頂端延伸成虛線的 BASELINE；在 LATE 上一個未命名的 ? ? ? 升得比 SCALE 還高；時鐘在 NOW 頂端快轉。 |
+| 3:15.45–3:18.98 | `late` | 0.25 | every breakthrough’s just a baseline running late | 時間軸上的紀錄樓梯（橫軸是真實年份，每個宣言立在它代表論文的發表日；高度只表示一階比一階高）：NOW 往右掃，每唱一個字就有一個宣言升起（MEMORY 1997 → DEPTH 2015 → ATTENTION 2017 → SCALE 2020）；被超越的變灰，頂端延伸成虛線的 BASELINE；唱到 RUNNING 時 NOW 停在 2026（現在），x 軸往右延伸成虛線的未來，三根未命名的 ? 一根比一根高地升起，SCALE 也成了 baseline；時鐘在 NOW 頂端快轉。 |
 
 鏡頭撞擊（hits，秒／強度）：185.60/0.6、186.78/1.2、188.18/0.6、194.88/1.4、195.50/0.6
 

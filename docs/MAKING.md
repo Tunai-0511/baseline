@@ -113,6 +113,17 @@ ffmpeg -i out/Baseline-4K-master.mp4 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset 
   -c:a copy -movflags +faststart out/Baseline-4K.mp4
 ```
 
+- 改一小段時不必整片重算。每一格只跟時間有關，所以只重算受影響的那幾秒（從前一個 IDR 關鍵影格算到後一個），用和母帶完全相同的 x264 參數編碼，再在這兩個 IDR 處接回母帶，其他部分不重新編碼：
+
+```bash
+cd app && bun scripts/render.ts video --scale 2 --fps 60 --samples auto --min-samples 4 --max-samples 108 --crf 17 \
+  --from 194.33333333333334 --to 199.88333333333333 --noaudio --out ../out/seg.mp4      # 第 11660–11992 格
+cd .. && sh tools/video/splice.sh out/Baseline-4K-master.mp4 out/seg.mp4 11660 11993 out/new-master.mp4 work/
+python3 tools/video/check_splice.py out/Baseline-4K-master.mp4 out/new-master.mp4 11660 11993 work/ out/seg.mp4
+```
+
+  接點有三個陷阱：先把母帶切成幾個檔再接，ffmpeg 會把時間戳平移 B 幀的延遲（2 格），聲音和畫面就差 2 格；concat 預設會把 SPS/PPS 塞進每個關鍵影格（`-auto_convert 0` 關掉）；音軌的封包會提早觸發切點，所以只拿影像軌來接，聲音最後整條放回。`check_splice.py` 檢查總格數、時間戳逐格連續、切點以外的封包和原母帶逐一相同、切點前後與接進來那段的頭尾各 30 格解碼後逐位元相同。
+
 ## 7. 品質檢查
 
 每個工具都是 `render.ts` 的一個模式：
@@ -138,12 +149,13 @@ ffmpeg -i out/Baseline-4K-master.mp4 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset 
 6. **v4 統一風格**：一套顏色（墨黑、骨白、洋紅）、巨字砸下、一格一個主角。
 7. **v9 打磨**：GUARANTEED 從「廉價的金色貼紙」改成黑玻璃石碑雷射刻字；鏡面地板、場景間轉場、全片相機；主歌三重做；全片文字重疊檢查。
 8. **v10**：公式城市與 71 條論文公式、光暈減半、∎ 推進接副歌、字要讀得到（lyricvis，看不清的字從 95 個降到 11 個，剩下的都是 0.1–0.3 秒的短字）、紀錄的樓梯。
+9. **4K 之後的修正**：紀錄樓梯的長條比 DEPTH 到 ATTENTION 的一年半還寬，兩根疊在一起；NOW 停在 2025，下一個紀錄還放在過去。改成長條約一年寬、NOW 停在 2026、x 軸延伸到未來、三根「?」。只重算受影響的 333 格，接回母帶（見第 6 節）。
 
 學到的事：
 - 字太近、太快、被切掉，觀眾就看不懂；鏡頭要讓整個字在畫面裡，片語要放在鏡頭正在看的地方。
 - 畫面上的每個東西都要有意義；飄過去的方塊再好看也是雜訊。
 - 會重疊、會出框的字一定會被看到；與其靠眼睛找，不如寫一支逐格檢查的程式。
-- 紀錄只會被超越，不會自己掉下來——圖表的語意要對。
+- 紀錄只會被超越，不會自己掉下來——圖表的語意要對；用了真實年份，長條的寬度也要跟著真實的間隔。
 
 ## 9. 授權
 

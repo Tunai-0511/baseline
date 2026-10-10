@@ -1,7 +1,8 @@
 # Third-party notices
 
-The music video "Baseline" is © 2026 Tunai, all rights reserved (see `LICENSE`). The components below are
-not the author's own work and stay under their own licenses.
+This repository is © 2026 Tunai under the MIT License (`LICENSE`), except the song itself, its recording and
+lyrics, which are all rights reserved (`LICENSE-SONG.md`). The components below are not the author's own work and
+stay under their own licenses.
 
 ## mexicat/pdoom-video — MIT License
 

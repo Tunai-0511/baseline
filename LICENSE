@@ -1,16 +1,21 @@
-Copyright (c) 2026 Tunai. All rights reserved.
-版權所有 © 2026 Tunai，保留一切權利。
+MIT License
 
-This repository contains the music video "Baseline": its source code, scenes,
-data, lyrics, audio recording and rendered imagery ("the Work"). The Work is
-protected by copyright. No permission is granted to copy, modify, distribute,
-publish, perform, or otherwise use the Work or any part of it, in any medium,
-without the prior written permission of the copyright holder.
+Copyright (c) 2026 Tunai
 
-Third-party components included in this repository remain under their own
-licenses, which are not affected by the notice above. See
-THIRD_PARTY_NOTICES.md. In particular, the portions of the rendering engine
-and the lyric-alignment tools that are adapted from mexicat/pdoom-video are
-available under the MIT License (licenses/pdoom-video-MIT.txt), and the fonts
-in app/public/fonts are licensed under the SIL Open Font License 1.1
-(licenses/fonts-OFL.txt).
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

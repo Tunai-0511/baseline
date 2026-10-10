@@ -1,6 +1,8 @@
 # 影片簡介
 
-上傳用的文字。中文、英文各一份，章節時間可以直接貼進 YouTube（第一個必須是 0:00）。
+影片：https://youtu.be/Qy3_4oXoS6c
+
+上傳用的文字。中文、英文各一份，章節時間可以直接貼進 YouTube。
 
 ---
 
@@ -22,7 +24,7 @@ English: **Baseline — every state of the art becomes a baseline (an AI archite
 
 整部片沒有用剪輯軟體，也沒有手擺一個關鍵影格：它是一個用 TypeScript 寫的算圖程式，給它歌曲裡的任何一個時間點，它就算出那一格。4K、60 fps、14,832 格。
 
-原始碼、分鏡表與製作說明：https://github.com/Tunai-0511/baseline
+原始碼（MIT）、分鏡表與製作說明：https://github.com/Tunai-0511/baseline
 
 ## English description
 
@@ -34,38 +36,31 @@ Everything on screen is real: the filters were actually trained on CIFAR-10; the
 
 No editing software and no hand-placed keyframes: the film is a program written in TypeScript that renders any moment of the song on demand. 4K, 60 fps, 14,832 frames.
 
-Source code, shot list and making-of: https://github.com/Tunai-0511/baseline
+Source code (MIT), shot list and making-of: https://github.com/Tunai-0511/baseline
 
 ---
 
 ## 章節 Chapters
 
+YouTube 的章節每段至少要 10 秒、第一個必須是 0:00，所以七秒長的預副歌併進相鄰段落。
+
 ```
-0:00 The Line — Perceptron, XOR
-0:16 Sigmoid → ReLU
-0:23 Hand-tuned features → Convolution
-0:31 SVM → Deep nets
-0:38 Depth is all you need
-0:45 Chorus — ILSVRC
-0:53 Frozen on the shelf
-1:00 N-gram, RNN, LSTM
-1:15 Seq2seq, Attention, Transformers
-1:30 Memory's all you need
-1:37 Chorus — WMT14
+0:00 Perceptron · XOR
+0:16 Sigmoid → ReLU · Convolution
+0:31 SVM → Deep nets · Depth is all you need
+0:45 Chorus · ILSVRC
+1:00 N-gram · RNN · LSTM
+1:15 Seq2seq · Attention · Transformers
+1:30 Memory's all you need · Chorus · WMT14
 1:45 One attention layer: GONE
-1:59 GAN, Diffusion, RoPE, Norms
-2:13 MoE, INT4, LoRA, In-context
-2:28 Attention's all you need
-2:35 Chorus — LAMBADA
-2:43 BERT → Decoder-only
-2:50 RLHF, DPO, FlashAttention
-3:04 Context window, Needle, Dates
-3:18 Scale is all you need
-3:26 Chorus — Parameters
-3:33 Quadratic attention
-3:40 Footnote
-3:48 The fall
-4:01 One more time
+1:59 GAN · Diffusion · RoPE · Norms
+2:13 MoE · INT4 · LoRA · In-context
+2:28 Attention's all you need · Chorus · LAMBADA
+2:43 BERT → Decoder-only · RLHF · DPO · FlashAttention
+3:04 Context window · Needle · Running late
+3:19 Scale is all you need · Chorus · Parameters
+3:33 Quadratic attention · Footnote
+3:48 The fall · One more time
 ```
 
 ---
@@ -167,7 +162,7 @@ one more time
 - 影像 Visuals：全程式算圖（TypeScript · three.js · Canvas2D · MathJax），與 Claude Code 協作
 - 引擎部分改寫自 mexicat/pdoom-video（MIT）；字型 Archivo、IBM Plex Mono、Cormorant Garamond（SIL OFL 1.1）
 
-© 2026 Tunai. All rights reserved.
+© 2026 Tunai。程式碼採 MIT 授權；歌曲（錄音與歌詞）保留權利。
 
 ## 標籤 Tags
 

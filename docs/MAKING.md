@@ -159,4 +159,4 @@ python3 tools/video/check_splice.py out/Baseline-4K-master.mp4 out/new-master.mp
 
 ## 9. 授權
 
-影片、歌詞、錄音、場景與資料 © 2026 Tunai，保留一切權利（`LICENSE`）。引擎與分析工具的一部分改寫自 [mexicat/pdoom-video](https://github.com/mexicat/pdoom-video)（MIT），字型是 SIL OFL 1.1，詳見 `THIRD_PARTY_NOTICES.md`。
+程式碼、場景、工具、資料與文件 © 2026 Tunai，採 MIT 授權（`LICENSE`）；歌曲本身（錄音與歌詞）保留權利（`LICENSE-SONG.md`）。引擎與分析工具的一部分改寫自 [mexicat/pdoom-video](https://github.com/mexicat/pdoom-video)（MIT），字型是 SIL OFL 1.1，詳見 `THIRD_PARTY_NOTICES.md`。

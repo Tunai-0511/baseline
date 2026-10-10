@@ -90,20 +90,28 @@ src/
 1. 找出時間 t 上的場景（轉場期間是兩個）。
 2. 每個場景的 Rig 給出相機；VScene 先畫公式城市，再畫自己的場景，全部是 Canvas2D 的針孔投影：線段、多邊形、逐字母透視的字、仿射網格貼圖、點雲、公式。鏡面地板是用反射的相機再畫一次到半解析度圖層，模糊後疊在地平線以下。
 3. 2D 圖層上傳成材質，交給 WebGL：轉場混接、全片相機（撞擊、震波折射）、後製。
-4. 動態模糊：同一格在快門區間內取 4、12、36、108 個子畫格（每一層都均勻分布在快門內），直到估計的殘餘誤差小於門檻；靜止畫面很快停下，甩鏡會一直加到拖影連續。成片裡 3% 的格用 12 個、45% 用 36 個、52% 用 108 個子畫格。
+4. 動態模糊：同一格在快門區間內取 4、12、36、108 個子畫格（每一層都均勻分布在快門內），直到估計的殘餘誤差小於門檻；靜止畫面很快停下，甩鏡會一直加到拖影連續。4K 成片的 14,832 格裡，7% 用 12 個、55% 用 36 個、38% 用 108 個子畫格。
 5. 一切都是 t 的純函數：沒有 `Math.random`、沒有 `Date`、沒有上一格的狀態；任何一格都能單獨、平行地重算。
 
 ## 6. 算圖（`app/scripts/render.ts`）
 
 ```bash
 cd app
-bun scripts/render.ts video --scale 2 --fps 60 --samples auto --min-samples 4 --max-samples 108 --crf 17 --out ../out/Baseline-4K.mp4
+bun scripts/render.ts video --scale 2 --fps 60 --samples auto --min-samples 4 --max-samples 108 --crf 17 --out ../out/Baseline-4K-master.mp4
 ```
 
 - 開兩個 headless Chrome（Playwright）各自算一段段的畫格，經 WebSocket 傳回 bun 的伺服器；伺服器依序重排（暫存在記憶體與磁碟），寫進同一個 ffmpeg。
 - ffmpeg：libx264（slow、crf 17、`-tune grain`、aq-mode 3），像素以 BT.709 標記；音訊 AAC 320 kbps。
 - `--scale 2` 是真的 3840 × 2160：版面一樣，線條、字、點陣都用兩倍解析度重算，不是放大。
-- 一台 Apple Silicon 的 Mac 上，1080p60 約 70 分鐘，4K60 約 3 小時以上。
+- 一台 Apple Silicon 的 Mac 上，1080p60 約 70 分鐘；4K60 約 2 小時 4 分（7,467 秒，每秒約 2 格）。
+- 這樣算出來的母帶很大（4K、crf 17 加上顆粒，約 17 GB、平均 550 Mbps），所以再壓一次給上傳用，限制位元率在 85 Mbps：
+
+```bash
+ffmpeg -i out/Baseline-4K-master.mp4 -map 0:v:0 -map 0:a:0 -c:v libx264 -preset slow -crf 17 -maxrate 85M -bufsize 170M \
+  -pix_fmt yuv420p -x264-params aq-mode=3 \
+  -vf "setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv" \
+  -c:a copy -movflags +faststart out/Baseline-4K.mp4
+```
 
 ## 7. 品質檢查
 

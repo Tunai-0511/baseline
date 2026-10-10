@@ -36,19 +36,34 @@ export default class Sig extends VScene {
     const tClip = w(this.L3, /clipped/).start, tAnd = w(this.L3, /^and$/).start, tHero = w(this.L3, /hero/).start, end = this.ctx.end;
     const gx = (t: number) => this.pulseX(t);
     this.rig = new Rig([
-      { t0, name: 'curve', key: (t) => { const k = ease.inOutCubic(clamp((t - t0) / (tSq - t0))); return K([0, lerp(0.3, 0.8, k), lerp(12.5, 13.5, k)], [0, 0.4, 0], 40); } },
+      { t0, name: 'curve', key: (t) => { const k = ease.inOutCubic(clamp((t - t0) / (tSq - t0))); return K([0, lerp(1.0, 1.3, k), lerp(15.5, 16.2, k)], [0, 1.2, 0], 40); } },
       { t0: tSq, snap: 0.35, name: 'bench', key: (t) => { const k = ease.outCubic(clamp((t - tSq) / (tGrad - tSq))); return K([lerp(-1, 0, k), lerp(2.2, 1.8, k), lerp(19, 24, k)], [0, 0.9, 0], 40); } },
-      { t0: tGrad - 0.12, snap: 0.45, name: 'chain', key: (t) => { const x = gx(t); return K([x + 5.2, CY + 3.6, 11.0], [x - 1.0, CY + 0.5, 0], 40, -0.03); } },
-      { t0: tZero, snap: 0.3, name: 'zero', key: (t) => { const k = ease.outCubic(clamp((t - tZero) / 0.8)); return K([UX(0) + lerp(5.0, 3.6, k), CY + lerp(3.6, 3.2, k), lerp(12.5, 11.0, k)], [UX(0) - 0.6, CY + 2.0, 0], 40, 0.02); } },
-      { t0: this.tRelu, snap: 0.4, name: 'relu', key: (t) => { const k = ease.inOutCubic(clamp((t - this.tRelu) / (tClip - this.tRelu))); return K([0, lerp(0.8, 1.2, k), lerp(12.0, 13.5, k)], [0, 0.6, 0], 40); } },
-      { t0: tClip, snap: 0.3, name: 'clip', key: (t) => { const k = ease.outCubic(clamp((t - tClip) / (tAnd - tClip))); return K([lerp(5.0, 6.8, k), lerp(2.2, 1.6, k), lerp(17.0, 18.5, k)], [lerp(4.2, 4.8, k), 1.0, 0], 40, -0.02); } },
-      { t0: tAnd - 0.1, snap: 0.4, name: 'hero-run', key: (t) => { const x = gx(t); return K([x + 5.0, CY + 3.4, 10.5], [x - 1.2, CY + 0.5, 0], 40, 0.03); } },
+      // (a steady dolly along the chain, slower than the pulse — locked to the pulse, the words written along its
+      // run slid off the frame within a few frames)
+      { t0: tGrad - 0.12, snap: 0.45, name: 'chain', key: (t) => { const x = this.chainCamX(t); return K([x + 5.2, CY + 3.6, 13.5], [x - 1.0, CY + 0.5, 0], 40, -0.03); } },
+      // (from DOWN: the shot holds DOWN TO over the place ZERO lands)
+      { t0: this.L2.find((x) => /^down$/i.test(x.w))!.start - 0.04, snap: 0.3, name: 'zero', key: (t) => { const k = ease.outCubic(clamp((t - tZero) / 0.8)); return K([UX(0) + lerp(5.0, 3.6, k), CY + lerp(3.6, 3.2, k), lerp(12.5, 11.0, k)], [UX(0) - 0.6, CY + 2.0, 0], 40, 0.02); } },
+      { t0: this.tRelu, snap: 0.25, name: 'relu', key: (t) => { const k = ease.inOutCubic(clamp((t - this.tRelu) / (tClip - this.tRelu))); return K([0, lerp(1.2, 1.4, k), lerp(16.5, 17.2, k)], [0, 1.4, 0], 40); } },
+      { t0: tClip, snap: 0.3, name: 'clip', key: (t) => { const k = ease.outCubic(clamp((t - tClip) / (tAnd - tClip))); return K([lerp(2.4, 3.6, k), lerp(1.8, 1.4, k), lerp(18.0, 19.0, k)], [lerp(0.8, 1.4, k), 0.6, 0], 40, -0.02); } },
+      { t0: tAnd - 0.1, snap: 0.4, name: 'hero-run', key: (t) => { const x = this.reluCamX(t); return K([x + 5.0, CY + 3.4, 13.0], [x - 1.2, CY + 0.5, 0], 40, 0.03); } },
       { t0: tHero, snap: 0.25, name: 'hero', key: (t) => { const k = ease.outExpo(clamp((t - tHero) / Math.max(0.3, end - tHero))); return K([UX(0) + lerp(4.0, 2.4, k), CY + lerp(2.8, 3.4, k), lerp(9.5, 12.5, k)], [UX(0) - 0.8, CY + 1.4, 0], lerp(40, 46, k), -0.02); } },
     ], [
       { t: tSq, amp: 0.8 }, { t: tZero, amp: 0.7 }, { t: this.tRelu, amp: 0.8 }, { t: tClip, amp: 1.2, dir: 'h' }, { t: tHero, amp: 1.6 },
     ], 0.8, 21);
   }
 
+  /** the chain dolly's x: right to left at an even pace while the gradient runs (σ: GRADIENTS → ZERO) */
+  chainCamX(t: number) {
+    const w = (L: Word[], re: RegExp) => L.find((x) => re.test(x.w))!;
+    const tGrad = w(this.L2, /gradients/).start, tZero = w(this.L2, /zero/).start;
+    return lerp(8.5, -5.5, clamp((t - tGrad) / (tZero - tGrad)));
+  }
+  /** the same for the ReLU run (AND CAME IN AS THE → HERO) */
+  reluCamX(t: number) {
+    const w = (L: Word[], re: RegExp) => L.find((x) => re.test(x.w))!;
+    const tAnd = w(this.L3, /^and$/).start, tHero = w(this.L3, /hero/).start;
+    return lerp(8.5, -6.0, clamp((t - tAnd) / (tHero - tAnd)));
+  }
   /** gradient pulse x along the chain (it runs from the loss on the right to unit 0 on the left) */
   pulseX(t: number) {
     const w = (L: Word[], re: RegExp) => L.find((x) => re.test(x.w))!;
@@ -182,10 +197,10 @@ export default class Sig extends VScene {
       const k = ease.outBack(clamp((t - L2[0]!.start) / 0.3), 1.6);
       // (steps left as SQUASHED lands over CH2, so the two words don't run into each other)
       const sx = -1.6 * ease.inOutCubic(clamp((t - (tSq.start - 0.12)) / 0.3));
-      this.text3(c, 'SIGMOID', wall, sx, 5.85, { size: 1.6 * k, fam: WIDE, color: t < L2[0]!.end ? U.mag : BONE, align: 'center', glow: 14, glowColor: U.ink });
+      this.text3(c, 'SIGMOID', wall, sx, 5.6, { size: 1.6 * k, fam: WIDE, color: t < L2[0]!.end ? U.mag : BONE, align: 'center', glow: 14, glowColor: U.ink });
     } else {
       const k = ease.outBack(clamp((t - tRelu) / 0.25), 2.2);
-      this.text3(c, 'RELU', wall, 0, 5.85, { size: 2.4 * k, fam: WIDE, color: AMB, align: 'center', glow: 16, glowColor: U.ink });
+      this.text3(c, 'RELU', wall, 0, 5.5, { size: 2.2 * k, fam: WIDE, color: AMB, align: 'center', glow: 16, glowColor: U.ink });
     }
     // SQUASHED over CH2, literally squashed
     if (!isRelu && t > tSq.start - 0.03) {
@@ -199,12 +214,12 @@ export default class Sig extends VScene {
     // CLIPPED THE / NEGATIVES on CH1/CH2 tops (ReLU)
     if (isRelu && t > tClip.start - 0.03 && t < tAnd.start + 0.3) {
       c.save(); c.globalAlpha *= 1 - clamp((t - tAnd.start + 0.18) / 0.14);
-      this.say3(c, [tClip, w(L3, /^the$/)], t, wall, 4.3 - 3.6, -6.75, { size: 1.3, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'right', upper: true, rise: 0.3 });
+      this.say3(c, [tClip, w(L3, /^the$/)], t, wall, 4.3 - 3.6, -5.6, { size: 1.3, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'right', upper: true, rise: 0.3 });
       if (t > tNeg.start - 0.03) {
         const p = clamp((t - tNeg.start) / (tNeg.end - tNeg.start));
-        this.text3(c, 'NEGATIVES', wall, 4.3 - 3.2, -6.75, { size: 1.3, fam: WIDE, align: 'left', each: (i, _ch, n) => ((i + 0.5) / n <= p * 1.5 + 0.05 ? { color: t < tNeg.end ? U.mag : BONE } : null) });
+        this.text3(c, 'NEGATIVES', wall, 4.3 - 3.2, -5.6, { size: 1.3, fam: WIDE, align: 'left', each: (i, _ch, n) => ((i + 0.5) / n <= p * 1.5 + 0.05 ? { color: t < tNeg.end ? U.mag : BONE } : null) });
         // the clip: the lower 45 % of NEGATIVES is cut away by the blade line
-        this.glowSeg(c, at(wall, 0.6, -6.55 + 0.18, 0.06), at(wall, 12.6, -6.55 + 0.18, 0.06), RED, 2, 8, clamp((t - tNeg.start) / 0.2));
+        this.glowSeg(c, at(wall, 0.6, -5.4 + 0.18, 0.06), at(wall, 12.6, -5.4 + 0.18, 0.06), RED, 2, 8, clamp((t - tNeg.start) / 0.2));
       }
       c.restore();
     }
@@ -275,9 +290,11 @@ export default class Sig extends VScene {
     };
     if (!isRelu) {
       const fw = w(L2, /fading/), dw = w(L2, /down/);
-      place([w(L2, /gradients/)], -1.0, CY + 2.7, 1.2, AMB, WIDE, fw.start);
+      // (each word at the middle of the frame as it is sung — the dolly carries it right, slowly)
+      const atCam = (wd: Word, dx: number) => this.chainCamX(wd.start) - 1.0 + dx - this.pulseX(wd.start);
+      place([w(L2, /gradients/)], atCam(w(L2, /gradients/), -1.5), CY + 2.7, 1.2, AMB, WIDE, fw.start);
       if (t > fw.start - 0.02 && gone(dw.start) > 0) {
-        const x = this.pulseX(fw.start) - 1.2;
+        const x = this.chainCamX(fw.start) - 1.0 - 2.4;
         const p = clamp((t - fw.start) / (fw.end - fw.start));
         c.save(); c.globalAlpha *= gone(dw.start);
         this.text3(c, 'FADING', P, x, CY + 2.7, { size: 1.6, fam: WIDE, align: 'center', each: (i, _ch, n) => ((i + 0.5) / n <= p * 1.6 + 0.05 ? { color: BONE, a: 1 - 0.13 * i } : null) });
@@ -287,16 +304,17 @@ export default class Sig extends VScene {
       // (ZERO sits clear of the × ¼ row under it; DOWN TO is sung low enough to be in the close shot, and ZERO pushes it
       // up as it lands — set at its final height, it was over the top of the frame while it was sung)
       const zk = t > tZero.start - 0.03 ? ease.outBack(clamp((t - tZero.start) / 0.25), 1.8) : 0;
-      place([w(L2, /down/), w(L2, /^to$/)], -1.6, Math.max(CY + 3.6, CY + 2.5 + 0.685 * 2.6 * zk + 0.5), 0.9, AMB);
+      place([w(L2, /down/), w(L2, /^to$/)], UX(0) + 0.4 - this.pulseX(w(L2, /down/).start), Math.max(CY + 3.6, CY + 2.5 + 0.685 * 2.6 * zk + 0.5), 0.9, AMB);
       if (t > tZero.start - 0.03) {
         const k = zk;
         this.text3(c, 'ZERO', P, UX(0) - 0.2, CY + 2.5, { size: 2.6 * k, fam: WIDE, color: RED, align: 'center', glow: 18, glowColor: U.ink, each: (i) => ({ a: 1 - 0.18 * i * clamp((t - tZero.start) / (tZero.end - tZero.start)) }) });
       }
     } else {
       const wi = (re: RegExp) => w(L3, re);
-      place([wi(/^and$/), wi(/came/)], -2.6, CY + 2.6, 1.1, AMB, HEAVY, wi(/^in$/).start);
-      place([wi(/^in$/)], -1.0, CY + 2.6, 1.1, AMB, HEAVY, wi(/^as$/).start);
-      place([wi(/^as$/), L3[L3.length - 2]!], -2.2, CY + 2.6, 1.1, AMB, HEAVY, tHero.start);
+      const atRun = (wd: Word, dx: number) => this.reluCamX(wd.start) - 1.2 + dx - this.pulseX(wd.start);
+      place([wi(/^and$/), wi(/came/)], atRun(wi(/^and$/), -2.6), CY + 2.6, 1.1, AMB, HEAVY, wi(/^in$/).start);
+      place([wi(/^in$/)], atRun(wi(/^in$/), -1.0), CY + 2.6, 1.1, AMB, HEAVY, wi(/^as$/).start);
+      place([wi(/^as$/), L3[L3.length - 2]!], atRun(wi(/^as$/), -2.0), CY + 2.6, 1.1, AMB, HEAVY, tHero.start);
       if (t > tHero.start - 0.03) {
         const k = ease.outBack(clamp((t - tHero.start) / 0.22), 2.4);
         const q0 = this.pr([UX(0), CY + 1.5, 0]);

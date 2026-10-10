@@ -58,12 +58,13 @@ export default class Feat extends VScene {
       this.carve.push({ ...cl, t: tk });
     });
     this.rig = new Rig([
-      { t0, name: 'head', key: (t) => { const k = ease.inOutQuad(clamp((t - t0) / (tSift - t0))); return K([lerp(2.4, 1.6, k), lerp(5.6, 5.2, k), lerp(9.6, 10.4, k)], [0, lerp(5.0, 4.6, k), 0], 42, 0.03); } },
+      // (far enough back and aimed high enough that HAND-TUNED on the plate's top frame is in the shot)
+      { t0, name: 'head', key: (t) => { const k = ease.inOutQuad(clamp((t - t0) / (tSift - t0))); return K([lerp(2.4, 1.6, k), lerp(6.2, 5.8, k), lerp(11.2, 11.8, k)], [0, lerp(5.7, 5.3, k), 0], 42, 0.03); } },
       { t0: tSift, snap: 0.3, name: 'sift', key: (t) => { const k = ease.outCubic(clamp((t - tSift) / (tHog - tSift))); return K([lerp(-3.0, -4.2, k), lerp(4.6, 4.0, k), lerp(11.5, 12.5, k)], [lerp(-4.8, -5.4, k), 3.6, 0], 42, -0.02); } },
       { t0: tHog, snap: 0.35, name: 'plate', key: (t) => { const k = ease.inOutQuad(clamp((t - tHog) / (tConv - tHog))); return K([lerp(1.0, -0.6, k), lerp(0.6, -0.2, k), lerp(26.0, 23.5, k)], [lerp(0.4, 0.0, k), -0.5, 0], 42); } },
       { t0: tConv - 0.05, snap: 0.45, name: 'conv', key: (t) => { const k = ease.inOutCubic(clamp((t - tConv) / (tLearn - tConv))); return K([lerp(10.5, 9.0, k), lerp(3.2, 2.4, k), lerp(14.5, 15.5, k)], [lerp(2.0, 3.2, k), 0.4, 1.0], 44, -0.02); } },
       { t0: tLearn - 0.05, snap: 0.5, name: 'wall', key: (t) => { const k = ease.inOutQuad(clamp((t - tLearn) / (tNobody - tLearn))); return K([lerp(16.0, 19.0, k), lerp(1.8, 1.2, k), lerp(14.0, 13.0, k)], [lerp(18.4, 20.4, k), 0.6, -1], 44, -0.02); } },
-      { t0: tNobody, snap: 0.3, name: 'nobody', key: (t) => { const k = ease.outCubic(clamp((t - tNobody) / (end - tNobody))); return K([lerp(20.6, 20.8, k), lerp(0.8, 0.4, k), lerp(11.5, 9.8, k)], [20.8, lerp(0.2, -0.2, k), -1], 46); } },
+      { t0: tNobody, snap: 0.3, name: 'nobody', key: (t) => { const k = ease.outCubic(clamp((t - tNobody) / (end - tNobody))); return K([lerp(20.6, 20.8, k), lerp(0.8, 0.5, k), lerp(12.6, 11.6, k)], [20.8, lerp(0.2, -0.1, k), -1], 46); } },
     ], [{ t: tSift, amp: 0.6 }, { t: tHog, amp: 0.8 }, { t: tConv, amp: 1.0, dir: 'h' }, { t: tNobody, amp: 0.9 }], 0.8, 31);
     void tEvery;
   }
@@ -208,10 +209,11 @@ export default class Feat extends VScene {
       const k = ease.outBack(clamp((t - tSift.start) / 0.22), 2);
       this.text3(c, 'SIFT', wallPl(-0.4), -9.3, 6.2, { size: 1.9 * k, fam: WIDE, color: t < tSift.end ? U.mag : BONE, align: 'center', alpha: 1 - 0.6 * cool });
     }
+    const andW = w(L4, /^and$/);
+    // (just after SIFT, where the camera is when it is sung — at the far end, by HOG, it was out of the shot)
+    if (t > andW.start - 0.03) this.text3(c, 'AND', wallPl(-0.4), -5.4, 6.2, { size: 0.8, fam: HEAVY, color: t < andW.end ? U.mag : hexA(BONE, 0.85), alpha: 1 - 0.6 * cool });
     if (t > tHogW.start - 0.03) {
       const k = ease.outBack(clamp((t - tHogW.start) / 0.22), 2);
-      const andW = w(L4, /^and$/);
-      this.text3(c, 'AND', wallPl(-0.4), 5.5, 6.2, { size: 0.75, fam: HEAVY, color: hexA(BONE, t >= andW.start ? 0.8 : 0), alpha: 1 - 0.6 * cool, align: 'right' });
       this.text3(c, 'HOG', wallPl(-0.4), 8.9, 6.2, { size: 1.9 * k, fam: WIDE, color: t < tHogW.end ? U.mag : BONE, align: 'center', alpha: 1 - 0.6 * cool });
     }
     // EVERY FEATURE / CARVED BY HAND on the plaque under the plate
@@ -238,10 +240,10 @@ export default class Feat extends VScene {
     }
     if (t > tNobody.start - 0.03) {
       const k = ease.outBack(clamp((t - tNobody.start) / 0.25), 1.8);
-      this.text3(c, 'NOBODY', WT, mid, WALL.y + WALL.h / 2 - 0.6, { size: 2.6 * k, fam: WIDE, color: t < tNobody.end ? U.mag : BONE, align: 'center', glow: 30, glowColor: '#000000' });
+      this.text3(c, 'NOBODY', WT, mid, WALL.y + WALL.h / 2 - 0.6, { size: 2.15 * k, fam: WIDE, color: t < tNobody.end ? U.mag : BONE, align: 'center', glow: 30, glowColor: '#000000' });
       if (t > tPlanned.start - 0.03) {
         const k2 = ease.outBack(clamp((t - tPlanned.start) / 0.25), 1.8);
-        this.text3(c, 'PLANNED', WT, mid, WALL.y + WALL.h / 2 - 2.8, { size: 2.6 * k2, fam: WIDE, color: t < tPlanned.end ? U.mag : '#FFFFFF', align: 'center', glow: 30, glowColor: '#000000' });
+        this.text3(c, 'PLANNED', WT, mid, WALL.y + WALL.h / 2 - 2.55, { size: 2.15 * k2, fam: WIDE, color: t < tPlanned.end ? U.mag : '#FFFFFF', align: 'center', glow: 30, glowColor: '#000000' });
       }
     }
     frameMarks(c, U.ash, { tl: cool < 0.5 ? 'BASELINE · PLATE 03 · FEATURES BY HAND' : 'BASELINE · PLATE 03 · FEATURES LEARNED', tr: cool < 0.5 ? 'HOG 3,780-D · SIFT 128-D' : 'conv1 · 96 × 11 × 11 × 3', bl: '2004 — 2012', br: tc(t), alpha: 0.6 });
@@ -362,6 +364,9 @@ export default class Feat extends VScene {
     if (k > 0.02) this.img3(c, this.seq, 156, 104 * 45, WP, WALL.x, WALL.y, WALL.w, WALL.h, { sy: 104 * f1, sh: 104, sw: 156, n: 6, smooth: false, alpha: a * k });
     // the film's one accent: the learned filters in magenta duotone (their luminance kept)
     c.save(); c.globalCompositeOperation = 'color'; this.rect3(c, WP, WALL.x, WALL.y, WALL.w, WALL.h, { fill: hexA('#FF2E7E', 0.9 * a) }); c.restore();
+    // (dimmed under NOBODY PLANNED: magenta type on the magenta wall did not read)
+    const dim = 0.55 * clamp((t - (tNobody - 0.3)) / 0.3);
+    if (dim > 0) this.rect3(c, WP, WALL.x, WALL.y, WALL.w, WALL.h, { fill: hexA('#0B0A0D', dim * a) });
     const fi = Math.round(fr);
     const acc = this.acc[fi] ?? 0, st = this.step[fi] ?? 0, ep = this.epoch[fi] ?? 0;
     this.text3(c, `STEP ${st.toLocaleString('en-US')}   EPOCH ${ep.toFixed(ep < 1 ? 2 : 0)}   TEST ACC ${(acc * 100).toFixed(1)}%`, WP, WALL.x, WALL.y - 0.5 - 0.42, { size: 0.36, fam: MONOB, color: hexA(ICE, 0.85 * a) });

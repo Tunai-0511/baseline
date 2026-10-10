@@ -51,7 +51,7 @@ export default class Eff2 extends VScene {
       { t0: t38 - 0.05, snap: 0.45, name: 'W', key: (t) => { const k = ease.inOutQuad(clamp((t - t38) / (tLora - t38))); return K([LX + lerp(-4, -2, k), lerp(6.5, 6.2, k), lerp(19, 17, k)], [LX - 1, 6.2, 0], 52, -0.03); } },
       { t0: tLora - 0.05, snap: 0.3, name: 'patch', key: (t) => { const k = ease.inOutQuad(clamp((t - tLora) / (t39 - tLora))); return K([LX + lerp(2, 6, k), lerp(6.4, 6.8, k), lerp(17, 15, k)], [LX + lerp(1, 3.5, k), 6.2, 0], 52, 0.03); } },
       { t0: t39 - 0.05, snap: 0.45, name: 'context', key: (t) => { const k = ease.inOutQuad(clamp((t - t39) / (tNo - t39))); return K([CX + lerp(-9, -5, k), lerp(3.4, 4.2, k), lerp(10, 12, k)], [CX + lerp(-2, 1, k), 2.6, -2], 54, -0.05); } },
-      { t0: tNo - 0.05, snap: 0.3, name: 'grad', key: (t) => { const k = ease.inOutQuad(clamp((t - tNo) / (e - tNo))); const kd = ease.inCubic(clamp((t - (e - 0.5)) / 0.5)); return K([CX + 7, lerp(6, 5, k), lerp(13, 11, k)], [CX + 7, lerp(4.5, 2.5, k) - 7 * kd, -1 + 2 * kd], 52, 0.02); } },
+      { t0: tNo - 0.05, snap: 0.3, name: 'grad', key: (t) => { const k = ease.inOutQuad(clamp((t - tNo) / (e - tNo))); const kd = ease.inCubic(clamp((t - (e - 0.3)) / 0.3)); /* (a short dive: TO CATCH is sung until it starts) */ return K([CX + 7, lerp(6, 5, k), lerp(13, 11, k)], [CX + 7, lerp(4.5, 3.6, k) - 7 * kd, -1 + 2 * kd], 52, 0.02); } },
     ], [{ t: s, amp: 0.6 }, { t: tMix, amp: 1.0 }, { t: t37, amp: 0.6 }, ...this.kicks.map((k) => ({ t: k, amp: 1.4 })), { t: tThr, amp: 0.7 }, { t: t38, amp: 0.6 }, { t: tLora, amp: 1.0 }, { t: t39, amp: 0.6 }, { t: tNo, amp: 0.6 }], 0.8, 123);
   }
 
@@ -110,8 +110,8 @@ export default class Eff2 extends VScene {
         const g = on ? this.routes[cur]!.gates[awake.indexOf(e)] ?? 0.5 : 0;
         this.box3(c, [x - 1.1, 0.2, z - 0.6], [x + 1.1, 9.4, z + 0.6], hexA(on ? MAG : GRAPH, a), on ? 2.4 : 1.2, { fill: hexA(on ? U.magDark : '#121016', 0.5 * a) });
         const P = this.readable(wallPl(z + 0.7, [x, 0, z + 0.7]));
-        // (on the tower's face, under its top: over the top the tags stood in the lyric's line on the back wall)
-        this.text3(c, `E${e}`, P, 0, 8.55, { size: 0.9, fam: MONOB, color: hexA(on ? MAG : ASH, a), align: 'center', glow: on ? 14 : 0, glowColor: MAG });
+        // (at the tower's foot: at its top the tags stood in the lyric's line on the back wall)
+        this.text3(c, `E${e}`, P, 0, 0.45, { size: 0.9, fam: MONOB, color: hexA(on ? MAG : ASH, a), align: 'center', glow: on ? 14 : 0, glowColor: MAG });
         this.text3(c, on ? `g = ${g.toFixed(2)}` : 'z z z', P, 0, -0.6, { size: 0.55, fam: MONOB, color: hexA(on ? BONE : GRAPH, a), align: 'center' });
       }
       // the router: a ring of light in front; the current token's two beams
@@ -127,7 +127,7 @@ export default class Eff2 extends VScene {
     }
     // the lyric, big, behind it all
     const back = wallPl(-9, [0, 0, -9]);
-    this.chunk3(c, L36, t, back, 0, 10.8, { size: 2.4, maxW: 30, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 2, 4, 6] });
+    this.chunk3(c, L36, t, back, 0, 9.3, { size: 2.4, maxW: 30, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 2, 4, 6] });
     void tOnly;
   }
 
@@ -184,7 +184,11 @@ export default class Eff2 extends VScene {
     this.text3(c, 'TOKENS / s', Gc, 0, -0.9, { size: 0.55, fam: MONOB, color: BONE, align: 'center' });
     // the lyric
     // (higher: from the bits shot the line on the far wall came down onto the field labels over the wall)
-    this.chunk3(c, L37, t, wallPl(-6, [QX, 0, -6]), 0, 14.7, { size: 2.2, maxW: 30, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 2, 5, 7] });
+    // (32 BITS / DOWN TO 4 on the far wall over the bits; FOR THE / THROUGHPUT'S SAKE over the gauge, where the camera
+    // is when they are sung — on the far wall they were out of the shot)
+    const iFor = L37.findIndex((x) => /^for$/i.test(x.w));
+    this.chunk3(c, L37.slice(0, iFor), t, wallPl(-6, [QX, 0, -6]), 0, 14.7, { size: 2.2, maxW: 30, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 2], hold: 0.25 });
+    this.chunk3(c, L37.slice(iFor), t, wallPl(-1.2, [QX + 13, 0, -1.2]), 0, 7.0, { size: 1.45, maxW: 15, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 2] });
   }
 
   // ------------------------------------------------------------------ LoRA
@@ -228,7 +232,9 @@ export default class Eff2 extends VScene {
     const bx = CX + 7;
     this.box3(c, [bx - 2.2, 0, -3.2], [bx + 2.2, 5.2, -0.8], hexA(ICE, 0.9), 1.6, { fill: '#1A1C22' });
     for (let i = 0; i < 7; i++) this.seg(c, [bx - 2.2, 0.6 + i * 0.68, -0.79], [bx + 2.2, 0.6 + i * 0.68, -0.79], hexA(ICE, 0.45), 1);
-    this.text3(c, 'θ  ·  FROZEN', wallPl(-0.78, [bx, 0, -0.78]), 0, 5.7, { size: 0.65, fam: MONOB, color: ICE, align: 'center' });
+    // (gone as TO CATCH comes down over it)
+    const tToC = L39[L39.length - 2]!.start, fza = 1 - clamp((t - (tToC - 0.1)) / 0.2);
+    if (fza > 0) this.text3(c, 'θ  ·  FROZEN', wallPl(-0.78, [bx, 0, -0.78]), 0, 5.7, { size: 0.65, fam: MONOB, color: ICE, align: 'center', alpha: fza });
     // the context: a long ribbon of tokens running away along the floor toward the frozen block
     const rows: [string, string][] = [['STATE OF THE ART', 'BASELINE'], ['TOP OF THE LEADERBOARD', 'BASELINE'], ['ALL YOU NEED', 'BASELINE'], ['ATTENTION', '?']];
     // (all four rows in front of the block — the first used to run under it — and the answers in a column clear of
@@ -249,10 +255,16 @@ export default class Eff2 extends VScene {
       const dt = t - (tNo.start - 0.15);
       // (beside the block, not through the lyric; NOT COMPUTED on the block's face, clear of the context ribbon)
       const y = 9.5 - 4.5 * dt * dt - 1.5 * dt;
-      const P = wallPl(0.6, [bx + 5.0, 0, 0.6]);
+      const P = wallPl(0.6, [bx + 7.2, 0, 0.6]);
       this.text3(c, '∇θ L', P, 0, y, { size: 2.2, fam: HEAVY, color: MAG, align: 'center', mid: true, glow: 20, glowColor: U.ink, alpha: clamp(1 - (dt - 1.4) / 0.4) });
       if (y < 5.2) this.text3(c, 'NOT COMPUTED', wallPl(-0.78, [bx, 0, -0.78]), 0, 2.6, { size: 0.6, fam: MONOB, color: BONE, align: 'center', alpha: clamp((5.2 - y) / 2) });
     }
-    this.chunk3(c, L39, t, wallPl(-7, [CX, 0, -7]), 0, 7.4, { size: 2.2, maxW: 26, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 4, 6, 8] });
+    // (THEN JUST PROMPT IT / IN CONTEXT on the far wall; NO GRADIENT / TO CATCH over the frozen block, where the camera
+    // is when they are sung)
+    const iNo = L39.findIndex((x) => /^no$/i.test(x.w));
+    this.chunk3(c, L39.slice(0, iNo), t, wallPl(-7, [CX, 0, -7]), 0.8, 7.4, { size: 1.7, maxW: 21, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 4], hold: 0.25 });
+    // (and down with the camera as it dives after the gradient: CATCH is held through the fall)
+    // (over the frozen block, above θ · FROZEN: where the camera looks as it is sung)
+    this.chunk3(c, L39.slice(iNo), t, wallPl(-0.4, [CX + 7, 0, -0.4]), 0, Math.min(7.3, this.key.tg[1] + 3.2), { size: 1.35, maxW: 12, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 2] });
   }
 }

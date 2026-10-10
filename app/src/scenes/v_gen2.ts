@@ -75,11 +75,11 @@ export default class Gen2 extends VScene {
       // the sinusoid wall
       { t0: t34 - 0.05, snap: 0.45, name: 'wall', key: (t) => { const k = ease.inOutQuad(clamp((t - t34) / (tGave - t34))); return K([RX + lerp(-3, 0, k), lerp(5.5, 5.2, k), lerp(26, 22, k)], [RX, 5.2, 0], 50, -0.02); } },
       // RoPE: into the tunnel, rolling with it
-      { t0: tGave - 0.05, snap: 0.3, name: 'tunnel', key: (t) => { const k = ease.inOutQuad(clamp((t - tGave) / (t35 - tGave + 0.1))); const z = lerp(10, -36, k); return K([RX, 5, z], [RX, 5, z - 20], 62, k * 1.6); } },
+      { t0: tGave - 0.05, snap: 0.3, name: 'tunnel', key: (t) => { const k = ease.inOutQuad(clamp((t - tGave) / (t35 - tGave + 0.1))); const z = lerp(12, -18, k); return K([RX, 5, z], [RX, 5, z - 20], 62, k * 0.35); } },
       // norms: the columns
       { t0: t35 - 0.05, snap: 0.45, name: 'columns', key: (t) => { const k = ease.inOutQuad(clamp((t - t35) / (tRelu - t35))); return K([NX + lerp(-5, -1.5, k), lerp(3.6, 4.6, k), lerp(15, 13.5, k)], [NX + lerp(-1, 0, k), 2.4, 0], 52, -0.03); } },
       // the activation: along the tube
-      { t0: tRelu - 0.05, snap: 0.3, name: 'curve', key: (t) => { const k = ease.inOutQuad(clamp((t - tRelu) / (e - tRelu))); return K([NX + lerp(-9, 4, k), lerp(2.2, 4.5, k), lerp(9, 12, k)], [NX + lerp(-3, 3, k), lerp(1.2, 3.5, k), 0], 54, 0.03); } },
+      { t0: tRelu - 0.05, snap: 0.3, name: 'curve', key: (t) => { const k = ease.inOutQuad(clamp((t - tRelu) / (e - tRelu))); return K([NX + lerp(-9, 4, k), lerp(3.0, 4.6, k), lerp(11, 13, k)], [NX + lerp(-3, 3, k), lerp(2.8, 3.8, k), 0], 54, 0.03); } },
     ], [{ t: s, amp: 0.6 }, { t: tCol, amp: 1.6 }, { t: t33, amp: 0.6 }, { t: tThou, amp: 0.5 }, { t: t34, amp: 0.6 }, { t: tGave, amp: 0.7 }, { t: t35, amp: 0.6 }, { t: tRelu, amp: 0.6 }], 0.8, 113);
   }
 
@@ -194,12 +194,13 @@ export default class Gen2 extends VScene {
       const dwj = this.dw[j], w = L33[j];
       if (!dwj || !w) continue;
       const next = L33[j + 1];
-      if (t < w.start - 0.35) continue;
-      if (next && j < 5 && t > next.start + 0.6) continue;
-      // (the words are sung fast: each is clean by the middle of its own syllables)
-      const k = clamp((t - (w.start - 0.3)) / Math.max(0.35, Math.min(0.6, (w.end - w.start) * 0.6 + 0.3)));
+      if (t < w.start - 0.2) continue;
+      if (next && t > next.start + 0.35) continue; // (the last one, A, clears as THOUSAND comes down the corridor)
+      // (the words are sung fast: each is clean by the middle of its own syllables; it forms only just before it is
+      // sung and the one before clears quickly, so two words never sit on each other for long)
+      const k = clamp((t - (w.start - 0.15)) / Math.max(0.25, Math.min(0.5, (w.end - w.start) * 0.6 + 0.15)));
       const fr = Math.min(63, Math.floor(ease.inOutQuad(k) * 63));
-      const away = next && j < 5 ? ease.inCubic(clamp((t - next.start + 0.05) / 0.5)) : 0;
+      const away = next ? ease.inCubic(clamp((t - next.start + 0.15) / 0.25)) : 0;
       const N = dwj.n, base = fr * N * 2;
       const pts = this.buf.length >= N * 3 ? this.buf : (this.buf = new Float32Array(N * 3));
       const clean = fr / 63, depth = (1 - clean) * 9;
@@ -211,6 +212,13 @@ export default class Gen2 extends VScene {
       }
       this.points(c, pts, N, mixHex(ASH, '#FFFFFF', clean), 7 + 5 * clean, 1 - away);
       tAll = Math.min(tAll, dwj.t[fr] ?? 0);
+      // (QA: the word is the particles, legible once mostly assembled)
+      if (clean > 0.55 && away < 0.2) {
+        const nL = Math.max(1, w.w.replace(/[^A-Za-z]/g, '').length), ww = dwj.width * cap;
+        const quads: V3[][] = [];
+        for (let q = 0; q < nL; q++) { const xa = x0 + (ww * q) / nL, xb = x0 + (ww * (q + 1)) / nL; quads.push([at(P, xa, 3.2), at(P, xb, 3.2), at(P, xb, 3.2 + cap * 0.75), at(P, xa, 3.2 + cap * 0.75)]); }
+        this.qaWord(w.w, quads, 1 - away);
+      }
     }
     // the step counter, huge, under the word
     const cnt = t < L33[0]!.start ? 1000 : t < tThou.start ? Math.round(tAll) : Math.round(lerp(1000, 0, clamp((t - tThou.start) / (tSteps.end - tThou.start))));
@@ -233,17 +241,15 @@ export default class Gen2 extends VScene {
         this.points(c, pts, N, mixHex(ASH, '#FFFFFF', cl), 5, cor);
         // (high on the frame's left side: at its foot the labels lay over THOUSAND · TINY · STEPS on the floor; and
         // gone as the camera comes up to the frame, before it is cut by the edge of the shot)
-        const la = cor * clamp((this.key.p[2] - z - 12) / 5) * clamp((t - (tThou.start - 0.15)) / 0.3); // (corridor shot only: seen square-on they sat in DENOISE)
+        const la = cor * clamp((this.key.p[2] - z - 12) / 5) * clamp((t - (tThou.start + 0.1)) / 0.3); // (corridor shot only: seen square-on they sat in DENOISE)
         if (la > 0.01) this.text3(c, `t = ${Math.round(dw0.t[fr] ?? 0)}`, Pz, -11.4, 7.4, { size: 0.9, fam: MONOB, color: hexA(sI === 9 ? MAG : BONE, la), glow: sI === 9 ? 14 : 0, glowColor: MAG });
       }
       // THOUSAND · TINY · STEPS on the floor of the corridor as they are sung
       const G = floorPl(0.02);
-      [tThou, tTiny, tSteps].forEach((w, i) => {
-        if (t < w.start - 0.02) return;
-        const z = -10 - i * 18;
-        const Pf = this.readable({ o: [DX, 0.02, z], r: [1, 0, 0], u: [0, 0, -1] });
-        this.hero3(c, w.w.toUpperCase().replace(/[^A-Z]/g, ''), Pf, 0, 0, t, w.start, w.end, { size: 4.2, glow: 18, glowColor: U.ink });
-      });
+      // THOUSAND · TINY · STEPS hung in the corridor a little ahead of the camera, over the frames' particles (on the
+      // floor, the camera flew over each before it was sung)
+      const zt = this.key.p[2] - 14;
+      this.chunk3(c, [tThou, tTiny, tSteps], t, wallPl(zt, [DX, 0, zt]), 0, 7.6, { size: 2.6, maxW: 24, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 1, 2] });
       void G;
     }
     // the lyric (the words themselves are the particles): a small mono caption of the schedule
@@ -288,10 +294,15 @@ export default class Gen2 extends VScene {
           this.seg(c, b, tip, hotM ? MAG : BONE, hotM ? 2.4 : 1.6, { alpha: op * (hotM ? 1 : 0.75) });
         }
       }
-      // ROPE'S ROTATION, slammed across the tunnel mouth as sung
+      // GAVE WAY TO / ROPE'S ROTATION, hung in the tunnel a little ahead of the camera as it flies in (on the mouth,
+      // the line was behind the camera by the time it was sung, and GAVE WAY TO was nowhere)
+      const tEnd = this.L[3]![0]!.start, ka = clamp((t - tGave.start) / (tEnd - tGave.start));
+      const zt = this.key.p[2] - lerp(13, 10, ka);
+      const TP = wallPl(zt, [RX, 0, zt]);
+      this.chunk3(c, L34.slice(L34.indexOf(tGave)), t, TP, 0, 4.4, { size: 1.75, maxW: 12, slam: 0.4, glow: 18, glowColor: U.ink, breaks: [0, 3] });
       const mouth = wallPl(4, [RX, 0, 4]);
-      this.chunk3(c, L34.slice(L34.indexOf(tRope)), t, mouth, 0, 9.6, { size: 2.2, maxW: 16, slam: 0.4, glow: 18, glowColor: U.ink });
       this.text3(c, 'q·k DEPENDS ONLY ON m − n', mouth, 0, 0.6, { size: 0.6, fam: MONOB, color: hexA(BONE, 0.85 * op), align: 'center', track: 0.1 });
+      void tRope;
     }
   }
 
@@ -340,7 +351,7 @@ export default class Gen2 extends VScene {
         this.text3(c, 'min ≈ −0.278  @  x ≈ −1.278', wallPl(0.1), xs(-1.278) - 0.3, ys(-0.278) - 1.0, { size: 0.42, fam: MONO, color: BONE, align: 'right' });
       }
       this.text3(c, bend < 0.5 ? 'ReLU(x) = max(0, x)' : 'SwiGLU(x) = Swish(xW) ⊙ xV', back, 0, 5.2, { size: 0.8, fam: MONOB, color: mixHex(BONE, MAG, bend), align: 'center', alpha: act });
-      this.chunk3(c, L35.slice(L35.indexOf(tRelu)), t, back, 0, 7.6, { size: 2.2, maxW: 24, slam: 0.4, glow: 18, glowColor: U.ink });
+      this.chunk3(c, L35.slice(L35.indexOf(tRelu)), t, back, 0, 6.4, { size: 2.2, maxW: 24, slam: 0.4, glow: 18, glowColor: U.ink });
     }
   }
 }

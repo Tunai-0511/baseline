@@ -41,14 +41,15 @@ export default class Ctx2 extends VScene {
     const t2k = w(0, /2K/).start, tMil = w(0, /million/).start, t53 = this.L[1]![0]!.start, tRem = w(1, /remembers/).start, t54 = this.L[2]![0]!.start, tDate = w(2, /date/).start, t55 = this.L[3]![0]!.start;
     this.rig = new Rig([
       { t0: s, name: 'tape', key: (t) => { const L = this.winLen(t); const h = 3 + Math.pow(L, 0.62) * 0.9; return K([2.5 + L * 0.04, h, 6 + Math.min(L, 50) * 0.05], [0, 0, -Math.min(L, 4096) * 0.42], 46, 0.0); } },
-      { t0: t53 - 0.05, snap: 0.6, name: 'needle', key: (t) => { const k = ease.inOutQuad(clamp((t - t53) / (tRem - t53))); const z = -4096; return K([lerp(9, 6, k), lerp(6.5, 5, k), z + lerp(14, 10, k)], [0, 2.6, z], 46, 0.02); } },
-      { t0: tRem - 0.05, snap: 0.35, name: 'map', key: (t) => { const k = ease.outCubic(clamp((t - tRem) / (t54 - tRem))); return K([lerp(-14, -16, k), lerp(5, 6, k), -4096 + lerp(14, 16, k)], [-15, 3.5, -4096 - 2], 46); } },
+      { t0: t53 - 0.05, snap: 0.3, name: 'needle', key: (t) => { const k = ease.inOutQuad(clamp((t - t53) / (tRem - t53))); const z = -4096; return K([lerp(9, 6, k), lerp(6.5, 5, k), z + lerp(14, 10, k)], [0, 2.6, z], 46, 0.02); } },
+      { t0: this.L[1]![this.L[1]!.findIndex((x) => /remembers/.test(x.w)) - 1]!.start - 0.05, snap: 0.3, name: 'map', key: (t) => { const k = ease.outCubic(clamp((t - tRem) / (t54 - tRem))); return K([lerp(-14, -16, k), lerp(5, 6, k), -4096 + lerp(14, 16, k)], [-15, 3.5, -4096 - 2], 46); } },
       { t0: t54 - 0.05, name: 'stones', key: (t) => {
         // close along the row (MEMORY → SCALE) while the line is sung, then back to see all four as their dates are cut
         const Z = 9000;
+        // (back far enough to hold the line over the stones: close along the row, it was over the frame's top)
         const ks: [number, V3, V3, number][] = [
-          [t54, [-10.5, 2.0, Z + 4.5], [-8.6, 1.9, Z - 3], 48],
-          [tDate - 0.3, [9.5, 2.3, Z + 4.8], [12.0, 2.0, Z - 3], 48],
+          [t54, [-10.5, 3.4, Z + 8.5], [-8.6, 3.7, Z - 3], 48],
+          [tDate - 0.3, [9.5, 3.6, Z + 8.8], [12.0, 3.7, Z - 3], 48],
           [tDate + 0.25, [1.0, 3.6, Z + 17], [0.4, 2.0, Z - 3], 50],
           [t55, [0.6, 3.9, Z + 18.5], [0.4, 2.1, Z - 3], 50],
         ];
@@ -59,7 +60,7 @@ export default class Ctx2 extends VScene {
         const L3 = (a: V3, b: V3): V3 => [lerp(a[0], b[0], u), lerp(a[1], b[1], u), lerp(a[2], b[2], u)];
         return K(L3(pa, pb), L3(ga, gb), lerp(fa, fb, u), 0.02 * Math.sin(t));
       } },
-      { t0: t55 - 0.05, snap: 0.5, name: 'late', key: (t) => { const x = this.nowX(t); return K([x + 1.5, 5.5, 9100 + 15], [x + 0.5, 4.2, 9100], 46, -0.01); } },
+      { t0: t55 - 0.05, snap: 0.25, name: 'late', key: (t) => { const x = this.nowX(t); return K([x + 1.5, 5.5, 9100 + 15], [x + 0.5, 4.2, 9100], 46, -0.01); } },
     ], [{ t: t2k, amp: 0.6 }, { t: tMil, amp: 1.2 }, { t: t53, amp: 0.6 }, { t: tDate, amp: 1.4 }, { t: t55, amp: 0.6 }], 0.8, 151);
   }
 
@@ -174,21 +175,21 @@ export default class Ctx2 extends VScene {
     // lyric type
     if (t < tNeedle.start - 0.05) {
       // the line sits on the tape near "now" while the window is small, then stays pinned high in frame
-      const P = this.readable({ o: [0, 2.9, -1.5], r: [1, 0, 0], u: [0, 0.6, -0.8] });
+      const P = this.readable({ o: [0, 2.3, -1.5], r: [1, 0, 0], u: [0, 0.6, -0.8] });
       const kz = clamp((Lw - 12) / 30);
       // (handed over, not cross-faded: both copies of the line on screen at once read as a double)
       c.save(); c.globalAlpha *= 1 - clamp(kz / 0.4);
-      this.say3(c, L52.slice(0, 3), t, P, 0, 0.9, { size: 0.62, fam: WIDE, up: '', cur: U.mag, done: PAPER, align: 'center', upper: true, text: (x) => x.w.replace(',', '') });
+      this.say3(c, L52.slice(0, 3), t, P, 0, -0.1, { size: 0.7, fam: WIDE, up: '', cur: U.mag, done: PAPER, align: 'center', upper: true, text: (x) => x.w.replace(',', '') });
       c.restore();
       if (kz > 0.3) {
         c.save(); c.globalAlpha *= clamp((kz - 0.3) / 0.5); c.textAlign = 'center'; c.font = `54px "${WIDE}"`; c.fillStyle = PAPER; c.shadowBlur = 14; c.shadowColor = '#000';
-        c.fillText('CONTEXT WINDOW: 2K', W / 2, 150);
+        c.fillText('CONTEXT WINDOW: 2K', W / 2, 150); this.qaText(c, 'CONTEXT WINDOW: 2K', W / 2, 150);
         c.restore();
       }
       if (t > tMil.start - 0.4) {
         const sung = L52.slice(3).filter((x) => t >= x.start).map((x) => x.w.replace(',', '').toUpperCase()).join(' ');
         c.save(); c.textAlign = 'center'; c.font = `70px "${WIDE}"`; c.fillStyle = GRN; c.shadowBlur = 16; c.shadowColor = '#000';
-        c.fillText(sung, W / 2, H - 120);
+        c.fillText(sung, W / 2, H - 120); this.qaText(c, sung, W / 2, H - 120);
         c.restore();
       }
     } else {
@@ -236,8 +237,10 @@ export default class Ctx2 extends VScene {
       }
     });
     if (t < t55.start + 0.4) {
-      const P: Pl = { o: [0, 7.4, 9000 - 6], r: [1, 0, 0], u: [0, 1, 0] };
-      c.save(); c.globalAlpha *= 1 - clamp((t - t55.start) / 0.4); this.chunk3(c, L54, t, P, 0, 0, { size: 1.5, maxW: 22, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 4, 7], text: (x) => x.w.replace(/[“”]/g, '"').replace(',', '') }); c.restore();
+      // (each phrase set over the stones where the camera looks as it is sung, then left there)
+      const P: Pl = { o: [0, 5.6, Z - 0.6], r: [1, 0, 0], u: [0, 1, 0] };
+      const anchor = (w: Word): [number, number] => [this.rig ? this.rig.at(w.start).tg[0] : 0, 0];
+      c.save(); c.globalAlpha *= 1 - clamp((t - t55.start) / 0.4); this.chunk3(c, L54, t, P, 0, 0, { anchor, size: 1.05, maxW: 15, slam: 0.4, glow: 16, glowColor: U.ink, breaks: [0, 4, 7], text: (x) => x.w.replace(/[“”]/g, '"').replace(',', '') }); c.restore();
     }
     // late: spikes on a time axis, NOW sweeping, each passed spike sinking to the baseline; a clock running ahead
     if (t > t55.start - 0.3) {

@@ -26,7 +26,7 @@ export default class Tail extends VScene {
     const t69 = this.L69[0]!.start;
     this.rig = new Rig([
       { t0: s, name: 'sheet', key: (t) => { const k = ease.inOutQuad(clamp((t - s) / (t69 - s))); return K([lerp(2, 5, k), lerp(11, 4.5, k), lerp(19, 9.5, k)], [lerp(0, 1.5, k), 0, lerp(4.5, NZ, k)], lerp(46, 36, k), 0); } },
-      { t0: t69 - 0.05, snap: 0.5, name: 'pen', key: (t) => { const p = this.penX(t); const k = ease.inOutCubic(clamp((t - (this.L69[this.L69.length - 1]!.end - 0.1)) / 0.9)); const a = K([p + 1.6, 0.8, NZ + 2.4], [p - 0.4, 0.05, NZ - 0.1], 30, -0.05); return { p: vlerp(a.p, [1.0, 7.5, NZ + 10.5], k), tg: vlerp(a.tg, [0.2, 0, NZ - 1.2], k), roll: lerp(-0.05, 0, k), fov: lerp(30, 40, k) }; } },
+      { t0: t69 - 0.05, snap: 0.5, name: 'pen', key: (t) => { const p = this.penX(t); const k = ease.inOutCubic(clamp((t - (this.L69[this.L69.length - 1]!.end - 0.1)) / 0.9)); const a = K([2.2 + p * 0.08, 3.8, NZ + 11.5], [0.3 + p * 0.05, 0.05, NZ - 0.2], 46, -0.02); void p; /* (the whole of ONE MORE TIME in frame as the pen writes it: following the pen 2 m away, two letters showed at a time) */ return { p: vlerp(a.p, [1.0, 7.5, NZ + 10.5], k), tg: vlerp(a.tg, [0.2, 0, NZ - 1.2], k), roll: lerp(-0.05, 0, k), fov: lerp(30, 40, k) }; } },
     ], [], 0.6, 191);
   }
 
@@ -81,7 +81,8 @@ export default class Tail extends VScene {
     // the line's words (small, quiet) until "one more time" takes the floor
     if (t < t69.start - 0.1) {
       // CITE ME IN RELATED WORK: set on the sheet, over the title block, as the camera comes down to it
-      this.chunk3(c, L68, t, floorPl(0.02), 0, -(NZ - 4.6), { size: 2.1, maxW: 24, slam: 0.4, glow: 14, glowColor: U.ink, breaks: [0, 3] });
+      // (centred on the camera's aim and smaller: seen at a grazing angle, WORK ran off the right edge)
+      this.chunk3(c, L68, t, floorPl(0.02), 0.9, -(NZ - 4.6), { size: 1.4, maxW: 18, slam: 0.4, glow: 14, glowColor: U.ink, breaks: [0, 3] });
     }
     frameMarks(c, U.ash, { tl: 'BASELINE · DWG 01 · ONE MORE TIME', tr: 'PLOTTER READY', bl: 'NOW — ', br: tc(t), alpha: 0.6 * blue });
     const fade = clamp((t - (e - 0.9)) / 0.9);

@@ -133,7 +133,7 @@ export default class Fall extends VScene {
     const hdr: Pl = { o: [0, rowY(NR) + 1.0, 0.2], r: [1, 0, 0], u: [0, 1, 0] };
     if (!drop && t < tNow.start + 0.4) {
       this.say3(c, L66.slice(0, 2), t, hdr, 0, 2.1, { size: 1.0, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true });
-      this.say3(c, L66.slice(L66.indexOf(tState)), t, hdr, 0, 0.3, { size: 1.75, slam: 0.4, fam: WIDE, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, rise: 0.3, glow: 16, glowColor: U.ink, text: (w) => w.w.replace(',', '') });
+      this.say3(c, L66.slice(L66.indexOf(tState)), t, hdr, -1.0, 0.3, { size: 1.4, slam: 0.4, fam: WIDE, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, rise: 0.3, glow: 16, glowColor: U.ink, text: (w) => w.w.replace(',', '') });
     }
     if (t > tNow.start - 0.02 && t < tBase.start + 0.3) {
       const y = this.fallY(t);

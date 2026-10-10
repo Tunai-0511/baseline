@@ -137,8 +137,9 @@ export default class Seq2 extends VScene {
       // (RAN IN PARALLEL clears as AND LEFT IT ALL BEHIND comes in beside it)
       this.say3(c, [w(3, /^ran$/), w(3, /^in$/), tPar], t, SP, 0, -2.0, { size: 1.5, slam: 0.4, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, alpha: 1 - clamp((t - (tLeft.start - 0.32)) / 0.15) });
       if (t > tLeft.start - 0.3) {
-        const BP = this.readable({ o: [GATE + 16.5, 6.5, -2], r: [1, 0, 0], u: [0, 1, 0] });
-        this.say3(c, L[3]!.slice(L[3]!.indexOf(w(3, /^and$/))), t, BP, 0, 0, { size: 1.5, slam: 0.4, fam: WIDE, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, rise: 0.3 });
+        // (where RAN IN PARALLEL was, under TRANSFORMERS, in the middle of the shot as the camera sets off — far to the
+        // right it ran off the frame; the camera then pulls away and the line is left behind)
+        this.say3(c, L[3]!.slice(L[3]!.indexOf(w(3, /^and$/))), t, SP, 0, -2.0, { size: 1.4, slam: 0.4, fam: WIDE, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, rise: 0.3 });
       }
     }
     frameMarks(c, U.ash, { tl: 'BASELINE · NIGHT LINE · LAST STOP', tr: t < tAtt.start ? 'ENCODER → c ∈ ℝ⁶⁴ → DECODER' : t < tRec.start ? 'α = softmax(score(s, h))' : t < tTr.start ? 'O(n) SEQUENTIAL STEPS' : 'O(1) SEQUENTIAL · n² PAIRS', bl: '2014 — 2017', br: tc(t), alpha: 0.6 });

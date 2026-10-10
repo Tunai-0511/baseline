@@ -7,16 +7,15 @@
 // the chart and bites each bar down to its year. Back in the yard the margin fences fall flat.
 // Style: paper-light plot — warm grey ground, ink, orange (+1) and teal (−1), the deep net in black.
 import type { Frame, PostOverrides } from '../engine/scene';
-import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, tc, clamp, lerp, ease, hexA, mixHex, hot, F, W, H, vlerp, vrot, orbit, U, type Ctx } from './_v';
+import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, tc, clamp, lerp, ease, hexA, hot, F, W, H, vlerp, orbit, U, type Ctx } from './_v';
 import type { Word } from '../engine/lyrics';
 import { hash } from '../engine/util';
 
 const BG = '#0B0A0D', INK = '#EDEAF2', GRID = '#1E1C24', GRID2 = '#2A2731', ORA = '#FF2E7E', TEAL = '#9A96A3', RED = '#FF2E7E', MUTE = '#5C5966';
 const WIDE = F.archivo(125, 900), HEAVY = F.archivo(112, 900), MONO = F.mono(500), MONOB = F.mono(700), ITAL = F.serif(600, true);
 const BOWL: V3 = [32, 0, 2]; // kernel demo centre
-const CH = { z: -24, x0: 2, dx: 4.4, k: 0.5 }; // chart: bars at z, from x0, spacing dx, height per % error
+const CH = { z: -24, x0: 2, dx: 4.4, k: 0.42 }; // chart: bars at z, from x0, spacing dx, height per % error
 const BARS: [string, number, boolean][] = [['2010', 28.2, false], ['2011', 25.8, false], ['2012', 16.4, true], ['2013', 11.7, true], ['2014', 6.7, true], ['2015', 3.57, true]];
-const TRAIN_Z = -19;
 
 interface Lin { posts: [number, number][]; label: number[]; w: [number, number]; b: number; normal: [number, number]; tangent: [number, number]; margin_m: number; support: number[] }
 interface Ker { posts: [number, number][]; label: number[]; z_m2: number[]; blade_z_m2: number; support: number[] }
@@ -33,6 +32,8 @@ export default class Svm extends VScene {
     try { const d = await (await fetch('data/svm_fit.json')).json(); this.lin = d.linear; this.ker = d.kernel; } catch { /* frame only */ }
     const w = (L: Word[], re: RegExp) => L.find((x) => re.test(x.w))!;
     const t0 = this.ctx.start, tWide = w(this.L6, /widest/).start, tKer = w(this.L6, /kernel/).start, tDeep = this.L7[0]!.start, tBench = w(this.L7, /benchmarks/).start, tMarg = w(this.L7, /margins/).start, tFall = w(this.L7, /fall/).start, end = this.ctx.end;
+    const tAnd = w(this.L7, /^and$/).start;
+    this.crush = this.crushTimes();
     const tg = this.lin ? this.lin.tangent : [-0.98, 0.18];
     const nm = this.lin ? this.lin.normal : [0.18, 0.98];
     this.rig = new Rig([
@@ -43,9 +44,11 @@ export default class Svm extends VScene {
         return K([nm[0]! * d + tg[0]! * 2, lerp(7.5, 8.5, k), nm[1]! * d + tg[1]! * 2], [tg[0]! * 1.5, 0.4, tg[1]! * 1.5], 44, 0.0);
       } },
       { t0: tKer - 0.05, snap: 0.55, name: 'bowl', key: (t) => { const k = ease.inOutQuad(clamp((t - tKer) / (tDeep - tKer))); return K(orbit([BOWL[0], 4.5, BOWL[2]], lerp(0.25, 0.95, k), lerp(0.45, 0.32, k), lerp(27, 24, k)), [BOWL[0], lerp(4.0, 5.2, k), BOWL[2]], 42); } },
-      { t0: tDeep - 0.05, snap: 0.5, name: 'chart', key: (t) => { const k = ease.inOutQuad(clamp((t - tDeep) / (tMarg - tDeep))); return K([lerp(26, 12, k), lerp(9, 8, k), lerp(-2, 1, k)], [lerp(18, 10, k), 6.0, CH.z + 2], 46, -0.02); } },
-      { t0: tMarg - 0.05, snap: 0.45, name: 'fall', key: (t) => {
-        const k = ease.outCubic(clamp((t - tMarg) / (end - tMarg)));
+      // the chart, square on and still (the bars are crushed in place; no pan to follow)
+      { t0: tDeep - 0.05, snap: 0.5, name: 'chart', key: (t) => { const k = ease.inOutQuad(clamp((t - tDeep) / (tAnd - tDeep))); return K([lerp(18, 16, k), lerp(9.0, 8.8, k), lerp(2.6, 2.0, k)], [13, 7.6, CH.z + 2], 46, -0.02); } },
+      // (from AND: the margins line is on the yard's fence, so the camera is back in the yard as it is sung)
+      { t0: tAnd - 0.05, snap: 0.45, name: 'fall', key: (t) => {
+        const k = ease.outCubic(clamp((t - tAnd) / (end - tAnd)));
         const a = K([lerp(12, 8, k), lerp(9, 11, k), lerp(17, 19, k)], [0, lerp(3.2, 2.6, k), -1], lerp(44, 48, k));
         // the last half second: the yard opens into a square shaft and the camera turns to look down it (DEPTH's mouth)
         const kh = ease.inOutCubic(clamp((t - (end - 0.55)) / 0.55));
@@ -53,7 +56,18 @@ export default class Svm extends VScene {
         const b = K([3.1, 16, 4.6], [0, -14, 0], 50, 0, [0, 0, -1]);
         return { p: vlerp(a.p, b.p, kh), tg: vlerp(a.tg, b.tg, kh), roll: 0, fov: lerp(a.fov, b.fov, kh), up: kh > 0.5 ? [0, 0, -1] : undefined };
       } },
-    ], [{ t: t0, amp: 0.5 }, { t: tKer, amp: 0.6 }, { t: tDeep, amp: 1.2, dir: 'h' }, { t: tBench, amp: 0.8 }, { t: tFall, amp: 1.8 }], 0.8, 41);
+    ], [{ t: t0, amp: 0.5 }, { t: tKer, amp: 0.6 }, { t: tDeep, amp: 1.2, dir: 'h' }, ...this.crush.map((tc) => ({ t: tc + 0.15, amp: 0.55 })), { t: tFall, amp: 1.8 }], 0.8, 41);
+    void tMarg; void tBench;
+  }
+
+  /** when each deep-net bar is crushed: on ATE, THE, BENCH-, -MARKS */
+  private crush: number[] = [];
+  private crushTimes(): number[] {
+    const L7 = this.L7, w = (re: RegExp) => L7.find((x) => re.test(x.w))!;
+    const ate = w(/ate/), bench = w(/benchmarks/), the = L7[L7.indexOf(ate) + 1]!;
+    const tt = [ate.start, the.start, bench.start, bench.start + 0.55 * (bench.end - bench.start)];
+    for (let i = 1; i < tt.length; i++) tt[i] = Math.max(tt[i]!, tt[i - 1]! + 0.2);
+    return tt;
   }
 
   frame(c: Ctx, t: number, f: Frame): PostOverrides {
@@ -72,38 +86,39 @@ export default class Svm extends VScene {
     // ------------------------------------------------ the bowl: the kernel trick
     if (t > tKer.start - 0.6) this.bowl(c, t, tKer.start, tAll.end);
     // ------------------------------------------------ the chart and the deep net
-    this.chart(c, t, tDeep.start, tBench, tMarg.start);
+    const tAnd2 = L7[L7.indexOf(tBench) + 1]!; // AND (the margins …)
+    this.chart(c, t, tDeep.start, tAnd2.start);
     // ------------------------------------------------ lyric type
     const wallY: Pl = wallPl(-6.5);
     // SVM, painted huge on the yard's back fence; THE WIDEST MARGIN along the street
     {
       const k = ease.outBack(clamp((t - tSvm.start) / 0.25), 1.8);
-      this.text3(c, 'SVM', wallY, -1, 3.0, { size: 6.0 * k, fam: WIDE, color: t < tSvm.end ? U.mag : INK, align: 'center', alpha: 1 - clamp((t - tKer.start) / 0.4) });
+      this.text3(c, 'SVM', wallY, -1, 2.4, { size: 5.2 * k, fam: WIDE, color: t < tSvm.end ? U.mag : INK, align: 'center', alpha: 1 - clamp((t - tKer.start) / 0.4) });
       // the hard-margin problem, painted under the name (Cortes & Vapnik)
-      this.eqFit(c, 'svm_primal', wallY, -1, 1.15, 14, 1.25, { color: INK, alpha: 0.85 * clamp((t - (tSvm.start + 0.3)) / 0.3) * (1 - clamp((t - tKer.start) / 0.4)) });
+      this.eqFit(c, 'svm_primal', wallY, -1, 0.95, 13, 1.1, { color: INK, alpha: 0.85 * clamp((t - (tSvm.start + 0.3)) / 0.3) * (1 - clamp((t - tKer.start) / 0.4)) });
     }
     if (this.lin && t > tWide.start - 0.05) {
       const tg = this.lin.tangent, nm = this.lin.normal;
       const P: Pl = this.readable({ o: [nm[0] * -0.2 - tg[0] * 1.5, 0.02, nm[1] * -0.2 - tg[1] * 1.5], r: [tg[0], 0, tg[1]], u: [nm[0], 0, nm[1]] });
-      this.say3(c, [w(L6, /^the$/), tWide, tMargin], t, P, 0, -0.65, { size: 1.45, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.3, alpha: 1 - clamp((t - tKer.start) / 0.3) });
+      this.say3(c, [w(L6, /^the$/), tWide, tMargin], t, P, -1.4, -0.65, { size: 1.2, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.3, alpha: 1 - clamp((t - tKer.start) / 0.3) });
     }
     // (gone before DEEP NETS: as the camera swings to the chart they slid over its labels)
-    const bwA = 1 - clamp((t - (tDeep.start - 0.35)) / 0.25);
+    const bwA = 1 - clamp((t - (tDeep.start - 0.12)) / 0.12);
     if (t > tKer.start - 0.03 && bwA > 0) {
       const BW: Pl = { o: [BOWL[0], 0, BOWL[2] - 9.5], r: [1, 0, 0], u: [0, 1, 0] };
-      this.say3(c, L6.slice(L6.indexOf(tKer)), t, BW, 0, 10.6, { size: 1.5, slam: 0.35, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4, alpha: bwA });
-      this.text3(c, 'φ(x) = (x₁, x₂, x₁² + x₂²)', BW, 0, 9.0, { size: 0.72, fam: ITAL, color: INK, align: 'center', alpha: clamp((t - tKer.start - 0.3) / 0.4) * bwA });
-      this.text3(c, 'k(x, y) = ⟨φ(x), φ(y)⟩ · φ never built', BW, 0, 7.6, { size: 0.5, fam: MONO, color: MUTE, align: 'center', alpha: clamp((t - tKer.start - 0.6) / 0.4) * bwA });
+      this.say3(c, L6.slice(L6.indexOf(tKer)), t, BW, 0, 11.4, { size: 1.5, slam: 0.35, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4, alpha: bwA, maxW: 16.5, lead: 1.85 });
+      this.text3(c, 'φ(x) = (x₁, x₂, x₁² + x₂²)', BW, 0, 8.25, { size: 0.72, fam: ITAL, color: INK, align: 'center', alpha: clamp((t - tKer.start - 0.3) / 0.4) * bwA });
+      this.text3(c, 'k(x, y) = ⟨φ(x), φ(y)⟩ · φ never built', BW, 0, 7.1, { size: 0.5, fam: MONO, color: MUTE, align: 'center', alpha: clamp((t - tKer.start - 0.6) / 0.4) * bwA });
     }
-    // DEEP NETS on the train; ATE THE BENCHMARKS over the chart
-    if (t > tDeep.start - 0.03) {
-      const CP: Pl = wallPl(CH.z - 0.5);
-      const i0 = L7.indexOf(tAte);
-      // (held in frame with DEEP NETS: fixed on the chart wall, the camera's pan ran its end off the right edge)
-      this.say3(c, L7.slice(i0, L7.indexOf(tBench) + 1), t, wallPl(CH.z + 1.6), this.key.tg[0] + 0.3, 9.3, { size: 1.75, slam: 0.35, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4, alpha: 1 - clamp((t - (tMarg.start - 0.3)) / 0.15) });
+    // DEEP NETS / ATE THE BENCHMARKS over the chart, above the bars, held still; gone as the camera leaves on AND
+    if (t > tDeep.start - 0.03 && t < tAnd2.start + 0.1) {
+      const LP: Pl = wallPl(CH.z + 1.6);
+      const la = 1 - clamp((t - (tAnd2.start - 0.12)) / 0.12);
+      this.say3(c, [tDeep, L7[1]!], t, LP, 13, 15.3, { size: 2.1, slam: 0.55, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.25, glow: 16, glowColor: U.ink, alpha: la });
+      this.say3(c, L7.slice(L7.indexOf(tAte), L7.indexOf(tBench) + 1), t, LP, 13, 13.3, { size: 1.75, slam: 0.35, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.4, glow: 14, glowColor: U.ink, alpha: la });
     }
     // AND THE MARGINS HAD TO FALL, the last word huge
-    if (t > tMarg.start - 0.25) {
+    if (t > tAnd2.start - 0.05) {
       const P: Pl = wallPl(-6.4);
       const i0 = L7.indexOf(w(L7, /^and$/));
       this.say3(c, L7.slice(i0, L7.indexOf(tFall)), t, P, 0, 8.6, { size: 1.55, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.3 });
@@ -251,69 +266,49 @@ export default class Svm extends VScene {
     }
   }
 
-  private chart(c: Ctx, t: number, tDeep: number, bench: Word, tMarg: number) {
-    const a = clamp((t - (tDeep - 0.15)) / 0.3) * (1 - clamp((t - tMarg + 0.1) / 0.4));
+  private chart(c: Ctx, t: number, tDeep: number, tOut: number) {
+    const a = clamp((t - (tDeep - 0.15)) / 0.3) * (1 - clamp((t - tOut) / 0.35));
     if (a <= 0) return;
     const CP: Pl = wallPl(CH.z - 0.6);
     // backboard with gridlines every 5 %
-    this.rect3(c, CP, CH.x0 - 2.5, -0.2, CH.dx * 6 + 3.0, 16.5, { fill: hexA('#141219', 0.95 * a), stroke: hexA(INK, 0.4 * a), lw: 1.2 });
-    for (let p = 0; p <= 30; p += 5) {
+    this.rect3(c, CP, CH.x0 - 2.5, -0.2, CH.dx * 6 + 3.0, 12.6, { fill: hexA('#141219', 0.95 * a), stroke: hexA(INK, 0.4 * a), lw: 1.2 });
+    for (let p = 0; p <= 25; p += 5) {
       this.seg(c, at(CP, CH.x0 - 2.0, p * CH.k, 0.02), at(CP, CH.x0 + CH.dx * 6, p * CH.k, 0.02), hexA(INK, (p === 0 ? 0.8 : 0.2) * a), 1);
       this.text3(c, `${p}%`, CP, CH.x0 - 2.2, p * CH.k - 0.15, { size: 0.42, fam: MONO, color: hexA(INK, 0.7 * a), align: 'right' });
     }
-    this.text3(c, 'ILSVRC · TOP-5 ERROR', CP, CH.x0 - 2.0, 15.4, { size: 0.5, fam: MONOB, color: hexA(INK, a) });
-    // the train: deep net conv slabs, from the right, passing in front of the bars
-    const tStart = tDeep - 0.1, tEnd = tMarg - 0.1;
-    const head = lerp(CH.x0 + CH.dx * 6 + 14, CH.x0 - 12, ease.inOutQuad(clamp((t - tStart) / (tEnd - tStart))));
-    const slabs = [[2.6, 5.2], [2.0, 4.4], [1.6, 3.8], [1.3, 3.2], [1.1, 2.6], [0.9, 2.2], [0.8, 1.6]];
-    // bars: SVM-era bars stay; the deep-net bars start at the 2011 height and are bitten down as the head passes
+    // the bars: the hand-feature years stay; each deep-net year starts at 2011's height and is crushed down to its
+    // error on its hit — the network that did it named under it (2026-10-10: a train of conv slabs used to drive
+    // past and bite them, and read as boxes floating by)
+    const NETS: [string, string][] = [['', ''], ['', ''], ['ALEXNET', '8 LAYERS'], ['ZFNET', '8 LAYERS'], ['GOOGLENET', '22 LAYERS'], ['RESNET', '152 LAYERS']];
     BARS.forEach(([yr, err, deep], i) => {
       const x = CH.x0 + i * CH.dx;
-      const bitten = deep && head < x + 1.0;
-      const hT = (deep ? (bitten ? err : 25.8) : err) * CH.k;
-      const k = bitten ? ease.outBack(clamp((x + 1.0 - head) / 3.0), 1.4) : 0;
-      const h = deep ? lerp(25.8 * CH.k, err * CH.k, k) : hT;
-      const col = deep ? (bitten ? ORA : MUTE) : TEAL;
+      const ti = deep ? this.crush[i - 2]! : -1;
+      const u = deep ? clamp((t - ti) / 0.14) : 1;
+      const hit = deep && t >= ti;
+      // the slam (ease-in) and a short ring after it
+      const ring = hit && u >= 1 ? 0.35 * Math.exp(-(t - ti - 0.14) * 12) * Math.sin((t - ti - 0.14) * 42) : 0;
+      const h = (deep ? lerp(25.8, err, ease.inQuad(u)) : err) * CH.k + ring;
+      const col = deep ? (hit ? ORA : MUTE) : TEAL;
       this.box3(c, [x - 1.3, 0, CH.z - 1.3], [x + 1.3, h, CH.z + 0.3], hexA(INK, a), 1.3, { fill: hexA(col, 0.85 * a) });
       this.text3(c, yr, CP, x, -1.0, { size: 0.6, fam: MONOB, color: hexA(INK, a), align: 'center' });
-      // (a bitten bar's value shows once the bar has settled: on the way down it ran through the lyric)
-      if (!deep || bitten) this.text3(c, err.toFixed(1), wallPl(CH.z + 0.32), x, h + 0.35, { size: 0.62, fam: MONOB, color: hexA(deep ? RED : INK, a * (deep ? clamp((k - 0.85) / 0.15) : 1)), align: 'center' });
-      // the bitten-off chunk falls
-      if (deep && bitten) {
-        const dt = (x + 1.0 - head) / 9;
-        if (dt > 0 && dt < 1.2) {
-          const y0 = err * CH.k, y1 = 25.8 * CH.k;
-          const fall = 4 * dt * dt;
-          this.box3(c, [x - 1.3 + dt * 2, y0 - fall, CH.z - 1.3 + dt * 3], [x + 1.3 + dt * 2, y1 - fall, CH.z + 0.3 + dt * 3], hexA(INK, 0.5 * (1 - dt / 1.2)), 1, { fill: hexA(MUTE, 0.4 * (1 - dt / 1.2)) });
+      if (!deep || u >= 1) this.text3(c, err.toFixed(1), wallPl(CH.z + 0.32), x, h + 0.35, { size: 0.62, fam: MONOB, color: hexA(deep ? RED : INK, a), align: 'center' });
+      if (!deep) return;
+      // what was crushed off: a flat shock line out from the bar's new top, and chips thrown up
+      const dt = t - ti - 0.14;
+      if (dt > 0 && dt < 0.7) {
+        const yt = err * CH.k, f = 1 - dt / 0.7;
+        this.glowSeg(c, [x - 1.3 - dt * 5, yt, CH.z + 0.31], [x + 1.3 + dt * 5, yt, CH.z + 0.31], RED, 2.2 * f, 10, f);
+        for (let j = 0; j < 14; j++) {
+          const vx = (hash(i, j, 1) - 0.5) * 7, vy = 3 + 5 * hash(i, j, 2), vz = 1 + 3 * hash(i, j, 3);
+          this.dot3(c, [x + vx * dt, yt + vy * dt - 9 * dt * dt, CH.z + 0.3 + vz * dt], 0.09, hexA(j % 3 ? INK : RED, f));
         }
       }
+      // the network, named under its year (lit from its hit)
+      const on = hit ? 1 : 0.3;
+      this.text3(c, NETS[i]![0], CP, x, -1.75, { size: 0.44, fam: MONOB, color: hexA(hit ? RED : INK, a * on), align: 'center' });
+      this.text3(c, NETS[i]![1], CP, x, -2.3, { size: 0.32, fam: MONO, color: hexA(INK, 0.8 * a * on), align: 'center' });
     });
-    // the SVM-era / deep-era divide
-    this.seg(c, at(CP, CH.x0 + CH.dx * 1.5, 0, 0.05), at(CP, CH.x0 + CH.dx * 1.5, 15, 0.05), hexA(RED, 0.8 * a), 1.6, { dash: [8, 6] });
-    this.text3(c, 'SVM + HAND FEATURES', CP, CH.x0 + CH.dx * 0.5, 14.2, { size: 0.42, fam: MONOB, color: hexA(TEAL, a), align: 'center' });
-    this.text3(c, 'DEEP NETS', CP, CH.x0 + CH.dx * 3.5, 14.2, { size: 0.42, fam: MONOB, color: hexA(INK, a), align: 'center' });
-    if (t < tStart) return;
-    c.save(); c.globalAlpha *= a;
-    let x = head;
-    slabs.forEach(([wd, ht], i) => {
-      const x0 = x, x1 = x + wd;
-      this.box3(c, [x0, 0.4, TRAIN_Z - ht / 2], [x1, 0.4 + ht, TRAIN_Z + ht / 2], '#9A96A3', 1.2, { fill: '#17151C' });
-      // a kernel cube in each slab face
-      if (i < slabs.length - 1) this.box3(c, [x1 - 0.5, 0.4 + ht * 0.4, TRAIN_Z - 0.4], [x1 - 0.1, 0.4 + ht * 0.4 + 0.4, TRAIN_Z], '#FF6A1F', 1.2);
-      x = x1 + 0.6;
-    });
-    // DEEP NETS lands and holds its place in the frame while the camera pans with the train under it (riding the
-    // lead slab, or fixed in the world, it slid across the frame, smeared by the motion)
-    const LP: Pl = wallPl(TRAIN_Z + 2.65);
-    const dw = this.L7[0]!, nw = this.L7[1]!;
-    // (on the chart's front plane, above ATE THE BENCHMARKS — it read upside down in order below it — and clear of
-    // the bitten bars' values)
-    void LP;
-    this.say3(c, [dw, nw], t, wallPl(CH.z + 1.6), this.key.tg[0] + 0.3, 11.35, { size: 2.1, slam: 0.55, fam: WIDE, up: '', cur: U.mag, done: INK, align: 'center', upper: true, rise: 0.25, glow: 16, glowColor: U.ink, alpha: 1 - clamp((t - (tMarg - 0.3)) / 0.15) });
-    // (the spec line goes as the first bar is bitten: the bitten bars' values come down through its height)
-    const xBite = CH.x0 + (BARS.length - 1) * CH.dx + 1.0, specA = clamp((head - xBite) / 2.5);
-    if (specA > 0) this.text3(c, 'CONV1 11×11 · CONV2 5×5 · CONV3–5 3×3 · FC 4096 · FC 4096 · SOFTMAX 1000', LP, head, 5.2, { size: 0.36, fam: MONO, color: hexA(INK, 0.75 * specA) });
-    c.restore();
-    void bench; void vrot; void vlerp; void mixHex;
+    // the hand-feature / deep-net divide
+    this.seg(c, at(CP, CH.x0 + CH.dx * 1.5, 0, 0.05), at(CP, CH.x0 + CH.dx * 1.5, 12.2, 0.05), hexA(RED, 0.8 * a), 1.6, { dash: [8, 6] });
   }
 }

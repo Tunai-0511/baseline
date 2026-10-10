@@ -93,7 +93,8 @@ export default class Intro extends VScene {
       } },
       { t0: 3.87, name: 'square', key: (t) => { const k = ease.inOutQuad(clamp((t - 3.87) / 3.69)); const yaw = lerp(0.3, 0.12, k); return K([2.2 + Math.sin(yaw) * 11.5, lerp(7.2, 6.6, k), Math.cos(yaw) * 11.5 + 0.6], [2.2, 0, 0.3], 40); } },
       { t0: tXORc, snap: 0.5, name: 'diagram', key: (t) => { const k = ease.inOutCubic(clamp((t - tXORc) / (tDrew - tXORc))); return K([lerp(1.6, 0.6, k), lerp(4.6, 4.4, k), lerp(6.0, 4.6, k)], [0, lerp(4.0, 4.4, k), -5.8], 50); } },
-      { t0: tDrew, snap: 0.35, name: 'drew', key: (t) => { const k = clamp((t - tDrew) / (tXor - tDrew)); return K([lerp(-6.0, -5.2, k), lerp(5.0, 4.6, k), lerp(6.2, 5.6, k)], [0.4, 0, 0.2], 44); } },
+      // (back far enough for the whole of DREW A LINE, BUT along the try)
+      { t0: tDrew, snap: 0.35, name: 'drew', key: (t) => { const k = clamp((t - tDrew) / (tXor - tDrew)); return K([lerp(-7.4, -6.6, k), lerp(6.2, 5.8, k), lerp(7.6, 7.0, k)], [0.4, 0, 0.2], 44); } },
       { t0: tXor, snap: 0.3, name: 'xor', key: (t) => { const k = clamp((t - tXor) / (tStack - tXor)); return K([lerp(0.67, -0.34, k), lerp(13.0, 13.66, k), lerp(9.36, 8.91, k)], [0, 0, 0.4], 44, lerp(0.015, -0.005, k)); } },
       { t0: tStack, snap: 0.4, name: 'stack', key: (t) => { const k = ease.inOutCubic(clamp((t - tStack) / (tAnd - tStack))); return K([lerp(8.6, 7.8, k), lerp(8.6, 9.6, k), lerp(13.0, 13.8, k)], [0, lerp(3.4, 3.8, k), -2.4], 46); } },
       { t0: tAnd, snap: 0.45, name: 'solve', key: (t) => { const k = ease.inOutQuad(clamp((t - tAnd) / (end - tAnd))); return K([lerp(3.4, 4.0, k), lerp(12.6, 13.4, k), lerp(9.6, 10.6, k)], [0.3, lerp(3.4, 2.8, k), -0.6], 44); } },
@@ -168,7 +169,7 @@ export default class Intro extends VScene {
         const nrm = vcross([0, 1, 0], dir);
         const mid = vlerp(a, b, 0.5);
         const P: Pl = this.readable({ o: [mid[0] - nrm[0] * 0.75, 0.01, mid[2] - nrm[2] * 0.75], r: dir, u: nrm });
-        this.say3(c, L0.slice(1, 4), t, P, 0, 0, { size: 1.05, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, alpha: 1 - clamp((t - tXor - 0.3) / 0.3), rise: 0.4 });
+        this.say3(c, L0.slice(1, 5), t, P, 0, 0, { size: 0.86, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, alpha: 1 - clamp((t - tXor - 0.3) / 0.3), rise: 0.4 });
       }
     }
     // the XOR band once solved: a + b between 0.5 and 1.5, shaded on the input plane

@@ -66,7 +66,7 @@ export default class Stop extends VScene {
       // the line itself, small and quiet at the top
       c.save(); c.globalAlpha *= out; c.textAlign = 'center'; c.font = `36px "${SERIF}"`; c.fillStyle = BONE;
       const sung = L64.filter((w) => t >= w.start).map((w) => w.w.replace(/[“”]/g, '"')).join(' ');
-      c.fillText(sung, W / 2, 140);
+      c.fillText(sung, W / 2, 140); this.qaText(c, sung, W / 2, 140);
       c.restore();
       void tBecomes;
     }

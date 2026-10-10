@@ -36,10 +36,11 @@ export default class Shelf extends VScene {
     const s = this.ctx.start, e = this.ctx.end;
     const tFrozen = w14(/frozen/).start, tShelf = w14(/shelf/).start, tNet = this.L15[0]!.start, tCrown = w15(/crown/).start, tLearn = w15(/learned/).start, tBy = w15(/^by$/).start;
     this.rig = new Rig([
-      { t0: s, name: 'dolly', key: (t) => { const k = ease.inOutQuad(clamp((t - s) / (tFrozen - s))); const x = lerp(X0 + 3, -X0 - 4, k); return K([x + 2.6, 5.4, 10.5], [x - 0.4, 4.1, 0], 44, 0.03); } },
-      { t0: tFrozen - 0.05, snap: 0.5, name: 'frost', key: (t) => { const k = ease.inOutCubic(clamp((t - tFrozen) / (tNet - tFrozen))); return K([lerp(2, 0, k), lerp(4.5, 4.0, k), lerp(11, 15.5, k)], [0, 2.8, 0], 44); } },
+      // (the whole shelf in frame, drifting in: dollying along it close, the lines in front of it ran off both edges)
+      { t0: s, name: 'dolly', key: (t) => { const k = ease.inOutQuad(clamp((t - s) / (tFrozen - s))); return K([lerp(-2.2, 2.2, k), lerp(5.6, 5.1, k), lerp(17.5, 15.8, k)], [lerp(-0.5, 0.5, k), 3.3, 0], 44, 0.03); } },
+      { t0: tFrozen - 0.05, snap: 0.5, name: 'frost', key: (t) => { const k = ease.inOutCubic(clamp((t - tFrozen) / (tNet - tFrozen))); return K([lerp(1.5, 0, k), lerp(4.6, 4.2, k), lerp(16.5, 18.5, k)], [0, 2.9, 0], 44); } },
       { t0: tNet - 0.05, snap: 0.6, name: 'crown', key: (t) => { const k = ease.inOutCubic(clamp((t - tNet) / (tLearn - tNet))); return K([lerp(6.5, 10.5, k), lerp(6.2, 5.6, k), lerp(20, 16.5, k)], [lerp(7.0, 12.0, k), 4.4, -2], 46, -0.02); } },
-      { t0: tLearn - 0.05, snap: 0.45, name: 'layers', key: (t) => { const k = ease.inOutQuad(clamp((t - tLearn) / (tBy - tLearn))); const z = lerp(0, -NET.gap * 3, k); return K([NET.x + 6.5, 4.8, z + 7.0], [NET.x + 0.2, 3.3, z - 0.8], 44, -0.03); } },
+      { t0: tLearn - 0.05, snap: 0.45, name: 'layers', key: (t) => { const k = ease.inOutQuad(clamp((t - tLearn) / (tBy - tLearn))); const z = lerp(0, -NET.gap * 3, k); return K([NET.x + 6.5, 5.4, z + 7.6], [NET.x + 0.2, 4.3, z - 0.8], 44, -0.03); } },
       { t0: tBy - 0.05, snap: 0.4, name: 'itself', key: (t) => { const k = ease.outCubic(clamp((t - tBy) / (e - tBy))); return K([NET.x - lerp(3.5, 5, k), lerp(5.2, 6.0, k), lerp(10.5, 13, k)], [NET.x + 0.6, 2.6, -NET.gap * 1.5], 46, 0.02); } },
     ], [{ t: tFrozen, amp: 0.6 }, { t: tCrown, amp: 0.8 }, { t: tBy, amp: 1.0 }], 0.8, 71);
     void tShelf;
@@ -117,36 +118,39 @@ export default class Shelf extends VScene {
     if (t > tFrozen.start - 0.02) {
       const fk = clamp((t - tFrozen.start) / (tFrozen.end - tFrozen.start));
       const P: Pl = wallPl(1.4);
-      this.text3(c, 'FROZEN', P, 0, Y0 + 0.6, { size: 3.4, fam: WIDE, align: 'center', glow: 22, glowColor: U.ink, alpha: 1 - 0.75 * clamp((t - tNet.start) / 0.5), each: (i, _ch, n) => ((i + 0.5) / n <= fk * 1.4 + 0.05 ? { color: t < tFrozen.end ? U.mag : FROST } : null) });
+      this.text3(c, 'FROZEN', P, 0, Y0 + 0.8, { size: 3.0, fam: WIDE, align: 'center', glow: 22, glowColor: U.ink, alpha: 1 - 0.75 * clamp((t - tNet.start) / 0.5), each: (i, _ch, n) => ((i + 0.5) / n <= fk * 1.4 + 0.05 ? { color: t < tFrozen.end ? U.mag : FROST } : null) });
       if (t > tOn.start - 0.02) this.say3(c, [tOn, w14(/^the$/), tShelf], t, wallPl(1.5), 0, Y0 - 1.4, { size: 1.1, slam: 0.3, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, alpha: 1 - clamp((t - tNet.start) / 0.5) });
     }
     // THE NETWORK TOOK / THE CROWN over the network; AND LEARNED THE FEATURES through the layers; BY ITSELF
     if (t > tNet.start - 0.02) {
       const NP: Pl = wallPl(1.8, [NET.x, 0, 1.8]);
       const i0 = 0, i1 = L15.indexOf(tCrown) + 1;
-      // (gone before AND LEARNED comes up through the layers: the two would stack on screen)
-      this.say3(c, L15.slice(i0, i1), t, NP, 0, NET.s + 4.6, { size: 1.3, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, maxW: 11, rise: 0.25, alpha: 1 - clamp((t - tLearn.start + 0.22) / 0.2) });
+      // (gone as AND is sung: AND LEARNED comes up through the layers, and the two would stack on screen)
+      const tAnd0 = w15(/^and$/).start;
+      this.say3(c, L15.slice(i0, i1), t, NP, 0, NET.s + 4.6, { size: 1.3, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, align: 'center', upper: true, maxW: 11, rise: 0.25, alpha: 1 - clamp((t - tAnd0 + 0.12) / 0.12) });
     }
-    if (t > tLearn.start - 0.02 && t < tBy.start + 0.3) {
-      const ws = L15.slice(L15.indexOf(w15(/^and$/)), L15.indexOf(tBy));
-      // one word per layer, deeper with each word — and only the word being sung shows (seen at an angle, the layers'
-      // words used to stack over each other)
-      ws.forEach((wd, i) => {
-        if (t < wd.start - 0.02) return;
-        const next = ws[i + 1];
-        // (gone by the time the next word shows: they share the spot, and a cross-fade printed THE over FEATURES)
-        const a = next ? 1 - clamp((t - (next.start - 0.07)) / 0.05) : 1;
+    const tAndL = w15(/^and$/);
+    if (t > tAndL.start - 0.02 && t < tBy.start + 0.1) {
+      // AND LEARNED on the first layer, THE FEATURES on the third, each sung word by word; one pair at a time (seen
+      // at an angle, the layers' words used to stack over each other; one word at a time, THE flashed for 0.1 s)
+      const ws = L15.slice(L15.indexOf(tAndL), L15.indexOf(tBy));
+      const iThe = ws.findIndex((x) => /^the$/i.test(x.w));
+      const groups: [Word[], number][] = [[ws.slice(0, iThe), 0], [ws.slice(iThe), 2]];
+      groups.forEach(([g, li], gi) => {
+        if (!g.length || t < g[0]!.start - 0.02) return;
+        const next = groups[gi + 1]?.[0][0];
+        const a = (next ? 1 - clamp((t - (next.start - 0.06)) / 0.06) : 1) * (1 - clamp((t - (tBy.start - 0.06)) / 0.08));
         if (a <= 0) return;
-        const li = Math.min(3, Math.max(0, i - 1));
         const z = -NET.gap * li + 0.05;
         const P: Pl = wallPl(z, [NET.x, NET.s + 1.0, z]);
-        this.text3(c, wd.w.toUpperCase(), P, 0, 0, { size: i === 0 ? 1.0 : 1.4, fam: HEAVY, color: t < wd.end ? GOLD : BONE, align: 'center', alpha: a, glow: 14, glowColor: '#000000' });
+        this.say3(c, g, t, P, 0, 0, { size: 1.25, fam: HEAVY, up: '', cur: GOLD, done: BONE, align: 'center', upper: true, slam: 0.35, alpha: a, glow: 14, glowColor: '#000000' });
       });
     }
     if (t > tBy.start - 0.02) {
-      const k = ease.outBack(clamp((t - tBy.start) / 0.25), 1.8);
-      const P: Pl = wallPl(2.6, [NET.x - 0.6, 0, 2.6]);
-      this.text3(c, 'BY ITSELF', P, 0, -0.55, { size: 1.9 * k, fam: WIDE, color: t < tItself.end ? U.mag : '#FFFFFF', align: 'center', glow: 20, glowColor: U.ink, each: (i) => (i < 2 || t >= tItself.start ? {} : null) });
+      // (slammed in at full size over the network: grown from nothing at its foot, BY was too small to read)
+      const k = 1 + 0.45 * Math.pow(1 - clamp((t - tBy.start) / 0.18), 3);
+      const P: Pl = wallPl(2.6, [NET.x + 0.5, 0, 2.6]);
+      this.text3(c, 'BY ITSELF', P, 0, NET.s + 0.2, { size: 1.7 * k, fam: WIDE, color: t < tItself.end ? U.mag : '#FFFFFF', align: 'center', glow: 20, glowColor: U.ink, each: (i) => (i < 2 || t >= tItself.start ? {} : null) });
     }
     frameMarks(c, U.ash, { tl: 'BASELINE · COLD STORAGE', tr: t < tNet.start ? 'FEATURES: DESIGNED' : 'FEATURES: LEARNED', bl: '2012', br: tc(t), alpha: 0.6 });
     return { bloom: 0.75, bloomThreshold: 0.55, halation: 0.2, ca: 0.3 + 1.5 * hot(t, tBy.start, 0.1), grain: 0.05, vignette: 0.32, zoom: 1 + 0.01 * kick };
@@ -204,7 +208,8 @@ export default class Shelf extends VScene {
       const fill = clamp((t - (tLearn + l * 0.22)) / 0.35);
       this.rect3(c, P, -S / 2, 0, S, S, { fill: hexA('#170A14', 0.9 * a), stroke: hexA(MAG, 0.8 * a), lw: 1.6 });
       // (every other one under its plane: seen from the side, the planes' top corners sit close together)
-      this.text3(c, names[l]!, P, -S / 2, l % 2 ? -0.5 : S + 0.25, { size: 0.26, fam: MONOB, color: hexA(BONE, 0.75 * a) });
+      const na = a * (1 - clamp((t - (tBy - 0.1)) / 0.2)); // (gone as BY ITSELF lands over the planes)
+      if (na > 0.01) this.text3(c, names[l]!, P, -S / 2, l % 2 ? -0.5 : S + 0.25, { size: 0.26, fam: MONOB, color: hexA(BONE, 0.75 * na) });
       if (fill <= 0) continue;
       const cells = 4, cs = S / cells;
       for (let r = 0; r < cells; r++) for (let q = 0; q < cells; q++) {

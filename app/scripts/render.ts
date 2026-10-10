@@ -1303,6 +1303,57 @@ try {
     const rows = [...groups.entries()].sort((a, b) => a[1].t0 - b[1].t0);
     for (const [k, g] of rows) console.log(`${g.t0.toFixed(2)}–${g.t1.toFixed(2)}  ×${g.n}  overlap ${g.k.toFixed(2)}  h ${g.h}px  ${k}`);
     console.log(`${rows.length} overlapping pairs`);
+  } else if (mode === 'lyricvis') {
+    // is the word being sung readable on screen? Every --step (default 0.05 s): each word in [start, max(end,
+    // start + 0.3)) needs a type run containing it (any plate), alpha > 0.45, glyphs ≥ --min-h px tall (default
+    // 22) and ≥ 85 % of its glyphs inside the frame. Words readable in < --ok of their samples (default 0.6) are
+    // reported with why (missing / small / cut / faint).
+    const from = +opt('from', '0')!, to = +opt('to', '247.2')!, step = +opt('step', '0.05')!, minH = +opt('min-h', '22')!, okFrac = +opt('ok', '0.6')!;
+    const rep: { w: string; t0: number; t1: number; n: number; ok: number; why: Record<string, number> }[] = await page.evaluate(async ({ from, to, step, minH }) => {
+      const P = (window as any).__mv, Q = (window as any).__textqa;
+      const words: { w: string; start: number; end: number }[] = P.engine.lyrics.words;
+      const norm = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      // (a word's window: its sung time, at least 0.3 s — cut short where the next word takes over within 0.05 s)
+      const acc = words.map((w, i) => { const nx = words[i + 1]; const lim = nx ? nx.start + 0.05 : Infinity; return { w: w.w, t0: w.start, t1: Math.max(w.end, Math.min(w.start + 0.3, lim)), n: 0, ok: 0, why: {} as Record<string, number> }; });
+      Q.on = true;
+      for (let t = from; t < to; t += step) {
+        const live = acc.map((a, i) => ({ a, i })).filter(({ a }) => t >= a.t0 && t < a.t1);
+        if (!live.length) continue;
+        Q.runs.length = 0; Q.rects.length = 0;
+        P.still(t);
+        const runs = Q.runs.map((r: any) => ({ ...r, ns: norm(r.s) }));
+        for (const { a } of live) {
+          const nw = norm(a.w);
+          if (!nw) continue;
+          a.n++;
+          const cand = runs.filter((r: any) => r.ns.includes(nw) || (nw.includes(r.ns) && r.ns.length >= 3));
+          let best = 'missing';
+          for (const r of cand) {
+            const g: number[] = r.g ?? [];
+            if (!g.length) continue;
+            let gh = 0, inside = 0;
+            for (let i = 0; i < g.length; i += 4) {
+              gh = Math.max(gh, g[i + 3]! - g[i + 1]!);
+              if (g[i]! >= -2 && g[i + 2]! <= 1922 && g[i + 1]! >= -2 && g[i + 3]! <= 1082) inside++;
+            }
+            const why = r.a <= 0.45 ? 'faint' : gh < minH ? 'small' : inside < 0.85 * (g.length / 4) ? 'cut' : 'ok';
+            if (why === 'ok') { best = 'ok'; break; }
+            if (best === 'missing' || (best === 'faint' && why !== 'faint')) best = why;
+          }
+          if (best === 'ok') a.ok++; else a.why[best] = (a.why[best] ?? 0) + 1;
+        }
+      }
+      Q.on = false;
+      return acc.filter((a) => a.n > 0);
+    }, { from, to, step, minH });
+    let bad = 0;
+    for (const a of rep) {
+      if (a.ok / a.n >= okFrac) continue;
+      bad++;
+      const why = Object.entries(a.why).sort((x, y) => y[1] - x[1]).map(([k, v]) => `${k} ${v}`).join(', ');
+      console.log(`${a.t0.toFixed(2)}  ${a.w.padEnd(14)}  readable ${a.ok}/${a.n}   ${why}`);
+    }
+    console.log(`${bad} of ${rep.length} sung words not readable enough`);
   } else if (mode === 'lyricqa') {
     exitCode = await lyricqaMode(page);
   } else if (mode === 'seam') {

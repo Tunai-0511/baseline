@@ -73,20 +73,21 @@ export default class Lb extends VScene {
     this.knots.push({ t: tBase, y: 0.06 });
     const cold = this.b.mode === 'cold', big = this.b.mode === 'hard' || this.b.mode === 'over' ? 1.35 : 1;
     this.rig = new Rig([
-      // (the chorus opens out of the pre-chorus's ∎: the camera starts against the slab's face, filled magenta, and
-      // pulls back as the magenta drains into the LED face)
+      // (the chorus opens out of the pre-chorus's ∎: the camera starts against the slab's face — filled magenta, YOU
+      // WERE printed on it in ink as it is sung — and pulls back as the magenta drains into the LED face)
       { t0: s, name: 'state', key: (t) => {
         const k = ease.inOutQuad(clamp((t - s) / (tNow - s)));
         const base = K([lerp(3.5, 1.2, k), YT + lerp(2.4, 3.0, k), lerp(19, 15.5, k)], [0, YT + TH * 0.5 + 0.2, 0], 42, lerp(-0.03, 0.01, k));
-        const o = ease.outCubic(clamp((t - s) / 0.7));
+        const o = ease.inOutCubic(clamp((t - s - 0.1) / 0.9));
         if (o >= 1) return base;
-        const pc: V3 = [0, YT + TH * 0.5, 2.0], tgc: V3 = [0, YT + TH * 0.5, 0];
+        const pc: V3 = [-RW + 2.6, YT + TH - 0.75, 5.2], tgc: V3 = [-RW + 2.6, YT + TH - 0.75, 0];
         return { ...base, p: vlerp(pc, base.p, o), tg: vlerp(tgc, base.tg, o) };
       } },
-      { t0: tNow + 0.1, snap: 0.14, name: 'dive', key: (t) => { const y = this.fallY(t); return K([6.5, y + 2.2, PZ + 12.5], [0.6, y - 0.4, PZ - 0.5], 48, 0.04); } },
+      { t0: tNow - 0.06, snap: 0.14, name: 'dive', key: (t) => { const y = this.fallY(t); return K([6.5, y + 2.2, PZ + 12.5], [0.6, y - 0.4, PZ - 0.5], 48, 0.04); } },
       { t0: tBase - 0.03, name: 'floor', key: (t) => { const k = ease.outCubic(clamp((t - tBase) / (tTop - tBase))); return K([0, lerp(15.5, 17.5, k), BZ + 2.4], [0, 0, BZ + 2.4], 52, 0, [0, 0, -1]); } },
       { t0: tTop - 0.03, name: 'crane', key: (t) => {
-        const k = ease.inOutCubic(clamp((t - tTop) / (tLead + 0.15 - tTop)));
+        // (a rocket: fast off the floor, easing into the header — TOP OF THE is sung on the way up)
+        const k = ease.outCubic(clamp((t - tTop) / 0.6));
         return K([lerp(4, 1.5, k), lerp(0.8, yHeadMid + 1.0, k), lerp(15, 18, k)], [0, lerp(3.5, yHeadMid - 0.4, k), 0], lerp(56, 42, k), lerp(0.06, 0, k));
       } },
       { t0: tUntil - 0.03, snap: 0.3, name: 'clock', key: (t) => { const k = ease.inOutQuad(clamp((t - tUntil) / (e - tUntil))); const kd = ease.outExpo(clamp((t - tDead) / 0.3)); return K([lerp(1.0, 0.4, k), yHeadMid + 0.4, lerp(17.5, 16.2, k) - 0.5 * kd], [0, yHeadMid - 0.2, 0], 42); } },
@@ -216,7 +217,9 @@ export default class Lb extends VScene {
     this.crown(c, [-RW + 1.4, y0 + TH + 0.65, 0], 0.85);
     // YOU WERE, small, top-left; STATE OF / THE ART, giant, word by word
     const iS = L[0]!.findIndex((w) => /state/.test(w.w));
-    this.say3(c, L[0]!.slice(0, iS), t, P, -RW + 0.6, TH - 0.85, { size: 0.62, fam: UF.heavy, up: '', cur: U.mag, done: U.bone, upper: true, slam: 0.3 });
+    // (in ink while the face is still the seal's magenta)
+    const omk = clamp((1 - ease.inOutQuad(clamp((t - this.ctx.start) / 0.55))) * 1.6);
+    this.say3(c, L[0]!.slice(0, iS), t, P, -RW + 0.6, TH - 0.85, { size: 0.62, fam: UF.heavy, up: '', cur: mixHex(U.mag, U.ink, omk), done: mixHex(U.bone, U.ink, omk), upper: true, slam: 0.3 });
     const l1 = L[0]!.slice(iS, iS + 2), l2 = L[0]!.slice(iS + 2);
     const s1 = l1.map((w) => w.w.toUpperCase()).join(' '), s2 = l2.map((w) => w.w.toUpperCase()).join(' ');
     const sz = Math.min(this.fitSize(s1, UF.wide, 2 * RW - 1.6, 2.4), this.fitSize(s2, UF.wide, 2 * RW - 1.6, 2.4));
@@ -316,7 +319,12 @@ export default class Lb extends VScene {
       const iL = ws.findIndex((w) => /leaderboard/.test(w.w));
       const s1 = ws.slice(0, iL).map((w) => w.w.toUpperCase()).join(' '), s2 = ws[iL]!.w.toUpperCase();
       const z1 = this.fitSize(s1, UF.wide, 2 * RW - 1.6, 2.4), z2 = this.fitSize(s2, UF.wide, 2 * RW - 1.2, 2.4);
-      this.say3(c, ws.slice(0, iL), t, P, 0, HH - 1.4 - z1 * 0.72, { size: z1, fam: UF.wide, up: '', cur: U.mag, done: U.bone, align: 'center', upper: true, slam: 0.4 });
+      // (the first line rides up the tower with the crane, near the frame's middle, and docks in the header: set in
+      // the header alone it was above the frame while TOP was sung)
+      const kc = ease.outCubic(clamp((t - tTop.start) / 0.6));
+      const camTy = lerp(3.5, yHeadMid - 0.4, kc) - yHead0;
+      const y1 = Math.min(HH - 1.4 - z1 * 0.72, camTy + 1.2);
+      this.say3(c, ws.slice(0, iL), t, P, 0, y1, { size: z1, fam: UF.wide, up: '', cur: U.mag, done: U.bone, align: 'center', upper: true, slam: 0.4, glow: 16, glowColor: U.ink });
       this.say3(c, [ws[iL]!], t, P, 0, 0.9, { size: z2, fam: UF.wide, up: '', cur: U.mag, done: U.bone, align: 'center', upper: true, slam: 0.4 });
     } else if (t >= tUntil.start - 0.02) {
       const ws = L[3]!;

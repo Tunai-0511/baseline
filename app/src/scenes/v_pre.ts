@@ -65,10 +65,19 @@ export default class Pre extends VScene {
         { t0: tG - 0.15, name: 'floor', key: (t) => { const k2 = ease.outCubic(clamp((t - tG) / (e - tG))); const y = -112 + 2.5 * k2; return K([0.3, y, 0.3], [0, y - 30, 0], lerp(56, 50, k2), 0, [0, 0, -1]); } },
       ];
     } else if (this.claim === 'memory') {
-      const xw = (t: number) => this.memX(t);
+      // whole words in frame (2026-10-10: following the writing head this close, three letters showed at a time and
+      // the line could not be read): MEMORY'S while it is written, then ALL YOU NEED, the camera easing between them
+      const span = (a: number, b: number) => ({ c: ((a + b) / 2) * CELL, w: (b - a) * CELL + 2.4 });
+      const w1 = span(0, 7), w2 = span(9, MEM.length - 1);
+      const fit = (w: number) => w / 0.8 / (2 * Math.tan((44 * Math.PI) / 360) * (16 / 9));
+      const tAllW = this.w(/^all$/).start;
       shots = [
-        { t0: s, name: 'row', key: (t) => { const x = xw(t); return K([x + 3.5, 3.8, 9.5], [x + 1.2, 0.6, 0], 44, -0.04); } },
-        { t0: tThe - 0.05, snap: 0.6, name: 'pull', key: (t) => { const k = ease.inOutCubic(clamp((t - tThe) / (tG - tThe))); const xe = (MEM.length - 1) * CELL; return K([lerp(xe - 8, xe - 2, k), lerp(5.5, 4.5, k), lerp(15, 13, k)], [lerp(xe - 16, xe - 4, k), 0.6, 0], 48, -0.05); } },
+        { t0: s, name: 'words', key: (t) => {
+          const k = ease.inOutCubic(clamp((t - (tAllW - 0.3)) / 0.55));
+          const cx = lerp(w1.c, w2.c, k), d = lerp(fit(w1.w), fit(w2.w), k) * (1 + 0.04 * (1 - clamp((t - s) / 1.5)));
+          return K([cx + d * 0.26, 2.4 + d * 0.1, d], [cx + d * 0.04, 0.1, 0], 44, -0.025);
+        } },
+        { t0: tThe - 0.05, snap: 0.6, name: 'pull', key: (t) => { const k = ease.inOutCubic(clamp((t - tThe) / (tG - tThe))); const xe = (MEM.length - 1) * CELL; return K([lerp(xe - 9, xe - 3, k), lerp(4.8, 4.4, k), lerp(19, 15, k)], [lerp(xe - 1, xe + 1.5, k), 2.6, 0], 48, -0.04); } },
         { t0: tG - 0.05, snap: 0.25, name: 'seal', key: (t) => { const k = ease.outCubic(clamp((t - tG) / (e - tG))); const xe = (MEM.length - 1) * CELL; return K([lerp(xe + 2, xe + 1, k), lerp(4.5, 3.2, k), lerp(14, 11, k)], [xe + 3.2, 2.2, 0], 44); } },
       ];
     } else if (this.claim === 'attention') {
@@ -321,7 +330,7 @@ export default class Pre extends VScene {
       this.text3(c, `L${k}`, Pw2, 0, 0, { size: 0.9, fam: WIDE, color: hexA(pal.hi, 0.85), align: 'center' });
     }
     // DEPTH: the outline at the mouth, extruded down 28 layers
-    const ol = glyphOutline('DEPTH', WIDE, 2.5, 0.04);
+    const ol = glyphOutline('DEPTH', WIDE, 2.1, 0.04); // (at 2.5 its D and H were cut by the frame's edges as the dive began)
     const ox = -ol.width / 2, oz = 1.25;
     const ek = clamp((t - X.start) / (X.end - X.start));
     const nCopies = Math.round(lerp(1, 28, ease.outCubic(ek)));
@@ -331,6 +340,14 @@ export default class Pre extends VScene {
       const sg: [V3, V3][] = [];
       for (let i = 0; i < ol.segs.length; i += 4) sg.push([[ox + ol.segs[i]!, y, oz - ol.segs[i + 1]!], [ox + ol.segs[i + 2]!, y, oz - ol.segs[i + 3]!]]);
       this.segs(c, sg, d === 0 ? (t < X.end + 0.2 ? U.mag : U.bone) : hexA(pal.c, 0.9 * Math.pow(0.9, d)), d === 0 ? 3.2 : 1.3);
+    }
+    // (QA: the outline at the mouth is the word's type)
+    if (t >= X.start && camY > 0.6) {
+      let y0 = 1e9, y1 = -1e9;
+      for (let i = 1; i < ol.segs.length; i += 2) { y0 = Math.min(y0, ol.segs[i]!); y1 = Math.max(y1, ol.segs[i]!); }
+      const quads: V3[][] = [];
+      for (let q = 0; q < 5; q++) { const xa = ox + (ol.width * q) / 5, xb = ox + (ol.width * (q + 1)) / 5; quads.push([[xa, 0.02, oz - y1], [xb, 0.02, oz - y1], [xb, 0.02, oz - y0], [xa, 0.02, oz - y0]]); }
+      this.qaWord('DEPTH', quads);
     }
     // the floors IS · ALL · YOU, written across the shaft where the camera will meet them; NEED at the bottom
     const floorWord = (wd: Word, s: string, size: number, y: number) => {
@@ -346,9 +363,9 @@ export default class Pre extends VScene {
     };
     const cyAt = (tt: number) => camYD(tt, tIs, tG.start - 0.15);
     const isW = this.Wd.find((x) => /^is$/.test(x.w))!, allW = this.w(/^all$/), youW = this.w(/^you$/);
-    floorWord(isW, 'IS', 4.4, Math.round((cyAt(isW.start + 0.6) - 1) / LAYER) * LAYER);
-    floorWord(allW, 'ALL', 4.4, Math.round((cyAt(allW.start + 0.6) - 1) / LAYER) * LAYER);
-    floorWord(youW, 'YOU', 4.4, Math.round((cyAt(youW.start + 0.6) - 1) / LAYER) * LAYER);
+    floorWord(isW, 'IS', 3.3, Math.round((cyAt(isW.start + 0.6) - 1) / LAYER) * LAYER);
+    floorWord(allW, 'ALL', 3.3, Math.round((cyAt(allW.start + 0.6) - 1) / LAYER) * LAYER);
+    floorWord(youW, 'YOU', 3.3, Math.round((cyAt(youW.start + 0.6) - 1) / LAYER) * LAYER);
     const yb = yL(NL);
     const B = floorPl(yb, [0, yb, 0]);
     this.grid3(c, B, -SH, SH, -SH, SH, 1, hexA(pal.c, 0.6), 1);
@@ -395,6 +412,18 @@ export default class Pre extends VScene {
       }
       // h_t arrow to the next cell
       if (i < n - 1 && MEM[i + 1] !== ' ') this.seg(c, [x + 1.2, -0.6, 0], [x + CELL - 1.2, -0.6, 0], hexA(pal.hi, 0.5), 1.2);
+    }
+    // (QA: the dot letters are the line's type)
+    let i0 = 0;
+    for (const word of MEM.split(' ')) {
+      const quads: V3[][] = [];
+      for (let j = 0; j < word.length; j++) {
+        const i = i0 + j, x = i * CELL;
+        if (idx < i + 0.6) continue;
+        quads.push([[x - 0.8, 1.1, 1.17], [x + 0.8, 1.1, 1.17], [x + 0.8, -1.1, 1.17], [x - 0.8, -1.1, 1.17]]);
+      }
+      this.qaWord(word, quads);
+      i0 += word.length + 1;
     }
     // labels
     this.text3(c, 'c_t  →  CELL STATE', wallPl(-1.2), -CELL, 2.3, { size: 0.42, fam: MONOB, color: pal.hi });

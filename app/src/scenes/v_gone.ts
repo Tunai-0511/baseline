@@ -7,7 +7,7 @@
 // camera dives down a stack of six of them.
 // Style: LSTM green and amber on black; the attention layer in eight head colours.
 import type { Frame, PostOverrides } from '../engine/scene';
-import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, pool, tc, clamp, lerp, ease, hexA, mixHex, hot, F, W, H, vlerp, U, type Ctx } from './_v';
+import { VScene, Rig, K, type V3, type Pl, at, floorPl, wallPl, frameMarks, pool, tc, clamp, lerp, ease, hexA, mixHex, hot, F, W, H, vlerp, U, type Ctx, basis, vnorm } from './_v';
 import type { Word } from '../engine/lyrics';
 import { hash } from '../engine/util';
 
@@ -105,7 +105,7 @@ export default class Gone extends VScene {
       const head = fade * (1 - clamp((t - (tFor.start - 0.08)) / 0.15));
       const k = ease.outBack(clamp((t - tLSTM.start) / 0.3), 1.6);
       if (head > 0) {
-        this.text3(c, 'LSTM,', front, -1.4, 5.6, { size: 2.3 * k, fam: WIDE, color: t < tLSTM.end ? U.mag : BONE, glow: 14, glowColor: U.ink, alpha: head });
+        this.text3(c, 'LSTM,', front, -1.4, 5.0, { size: 2.0 * k, fam: WIDE, color: t < tLSTM.end ? U.mag : BONE, glow: 14, glowColor: U.ink, alpha: head });
         // (under the cell-state highway, not across it: its × and + showed through YOU)
         this.say3(c, [w30(/you/), tHeld, w30(/^the$/), tMem], t, front, -1.4, 3.1, { size: 1.15, slam: 0.35, fam: HEAVY, up: '', cur: U.mag, done: BONE, upper: true, rise: 0.3, alpha: head, glow: 16, glowColor: U.ink });
       }
@@ -144,19 +144,25 @@ export default class Gone extends VScene {
     // the drop's last two bars: what just happened, written across the layer the camera is diving through
     if (t > tDrop) {
       const bars = this.ctx.audio.downbeats.filter((d) => d >= tDrop - 0.05 && d < this.ctx.end);
-      const WORDS: [number, string, string][] = [[2, 'ALL PAIRS', 'AT ONCE'], [3, 'NO', 'RECURRENCE']];
+      // (GONE is held over the drop's first bars: written across the layer the camera dives through, it stays sung)
+      const WORDS: [number, string, string][] = [[1, 'GONE', ''], [2, 'ALL PAIRS', 'AT ONCE'], [3, 'NO', 'RECURRENCE']];
       for (const [bi, w1, w2] of WORDS) {
         const tb = bars[bi];
         if (tb === undefined || t < tb) continue;
         const nb = bars[bi + 1] ?? this.ctx.end;
         if (t > nb + 0.05) continue;
         const yl = SLAB_Y - bi * 6.5 * 1.5 + 0.05;
-        const P = this.readable(floorPl(yl, [24, yl, 0]));
+        // (set square to the screen as the camera was when the bar began — on the floor's own axes, seen from the
+        // dive, the words read sideways)
+        const kb = this.rig ? basis(this.rig.at(tb)) : null;
+        const rr = kb ? vnorm([kb.R[0], 0, kb.R[2]]) : ([1, 0, 0] as V3), uu = kb ? vnorm([kb.U[0], 0, kb.U[2]]) : ([0, 0, -1] as V3);
+        const P: Pl = { o: [24, yl, 0], r: rr, u: uu };
         const k = clamp((t - tb) / 0.12);
         const sc = 1 + 0.5 * Math.pow(1 - k, 3);
         // (well apart: on a floor seen at a grazing angle the gap between two rows foreshortens to nothing)
-        this.text3(c, w1, P, 0, -0.6, { size: 3.2, fam: WIDE, color: bi === 2 ? U.mag : U.bone, align: 'center', mid: true, glow: 20, glowColor: U.ink, each: () => ({ sc }) });
-        this.text3(c, w2, P, 0, -6.6, { size: 3.2, fam: WIDE, color: bi === 2 ? U.bone : U.mag, align: 'center', mid: true, glow: 20, glowColor: U.ink, each: () => ({ sc }) });
+        // (the second line's start under the first's: the floor seen at an angle pushes the far line right)
+        this.text3(c, w1, P, 0, w2 ? -0.6 : -3.0, { size: w2 ? 2.2 : 4.6, fam: WIDE, color: bi === 2 || !w2 ? U.mag : U.bone, align: 'center', mid: true, glow: 20, glowColor: U.ink, each: () => ({ sc }) });
+        if (w2) this.text3(c, w2, P, 0, -4.6, { size: 2.2, fam: WIDE, color: bi === 2 ? U.bone : U.mag, align: 'center', mid: true, glow: 20, glowColor: U.ink, each: () => ({ sc }) });
       }
     }
     frameMarks(c, U.ash, { tl: t < tOne.start ? 'BASELINE · LSTM · c_t → c_t+1 → …' : 'BASELINE · ONE ATTENTION LAYER', tr: t < tDrop ? '1997 → 2017' : 'DROP', bl: t < tDrop ? 'RECURRENCE' : 'NO RECURRENCE', br: tc(t), alpha: 0.6 });

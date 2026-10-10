@@ -24,7 +24,7 @@ export function makeDirection(ly: Lyrics, au: AudioData, tl: TimelineEntry[]): D
     S('verse2a', 'verse2b', 'whip', 0.16, 0.3, { dir: [1, 0], p: [0.04, 3, 0.08, 0.02] }),
     S('verse2b', 'pre2', 'zoom', 0.2, 0.32, { p: [6, 0.6, 2.4, 0], fx: { flash: 0.03 } }),
     S('chorus2', 'chorus2b', 'slice', 0.1, 0.3, { dir: [-1, 0], p: [12, 0.5, 0.014, 1] }),
-    S('verse3a', 'verse3b', 'push', 0.06, 0.4, { dir: [-1, 0], p: [0.35, 3, 0.02, -0.04] }),
+    S('verse3a', 'verse3b', 'push', 0.06, 0.25, { dir: [-1, 0], p: [0.35, 3, 0.02, -0.04] }), // (short: DENSE is sung as it pushes in)
     S('chorus3', 'chorus3b', 'slice', 0.1, 0.3, { dir: [1, 0], p: [11, 0.5, 0.012, 1] }),
     S('bridgeA', 'bridgeB', 'zoom', 0.2, 0.32, { p: [5, 0.6, 2.4, 0.06] }),
     S('bridgeB', 'pre4', 'whip', 0.18, 0.32, { dir: [0, -1], p: [0.05, 3, 0.1, 0.03], fx: { ca: 3 } }),

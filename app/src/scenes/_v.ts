@@ -15,7 +15,7 @@ import { smoothstep, hash } from '../engine/util';
 import { eqImage } from './_eq';
 import { Rig, K, basis, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit } from './_wire';
 
-export { Rig, K, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit, W, H, clamp, lerp, ease, hexA, mixHex, sungW, hot, F };
+export { Rig, K, basis, type Key, type V3, vadd, vsub, vsc, vdot, vlerp, vnorm, vcross, vrot, orbit, W, H, clamp, lerp, ease, hexA, mixHex, sungW, hot, F };
 export type { Ctx };
 
 /**
@@ -154,6 +154,31 @@ export abstract class VScene extends D2Scene {
     if (this.rig) this.setKey(this.rig.at(t));
     if (this.env) this.drawEnv(c, t, this.env);
     return this.frame(c, t, f);
+  }
+
+  /** QA: a line of screen-space type (fillText at x, y with c's current font and textAlign) as a run */
+  qaText(c: Ctx, s: string, x: number, y: number) {
+    if (!TEXT_QA.on || MIRRORING || !s) return;
+    const m = c.measureText(s), w = m.width, asc = m.actualBoundingBoxAscent;
+    const x0 = c.textAlign === 'center' ? x - w / 2 : c.textAlign === 'right' || c.textAlign === 'end' ? x - w : x;
+    TEXT_QA.runs.push({ scene: this.ctx.id, s, x0, y0: y - asc, x1: x0 + w, y1: y, a: c.globalAlpha, g: [x0, y - asc, x0 + w, y] });
+  }
+
+  /** QA: a word drawn as something other than type (dots, particles, an outline): its letters as 3D quads */
+  qaWord(s: string, quads: V3[][], a = 1) {
+    if (!TEXT_QA.on || MIRRORING || !quads.length || a <= 0) return;
+    const g: number[] = [];
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const q of quads) {
+      const cq = q.map((p) => this.cs(p));
+      if (cq.some((p) => p[2] < this.near)) continue;
+      const sq = cq.map((p) => this.sp(p));
+      const xs = sq.map((p) => p[0]), ys = sq.map((p) => p[1]);
+      const b = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] as const;
+      g.push(b[0], b[1], b[2], b[3]);
+      x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]);
+    }
+    if (g.length) TEXT_QA.runs.push({ scene: this.ctx.id, s, x0, y0, x1, y1, a, g });
   }
 
   /** the plate's world (see EnvCfg); set it in init */

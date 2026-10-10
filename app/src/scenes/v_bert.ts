@@ -29,9 +29,9 @@ export default class Bert extends VScene {
     const tRead = w46(/read/).start, tMask = w46(/masked/).start, tBi = w46(/bidirectional/).start, tDec = this.L47[0]!.start, tScale = w47(/scaled/).start, tMade = w47(/made/).start;
     this.rig = new Rig([
       { t0: s, name: 'row', key: (t) => { const k = ease.inOutQuad(clamp((t - s) / (tMask - s))); return K([lerp(-3.5, -0.5, k), lerp(5.4, 5.8, k), lerp(19, 19.5, k)], [lerp(-3.5, -0.5, k), TY + 0.8, 0], 44, 0.02); } },
-      { t0: tBi - 0.05, snap: 0.5, name: 'square', key: (t) => { const k = ease.inOutQuad(clamp((t - tBi) / (tDec - tBi))); return K([lerp(2, 0, k), lerp(14, 16, k), lerp(16, 14, k)], [0, 0, lerp(5, 7, k)], 46); } },
+      { t0: tMask - 0.05, snap: 0.4, name: 'square', key: (t) => { const k = ease.inOutQuad(clamp((t - tBi) / (tDec - tBi))); return K([lerp(2, 0, k), lerp(14, 16, k), lerp(16, 14, k)], [0, 0, lerp(5, 7, k)], 46); } },
       { t0: tScale - 0.05, snap: 0.4, name: 'scale', key: (t) => { const k = ease.inOutCubic(clamp((t - tScale) / (tMade - tScale + 0.3))); return K([0, lerp(18, 34, k), lerp(16, 26, k)], [0, 0, lerp(8, 13, k)], 46); } },
-      { t0: tMade - 0.05, snap: 0.45, name: 'optional', key: (t) => { const k = ease.outCubic(clamp((t - tMade) / (e - tMade))); const b = K([lerp(-8.5, -10.5, k), lerp(6, 7, k), lerp(13, 15, k)], [-10.5, 3.4, 2], 44, -0.02); const kp = ease.inCubic(clamp((t - (e - 0.35)) / 0.35)); return kp > 0 ? { ...b, p: vlerp(b.p, [-11.2, 3.4, 1.2], kp), tg: vlerp(b.tg, [-11.2, 3.4, 0], kp) } : b; } },
+      { t0: w47(/^and$/).start - 0.05, snap: 0.35, name: 'optional', key: (t) => { const k = ease.outCubic(clamp((t - tMade) / (e - tMade))); const b = K([lerp(-8.5, -10.5, k), lerp(6, 7, k), lerp(13, 15, k)], [-10.5, 3.4, 2], 44, -0.02); const kp = ease.inCubic(clamp((t - (e - 0.35)) / 0.35)); return kp > 0 ? { ...b, p: vlerp(b.p, [-11.2, 3.4, 1.2], kp), tg: vlerp(b.tg, [-11.2, 3.4, 0], kp) } : b; } },
     ], [{ t: s, amp: 0.3 }, { t: tDec, amp: 0.4 }, { t: tScale, amp: 0.3 }], 0.6, 131);
   }
 

@@ -213,6 +213,8 @@ async function video(url: string, from: number, to: number, fps: number, out: st
   const fail = (e: unknown) => {
     if (failure) return;
     failure = e instanceof Error ? e : new Error(String(e));
+    // (said here: the pages then fail with "websocket closed", and that is what reaches the top)
+    console.error(`\nrender failed: ${failure.message}`);
     for (const ws of sockets) ws?.close();
     rejectFailed(failure);
   };
@@ -261,6 +263,7 @@ async function video(url: string, from: number, to: number, fps: number, out: st
     websocket: {
       maxPayloadLength: Math.max(64 * 1024 * 1024, OW * OH * 3 + 1024),
       open(ws) { sockets[ws.data.k] = ws; if (failure) ws.close(); },
+      close(ws, code, reason) { if (!failure && !ending) console.error(`\nworker ${ws.data.k} socket closed (${code}${reason ? ` ${reason}` : ''})`); },
       message(ws, msg) {
         if (failure) return;
         try {
